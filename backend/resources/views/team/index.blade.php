@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title','· Team')
+@section('content')
+<div class="page-head"><div><h1>Team & Roles</h1><p class="muted">Manage workspace members.</p></div></div>
+<div class="two-col"><section class="panel"><h2>Add member</h2><form method="post" action="{{ route('team.store') }}">@csrf<div class="form-grid"><div><label>Name<input name="name" required></label></div><div><label>Email<input name="email" type="email" required></label></div><div><label>Phone<input name="phone"></label></div><div><label>Role<select name="role"><option>sales</option><option>manager</option><option>admin</option></select></label></div><div class="span-2"><label>Password<input name="password" type="password" minlength="8" required></label></div></div><button class="btn primary">Add member</button></form></section><section class="panel"><h2>Members</h2><table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>@foreach($users as $u)<tr><td>{{ $u->name }}</td><td>{{ $u->email }}</td><td>{{ $u->role }}</td></tr>@endforeach</tbody></table></section></div>
+@endsection
