@@ -44,6 +44,9 @@ jobs:
           docker cp omnigocrm-test:/var/www/html/data/logs/. /tmp/omnigocrm-espo-logs/ 2>/dev/null || true
           echo "===== EspoCRM internal logs ====="
           find /tmp/omnigocrm-espo-logs -type f -maxdepth 2 -print -exec sh -c 'echo "----- $1 -----"; tail -n 300 "$1"' _ {} \; 2>/dev/null || true
+          docker cp omnigocrm-test-db:/var/lib/mysql/general.log /tmp/omnigocrm-espo-logs/mariadb-general.log 2>/dev/null || true
+          echo "===== MariaDB schema query log ====="
+          tail -n 2000 /tmp/omnigocrm-espo-logs/mariadb-general.log 2>/dev/null || true
 
       - name: Tear down
         if: always()
