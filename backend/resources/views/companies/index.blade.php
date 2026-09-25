@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title','· Companies')
+@section('content')
+<div class="page-head"><div><h1>Companies</h1><p class="muted">Organizations linked to leads and contacts.</p></div></div>
+<div class="two-col"><section class="panel"><h2>Add company</h2><form method="post" action="{{ route('companies.store') }}">@csrf<div class="form-grid"><div class="span-2"><label>Name<input name="name" required></label></div><div><label>Email<input name="email" type="email"></label></div><div><label>Phone<input name="phone"></label></div><div class="span-2"><label>Website<input name="website"></label></div><div class="span-2"><label>Address<textarea name="address"></textarea></label></div></div><button class="btn primary">Save company</button></form></section><section class="panel"><h2>Companies</h2><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th></tr></thead><tbody>@foreach($companies as $c)<tr><td>{{ $c->name }}</td><td>{{ $c->email ?: '—' }}</td><td>{{ $c->phone ?: '—' }}</td><td>{{ $c->status }}</td></tr>@endforeach</tbody></table>{{ $companies->links() }}</section></div>
+@endsection
