@@ -94,3 +94,18 @@ POST validates the `X-Hub-Signature-256` HMAC using the configured app secret be
 ## Security
 
 Never commit WhatsApp tokens or app secrets. EspoCRM also provides App Secrets for sensitive values, which can be used instead of plain configuration where appropriate.
+
+
+## Shared Inbox API
+
+Use EspoCRM's standard entity API to list `WhatsAppConversation` records and their related `WhatsAppMessage` records. The custom conversation action supports `read`, `open`, and `close` for authenticated CRM users.
+
+The conversation record tracks unread count and last-message timestamps. Inbound webhook events increment unread count; opening a conversation and calling the `read` action resets it.
+
+## Template lifecycle
+
+Templates are intentionally stored as provider-backed records. `Draft` and `Pending` templates are not sendable. `Approved` + `active=true` is required. Provider synchronization can update approval status, language, category, components, and `lastSyncedAt`; provider credentials remain installation secrets.
+
+## Provider boundary
+
+All server-initiated messaging uses Meta's official Cloud API. OmniGoCRM does not automate WhatsApp Web, browser sessions, QR logins, or unofficial client protocols.
