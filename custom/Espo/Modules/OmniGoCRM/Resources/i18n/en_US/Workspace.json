@@ -1,0 +1,38 @@
+{
+    "fields": {
+        "name": "Workspace Name",
+        "slug": "Slug",
+        "status": "Status",
+        "plan": "Plan",
+        "subscriptionStatus": "Subscription Status",
+        "billingCustomerId": "Billing Customer ID",
+        "billingSubscriptionId": "Billing Subscription ID",
+        "trialEndsAt": "Trial Ends At",
+        "ownerUserId": "Owner User ID",
+        "ownerUser": "Owner",
+        "notes": "Notes"
+    },
+    "options": {
+        "status": {
+            "Active": "Active",
+            "Suspended": "Suspended",
+            "Archived": "Archived"
+        },
+        "plan": {
+            "Free": "Free",
+            "Starter": "Starter",
+            "Business": "Business",
+            "Enterprise": "Enterprise"
+        },
+        "subscriptionStatus": {
+            "Trialing": "Trialing",
+            "Active": "Active",
+            "Past Due": "Past Due",
+            "Canceled": "Canceled",
+            "None": "None"
+        }
+    },
+    "labels": {
+        "Workspace": "Workspace"
+    }
+}
