@@ -1,0 +1,8 @@
+[
+    {
+        "route": "/OmniGoCRM/LeadCapture",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostLeadCapture",
+        "noAuth": true
+    }
+]
