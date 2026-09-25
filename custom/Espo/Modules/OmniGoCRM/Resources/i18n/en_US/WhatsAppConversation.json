@@ -1,0 +1,23 @@
+{
+    "fields": {
+        "waId": "WhatsApp ID",
+        "phoneNumber": "Phone Number",
+        "customerDisplayName": "Customer Name",
+        "status": "Conversation Status",
+        "unreadCount": "Unread",
+        "lastMessageAt": "Last Message At",
+        "lastMessagePreview": "Last Message",
+        "assignedUser": "Assigned User",
+        "lead": "Lead",
+        "contact": "Contact"
+    },
+    "options": {
+        "status": {
+            "Open": "Open",
+            "Closed": "Closed"
+        }
+    },
+    "labels": {
+        "WhatsAppConversation": "WhatsApp Conversation"
+    }
+}
