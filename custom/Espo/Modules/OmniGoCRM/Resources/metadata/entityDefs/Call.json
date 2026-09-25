@@ -10,7 +10,13 @@
         },
         "omniGoCRMRecordingStatus": {
             "type": "enum",
-            "options": ["Not Available", "Requested", "Available", "Failed", "Deleted"],
+            "options": [
+                "Not Available",
+                "Requested",
+                "Available",
+                "Failed",
+                "Deleted"
+            ],
             "default": "Not Available",
             "displayAsLabel": true
         },
@@ -18,14 +24,21 @@
             "type": "url"
         },
         "omniGoCRMRecordingDuration": {
-            "type": "duration"
+            "type": "int",
+            "min": 0
         },
         "omniGoCRMRecordingConsentAt": {
             "type": "datetime"
         },
         "omniGoCRMPhoneNumber": {
             "type": "phone",
-            "typeList": ["Mobile", "Work", "Other", "WhatsApp", "Phone"],
+            "typeList": [
+                "Mobile",
+                "Work",
+                "Other",
+                "WhatsApp",
+                "Phone"
+            ],
             "isPersonalData": true
         },
         "omniGoCRMTranscript": {
@@ -35,10 +48,16 @@
     },
     "indexes": {
         "externalCallId": {
-            "columns": ["omniGoCRMExternalCallId", "deleted"]
+            "columns": [
+                "omniGoCRMExternalCallId",
+                "deleted"
+            ]
         },
         "provider": {
-            "columns": ["omniGoCRMProvider", "deleted"]
+            "columns": [
+                "omniGoCRMProvider",
+                "deleted"
+            ]
         }
     }
 }
