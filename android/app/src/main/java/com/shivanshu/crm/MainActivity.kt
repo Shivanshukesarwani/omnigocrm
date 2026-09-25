@@ -1,10 +1,8 @@
 package com.shivanshu.crm
 
-import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -14,514 +12,249 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import java.util.concurrent.Executors
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : Activity() {
     private lateinit var api: ApiClient
     private lateinit var session: SessionManager
     private lateinit var root: LinearLayout
-    private lateinit var title: TextView
-    private val worker = Executors.newSingleThreadExecutor()
+    private lateinit var body: LinearLayout
+    private val worker = Executors.newCachedThreadPool()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         api = ApiClient(this)
         session = SessionManager(this)
-        if (session.token == null) showLogin() else showDashboard()
+        if (session.token.isNullOrBlank()) showLogin() else showDashboard()
     }
 
     private fun showLogin() {
-        val box = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(40, 60, 40, 40)
-        }
-        addText(box, "Shivanshu CRM", 28f, true)
-        addText(box, "Login to your CRM", 16f, false)
-        val email = EditText(this).apply { hint = "Email" }
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40, 70, 40, 40) }
+        addText(box, "OmniGoCRM", 30f, true)
+        addText(box, "Native Android client for the EspoCRM-based OmniGoCRM server", 16f, false)
+        val username = EditText(this).apply { hint = "Username or email" }
         val password = EditText(this).apply { hint = "Password"; inputType = 0x81 }
-        val button = Button(this).apply { text = "Login" }
-        box.addView(email, lp())
-        box.addView(password, lp())
-        box.addView(button, lp())
-        button.setOnClickListener {
-            button.isEnabled = false
+        val login = Button(this).apply { text = "Sign in" }
+        box.addView(username, lp()); box.addView(password, lp()); box.addView(login, lp())
+        login.setOnClickListener {
+            if (username.text.isNullOrBlank() || password.text.isNullOrBlank()) { toast("Username and password are required."); return@setOnClickListener }
+            login.isEnabled = false
             api.runAsync {
-                try {
-                    api.login(email.text.toString().trim(), password.text.toString())
-                    runOnUiThread { showDashboard() }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        button.isEnabled = true
-                        toast(e.message ?: "Login failed")
-                    }
-                }
+                try { api.login(username.text.toString().trim(), password.text.toString()); runOnUiThread { showDashboard() } }
+                catch (e: Exception) { runOnUiThread { login.isEnabled = true; toast(e.message ?: "Login failed") } }
             }
         }
         setContentView(box)
     }
 
-    private fun setupShell(screenTitle: String) {
-        root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.rgb(247, 249, 252))
-        }
-        val bar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(18, 16, 10, 10)
-            setBackgroundColor(Color.WHITE)
-        }
-        title = TextView(this).apply {
-            text = screenTitle
-            textSize = 22f
-            setTextColor(Color.rgb(20, 30, 50))
-            setTypeface(null, 1)
-        }
-        bar.addView(title, LinearLayout.LayoutParams(0, -2, 1f))
+    private fun shell(title: String) {
+        root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(Color.rgb(247, 249, 252)) }
+        val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(16, 16, 10, 10); setBackgroundColor(Color.WHITE) }
+        addText(header, title, 22f, true, LinearLayout.LayoutParams(0, -2, 1f))
         val logout = Button(this).apply { text = "Logout" }
-        bar.addView(logout, LinearLayout.LayoutParams(110, -2))
-        logout.setOnClickListener {
-            api.runAsync {
-                api.logout()
-                runOnUiThread {
-                    session.clear()
-                    showLogin()
-                }
-            }
-        }
-        root.addView(bar)
-
+        header.addView(logout, LinearLayout.LayoutParams(110, -2))
+        logout.setOnClickListener { api.runAsync { api.logout(); runOnUiThread { session.clear(); showLogin() } } }
+        root.addView(header)
         val navScroll = ScrollView(this).apply { isHorizontalScrollBarEnabled = false }
-        val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(8, 4, 8, 4); setBackgroundColor(Color.WHITE) }
-        listOf("Dashboard", "Leads", "Contacts", "Customers", "Follow-ups", "Companies", "Tasks", "Products", "Quotations", "Orders", "Payments", "Notifications").forEach { label ->
-            val b = Button(this).apply { text = label }
-            nav.addView(b, LinearLayout.LayoutParams(-2, -2))
-            b.setOnClickListener {
+        val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(6, 3, 6, 3); setBackgroundColor(Color.WHITE) }
+        val menu = listOf("Dashboard", "Leads", "Contacts", "Accounts", "Opportunities", "Tasks", "Meetings", "Calls", "Products", "WhatsApp")
+        menu.forEach { label ->
+            val button = Button(this).apply { text = label }
+            nav.addView(button, LinearLayout.LayoutParams(-2, -2))
+            button.setOnClickListener {
                 when (label) {
                     "Dashboard" -> showDashboard()
                     "Leads" -> showLeads()
-                    "Contacts" -> showContacts()
-                    "Customers" -> showCustomers()
-                    "Follow-ups" -> showFollowUps()
-                    "Companies" -> showCompanies()
+                    "Contacts" -> showEntityList("Contact", "Contacts")
+                    "Accounts" -> showEntityList("Account", "Accounts")
+                    "Opportunities" -> showEntityList("Opportunity", "Opportunities")
                     "Tasks" -> showTasks()
-                    "Products" -> showProducts()
-                    "Quotations" -> showQuotations()
-                    "Orders" -> showOrders()
-                    "Payments" -> showPayments()
-                    "Notifications" -> showNotifications()
+                    "Meetings" -> showEntityList("Meeting", "Meetings")
+                    "Calls" -> showEntityList("Call", "Calls")
+                    "Products" -> showEntityList("Product", "Products")
+                    "WhatsApp" -> showWhatsApp()
                 }
             }
         }
-        navScroll.addView(nav)
-        root.addView(navScroll)
-        setContentView(root)
+        navScroll.addView(nav); root.addView(navScroll)
+        val content = ScrollView(this).apply { setPadding(14, 12, 14, 30) }
+        body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        content.addView(body); root.addView(content, LinearLayout.LayoutParams(-1, 0, 1f)); setContentView(root)
     }
 
-    private fun contentScroll(): ScrollView = ScrollView(this).also { it.setPadding(14, 12, 14, 30) }
-
     private fun showDashboard() {
-        setupShell("Dashboard")
-        val scroll = contentScroll()
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        addText(box, "Welcome, ${session.userName ?: "User"}", 21f, true)
-        val counts = TextView(this).apply { textSize = 18f; setPadding(0, 12, 0, 16) }
-        box.addView(counts, lp())
-        addText(box, "Recent Leads", 18f, true)
-        val leadList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        box.addView(leadList, lp())
-        scroll.addView(box)
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        shell("Dashboard")
+        addText(body, "Welcome, " + (session.userName ?: "User"), 24f, true)
+        val summary = TextView(this).apply { textSize = 17f; setPadding(0, 12, 0, 20) }; body.addView(summary, lp())
         api.runAsync {
             try {
-                val d = api.dashboard()
-                val c = d.getJSONObject("counts")
-                val rows = d.getJSONArray("recent_leads")
+                val leads = api.list("Lead", "id,firstName,lastName,accountName,phoneNumber,whatsappNumber,status,leadStage", 5)
+                val contacts = api.list("Contact", "id,name", 5)
+                val accounts = api.list("Account", "id,name", 5)
+                val opportunities = api.list("Opportunity", "id,name", 5)
+                val tasks = api.list("Task", "id,name,status", 5)
+                val messages = api.list("WhatsAppMessage", "id,name,direction,status,textBody,toNumber,fromNumber", 5)
                 runOnUiThread {
-                    counts.text = "Leads: ${c.getInt("leads")}   Contacts: ${c.getInt("contacts")}\nCustomers: ${c.getInt("customers")}   Follow-ups: ${c.getInt("followups")}"
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        leadList.addView(card("${o.optString("first_name")} ${o.optString("last_name")}".trim(), "${o.optString("company")} • ${o.optString("mobile")} • ${o.optString("status")}") {
-                            showLead(o.getLong("id"))
-                        })
-                    }
+                    summary.text = "Leads: " + leads.length() + "   Contacts: " + contacts.length() + "\n" +
+                        "Accounts: " + accounts.length() + "   Opportunities: " + opportunities.length() + "\n" +
+                        "Tasks: " + tasks.length() + "   WhatsApp messages: " + messages.length()
+                    addText(body, "Recent leads", 19f, true)
+                    if (leads.length() == 0) addText(body, "No leads found.", 14f, false)
+                    for (i in 0 until leads.length()) { val row = leads.getJSONObject(i); body.addView(card(leadName(row), leadSubtitle(row)) { showLead(row.optString("id")) }) }
                 }
-            } catch (e: Exception) {
-                runOnUiThread { toast(e.message ?: "Could not load dashboard") }
-            }
+            } catch (e: Exception) { runOnUiThread { summary.text = "Could not load dashboard data."; toast(e.message ?: "Dashboard error") } }
         }
     }
 
     private fun showLeads() {
-        setupShell("Leads")
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(14, 10, 14, 20) }
-        val add = Button(this).apply { text = "+ New Lead" }
-        box.addView(add, lp())
-        add.setOnClickListener { showCreateLead() }
-        val scroll = contentScroll()
-        box.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        root.addView(box, LinearLayout.LayoutParams(-1, 0, 1f))
+        shell("Leads")
+        val add = Button(this).apply { text = "+ New Lead" }; body.addView(add, lp()); add.setOnClickListener { showCreateLead() }
         api.runAsync {
-            try {
-                val leads = api.leads()
-                runOnUiThread {
-                    leads.forEach { lead ->
-                        scroll.addView(card("${lead.firstName} ${lead.lastName}".trim(), "${lead.company.ifBlank { "Individual" }} • ${lead.mobile} • ${lead.status}") {
-                            showLead(lead.id)
-                        })
-                    }
-                }
-            } catch (e: Exception) {
-                runOnUiThread { toast(e.message ?: "Could not load leads") }
-            }
+            try { val rows = api.list("Lead", "id,firstName,lastName,accountName,phoneNumber,whatsappNumber,status,leadStage", 100); runOnUiThread { renderLeadList(rows) } }
+            catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load leads") } }
         }
+    }
+
+    private fun renderLeadList(rows: JSONArray) {
+        for (i in 0 until rows.length()) { val row = rows.getJSONObject(i); body.addView(card(leadName(row), leadSubtitle(row)) { showLead(row.optString("id")) }) }
     }
 
     private fun showCreateLead() {
-        setupShell("New Lead")
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(14, 10, 14, 20) }
-        val fields = listOf(edit("First name *"), edit("Last name"), edit("Company"), edit("Mobile *"), edit("Source"), edit("Requirement"))
-        fields.forEach { box.addView(it, lp()) }
-        val save = Button(this).apply { text = "Create Lead" }
-        val back = Button(this).apply { text = "Back" }
-        box.addView(save, lp()); box.addView(back, lp())
+        shell("New Lead")
+        val first = edit("First name *"); val last = edit("Last name"); val company = edit("Company / Account")
+        val phone = edit("Phone"); val whatsapp = edit("WhatsApp number"); val source = edit("Lead source detail"); val requirement = edit("Requirement / notes")
+        listOf(first, last, company, phone, whatsapp, source, requirement).forEach { body.addView(it, lp()) }
+        val save = Button(this).apply { text = "Create Lead" }; body.addView(save, lp())
         save.setOnClickListener {
-            val first = fields[0].text.toString(); val last = fields[1].text.toString(); val company = fields[2].text.toString(); val mobile = fields[3].text.toString(); val source = fields[4].text.toString(); val req = fields[5].text.toString()
-            if (first.isBlank() || mobile.isBlank()) { toast("First name and mobile are required"); return@setOnClickListener }
+            if (first.text.isNullOrBlank()) { toast("First name is required."); return@setOnClickListener }
             save.isEnabled = false
             api.runAsync {
-                try { api.createLead(first, last, company, mobile, source, req); runOnUiThread { showLeads() } }
-                catch (e: Exception) { runOnUiThread { save.isEnabled = true; toast(e.message ?: "Could not create lead") } }
+                try {
+                    api.createLead(first.text.toString().trim(), last.text.toString().trim(), company.text.toString().trim(), phone.text.toString().trim(), whatsapp.text.toString().trim(), source.text.toString().trim(), requirement.text.toString().trim())
+                    runOnUiThread { showLeads() }
+                } catch (e: Exception) { runOnUiThread { save.isEnabled = true; toast(e.message ?: "Could not create lead") } }
             }
         }
-        back.setOnClickListener { showLeads() }
-        root.addView(contentScroll().also { it.addView(box) }, LinearLayout.LayoutParams(-1, 0, 1f))
     }
 
-    private fun showLead(id: Long) {
-        setupShell("Lead")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try { val lead = api.lead(id); runOnUiThread { renderLead(scroll, lead) } }
-            catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load lead") } }
-        }
-    }
+    private fun showLead(id: String) {
+        shell("Lead")
+        api.runAsync { try { val row = api.read("Lead", id); runOnUiThread { renderLeadDetail(row) } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load lead") } } }
 
-    private fun renderLead(scroll: ScrollView, o: org.json.JSONObject) {
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        addText(box, "${o.optString("first_name")} ${o.optString("last_name")}".trim(), 26f, true)
-        addText(box, "${o.optString("company")}\n${o.optString("mobile")}\n${o.optString("requirement")}", 15f, false)
-        val call = Button(this).apply { text = "📞 Call" }
-        val wa = Button(this).apply { text = "💬 WhatsApp" }
-        val convert = Button(this).apply { text = "Convert to Contact" }
-        box.addView(call, lp()); box.addView(wa, lp()); box.addView(convert, lp())
-        val phone = o.optString("whatsapp").ifBlank { o.optString("mobile") }
-        call.setOnClickListener { startTrackedCall("lead", o.getLong("id"), phone) }
-        wa.setOnClickListener { chooseTemplate("lead", o.getLong("id")) }
-        if (o.optLong("converted_contact_id", 0L) > 0) { convert.text = "Already converted"; convert.isEnabled = false }
-        else convert.setOnClickListener {
-            api.runAsync { try { val c=api.convertLead(o.getLong("id")); runOnUiThread { toast("Converted to Contact #${c.getLong("id")}"); showContacts() } } catch(e:Exception){ runOnUiThread{toast(e.message ?: "Conversion failed")} } }
+    private fun renderLeadDetail(row: JSONObject) {
+        addText(body, leadName(row), 28f, true)
+        val details = listOf(row.optString("accountName"), row.optString("phoneNumber"), row.optString("whatsappNumber"), row.optString("emailAddress"), row.optString("leadStage"), row.optString("leadSourceDetail"), row.optString("description"))
+        addText(body, details.filter { it.isNotBlank() }.joinToString("\n"), 15f, false)
+        val call = Button(this).apply { text = "Call" }; val whatsapp = Button(this).apply { text = "WhatsApp message" }; val convert = Button(this).apply { text = "Convert to Contact" }
+        body.addView(call, lp()); body.addView(whatsapp, lp()); body.addView(convert, lp())
+        val phone = row.optString("whatsappNumber").ifBlank { row.optString("phoneNumber") }
+        call.setOnClickListener {
+            if (phone.isBlank()) toast("No phone number.") else startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone.filter { it.isDigit() || it == '+' })))
         }
-        addText(box, "Recent Calls", 18f, true)
-        val calls = o.optJSONArray("calls") ?: org.json.JSONArray()
-        for (i in 0 until calls.length()) {
-            val c = calls.getJSONObject(i)
-            box.addView(card(c.optString("phone"), "${c.optString("direction")} • ${c.optInt("duration_seconds")} sec"))
+        whatsapp.setOnClickListener {
+            val id = row.optString("id")
+            if (!row.optBoolean("whatsappOptIn", false)) toast("WhatsApp opt-in is required before CRM-initiated messaging.") else promptWhatsAppMessage(id)
         }
-
-        addText(box, "Activity timeline", 18f, true)
-        val activities = o.optJSONArray("activities") ?: org.json.JSONArray()
-        if (activities.length() == 0) {
-            addText(box, "No activity recorded yet.", 14f, false)
-        } else {
-            for (i in 0 until activities.length()) {
-                val a = activities.getJSONObject(i)
-                box.addView(card(
-                    a.optString("action").replace('_',' '),
-                    "${a.optString("created_at")} • ${a.optString("description")}"
-                ))
+        convert.setOnClickListener {
+            convert.isEnabled = false
+            api.runAsync {
+                try { val result = api.convertLead(row.optString("id")); runOnUiThread { toast("Lead converted. Contact: " + result.optString("createdContactId", "created")); showLead(row.optString("id")) } }
+                catch (e: Exception) { runOnUiThread { convert.isEnabled = true; toast(e.message ?: "Conversion failed") } }
             }
         }
-        scroll.addView(box)
     }
 
-    private fun chooseTemplate(type: String, id: Long) {
+    private fun promptWhatsAppMessage(leadId: String) {
+        val input = EditText(this).apply { hint = "Message"; minLines = 3 }
+        AlertDialog.Builder(this).setTitle("Send WhatsApp message").setView(input).setNegativeButton("Cancel", null).setPositiveButton("Send") { _, _ ->
+            val message = input.text.toString().trim()
+            if (message.isBlank()) { toast("Message is empty."); return@setPositiveButton }
+            api.runAsync {
+                try { val result = api.sendWhatsAppText(leadId, message); runOnUiThread { toast("Sent. Provider message ID: " + result.optString("providerMessageId")) } }
+                catch (e: Exception) { runOnUiThread { toast(e.message ?: "WhatsApp send failed") } }
+            }
+        }.show()
+    }
+
+    private fun showEntityList(entityType: String, title: String) {
+        shell(title)
         api.runAsync {
-            try {
-                val templates = api.templates()
-                runOnUiThread {
-                    val labels = templates.map { "${it.name} · ${it.situation}" }.toTypedArray()
-                    AlertDialog.Builder(this).setTitle("WhatsApp message").setItems(labels) { _, which ->
-                        api.runAsync {
-                            try {
-                                val result = api.whatsapp(type, id, templates[which].situation)
-                                runOnUiThread { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result.getString("url")))) }
-                            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not create WhatsApp message") } }
-                        }
-                    }.show()
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load templates") } }
+            try { val rows = api.entityItems(entityType); runOnUiThread { if (rows.isEmpty()) addText(body, "No records found.", 14f, false); rows.forEach { item -> body.addView(card(item.title, item.subtitle) { showGenericDetail(entityType, title, item.id) }) } } }
+            catch (e: Exception) { runOnUiThread { toast(e.message ?: ("Could not load " + title)) } }
         }
     }
 
-    private fun showContacts() {
-        setupShell("Contacts")
-        val scroll = contentScroll(); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+    private fun showGenericDetail(entityType: String, title: String, id: String) {
+        shell(title.removeSuffix("s"))
         api.runAsync {
-            try {
-                val rows = api.contacts()
-                runOnUiThread { rows.forEach { c -> scroll.addView(card("${c.firstName} ${c.lastName}".trim(), "${c.company.ifBlank { "Contact" }} • ${c.mobile}${if (c.customerCode != null) " • ${c.customerCode}" else ""}") { showContact(c.id) }) } }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load contacts") } }
-        }
-    }
-
-    private fun showContact(id: Long) {
-        api.runAsync {
-            try {
-                val o = api.contact(id)
-                runOnUiThread {
-                    setupShell("Contact")
-                    val scroll = contentScroll(); val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-                    addText(box, "${o.optString("first_name")} ${o.optString("last_name")}".trim(), 26f, true)
-                    addText(box, "${o.optString("company")}\n${o.optString("mobile")}\n${o.optString("email")}", 15f, false)
-                    val call=Button(this).apply{text="📞 Call"}; val wa=Button(this).apply{text="💬 WhatsApp"}; val convert=Button(this).apply{text="Convert to Customer"}
-                    box.addView(call,lp());box.addView(wa,lp());box.addView(convert,lp())
-                    val phone=o.optString("whatsapp").ifBlank{o.optString("mobile")}
-                    call.setOnClickListener{startTrackedCall("contact",id,phone)};wa.setOnClickListener{chooseTemplate("contact",id)}
-                    if(o.optJSONObject("customer")!=null){convert.text="Already a Customer";convert.isEnabled=false}else convert.setOnClickListener{convertContact(id)}
-
-                    addText(box, "Activity timeline", 18f, true)
-                    val activities=o.optJSONArray("activities") ?: org.json.JSONArray()
-                    if(activities.length()==0) addText(box,"No activity recorded yet.",14f,false)
-                    else for(i in 0 until activities.length()){
-                        val a=activities.getJSONObject(i)
-                        box.addView(card(a.optString("action").replace('_',' '), "${a.optString("created_at")} • ${a.optString("description")}"))
-                    }
-                    scroll.addView(box); root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f))
-                }
-            } catch(e:Exception){runOnUiThread{toast(e.message ?: "Could not load contact")}}
-        }
-    }
-
-    private fun convertContact(id: Long) {
-        api.runAsync { try { val c=api.convertContact(id); runOnUiThread { toast("Converted to ${c.optString("customer_code")}"); showCustomers() } } catch(e:Exception){runOnUiThread{toast(e.message ?: "Conversion failed")}} }
-    }
-
-    private fun showCustomers() {
-        setupShell("Customers")
-        val scroll=contentScroll();root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f))
-        api.runAsync { try { val rows=api.customers(); runOnUiThread { rows.forEach { c -> scroll.addView(card(c.code,"${c.name.trim()} • ${c.company} • ${c.mobile}"){showCustomer(c.id)}) } } } catch(e:Exception){runOnUiThread{toast(e.message ?: "Could not load customers")}} }
-    }
-
-    private fun showCustomer(id: Long) {
-        api.runAsync {
-            try {
-                val o=api.customer(id)
-                runOnUiThread {
-                    setupShell("Customer")
-                    val scroll=contentScroll(); val box=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL}; val c=o.optJSONObject("contact")
-                    addText(box,o.optString("customer_code"),26f,true)
-                    addText(box,"${c?.optString("first_name") ?: ""} ${c?.optString("last_name") ?: ""}\n${c?.optString("company") ?: ""}\n${c?.optString("mobile") ?: ""}",15f,false)
-                    val call=Button(this).apply{text="📞 Call"};val wa=Button(this).apply{text="💬 WhatsApp"};box.addView(call,lp());box.addView(wa,lp())
-                    val phone=c?.optString("whatsapp")?.ifBlank{c.optString("mobile")} ?: ""
-                    call.setOnClickListener{startTrackedCall("customer",id,phone)};wa.setOnClickListener{chooseTemplate("customer",id)}
-
-                    addText(box, "Activity timeline", 18f, true)
-                    val activities=o.optJSONArray("activities") ?: org.json.JSONArray()
-                    if(activities.length()==0) addText(box,"No activity recorded yet.",14f,false)
-                    else for(i in 0 until activities.length()){
-                        val a=activities.getJSONObject(i)
-                        box.addView(card(a.optString("action").replace('_',' '), "${a.optString("created_at")} • ${a.optString("description")}"))
-                    }
-                    scroll.addView(box);root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f))
-                }
-            } catch(e:Exception){runOnUiThread{toast(e.message ?: "Could not load customer")}}
-        }
-    }
-
-    private fun showFollowUps() {
-        setupShell("Follow-ups")
-        val scroll=contentScroll();root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f))
-        api.runAsync {
-            try {
-                val rows=api.followUps()
-                runOnUiThread {
-                    for(i in 0 until rows.length()) {
-                        val f=rows.getJSONObject(i);val sub=f.optJSONObject("subject")
-                        val name=if(sub?.has("first_name")==true) "${sub.optString("first_name")} ${sub.optString("last_name")}".trim() else f.optString("type")
-                        scroll.addView(card(name,"${f.optString("scheduled_for")} • ${f.optString("status")} • ${f.optString("note")}"))
-                    }
-                }
-            } catch(e:Exception){runOnUiThread{toast(e.message ?: "Could not load follow-ups")}}
-        }
-    }
-
-    private fun startTrackedCall(subjectType:String,subjectId:Long,phone:String){
-        if(phone.isBlank()){toast("No phone number");return}
-        requestCallPermissionsThen {
-            val serviceIntent=Intent(this,CallTrackingService::class.java).apply{putExtra("subject_type",subjectType);putExtra("subject_id",subjectId);putExtra("phone",phone)}
-            try{startForegroundService(serviceIntent)}catch(_:Exception){startService(serviceIntent)}
-            val clean=phone.filter{it.isDigit()||it=='+'}
-            try{
-                if(checkSelfPermission(Manifest.permission.CALL_PHONE)==PackageManager.PERMISSION_GRANTED) startActivity(Intent(Intent.ACTION_CALL,Uri.parse("tel:$clean")))
-                else startActivity(Intent(Intent.ACTION_DIAL,Uri.parse("tel:$clean")))
-            }catch(e:Exception){toast("Could not open phone: ${e.message}")}
-        }
-    }
-
-    private fun requestCallPermissionsThen(action:()->Unit){
-        val need=mutableListOf<String>()
-        if(checkSelfPermission(Manifest.permission.CALL_PHONE)!=PackageManager.PERMISSION_GRANTED) need+=Manifest.permission.CALL_PHONE
-        if(checkSelfPermission(Manifest.permission.RECORD_AUDIO)!=PackageManager.PERMISSION_GRANTED) need+=Manifest.permission.RECORD_AUDIO
-        if(need.isEmpty()) action() else {requestPermissions(need.toTypedArray(),500);toast("Allow call and microphone permissions, then tap Call again")}
-    }
-
-    private fun edit(hint:String)=EditText(this).apply{this.hint=hint;setPadding(12,10,12,10)}
-    private fun lp()=LinearLayout.LayoutParams(-1,LinearLayout.LayoutParams.WRAP_CONTENT).apply{setMargins(0,7,0,7)}
-    private fun section(text:String)=TextView(this).apply{this.text=text;textSize=18f;setTypeface(null,1);setPadding(0,14,0,8)}
-    private fun addText(parent:LinearLayout,text:String,size:Float,bold:Boolean){parent.addView(TextView(this).apply{this.text=text;textSize=size;setTextColor(Color.rgb(28,37,54));if(bold)setTypeface(null,1);setPadding(0,8,0,8)},lp())}
-    private fun card(titleText:String,subtitle:String="",click:(()->Unit)?=null)=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(16,14,16,14);setBackgroundColor(Color.WHITE);addView(TextView(this@MainActivity).apply{text=titleText;textSize=17f;setTypeface(null,1)},lp());if(subtitle.isNotBlank())addView(TextView(this@MainActivity).apply{text=subtitle;textSize=14f;setTextColor(Color.DKGRAY)},lp());click?.let{setOnClickListener{it()}};layoutParams=LinearLayout.LayoutParams(-1,LinearLayout.LayoutParams.WRAP_CONTENT).apply{setMargins(0,7,0,7)}}
-    private fun toast(message:String)=android.widget.Toast.makeText(this,message,android.widget.Toast.LENGTH_LONG).show()
-    override fun onDestroy(){worker.shutdownNow();super.onDestroy()}
-
-    private fun showCompanies() {
-        setupShell("Companies")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try {
-                val rows = api.companies()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        scroll.addView(card(o.optString("name"), "${o.optString("phone")} • ${o.optString("email")}"))
-                    }
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load companies") } }
+            try { val row = api.read(entityType, id); runOnUiThread {
+                addText(body, row.optString("name").ifBlank { id }, 26f, true)
+                val lines = row.keys().asSequence().filter { it != "id" && it != "deleted" }.take(20).map { key -> key + ": " + row.optString(key) }.filter { !it.endsWith(": ") }.toList()
+                addText(body, lines.joinToString("\n"), 14f, false)
+            } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load record") } }
         }
     }
 
     private fun showTasks() {
-        setupShell("Tasks")
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val add = Button(this).apply { text = "+ New Task" }
-        box.addView(add, lp())
-        val scroll = contentScroll()
-        box.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        root.addView(box, LinearLayout.LayoutParams(-1, 0, 1f))
-        add.setOnClickListener {
-            val titleInput = edit("Task title")
-            AlertDialog.Builder(this).setTitle("New task").setView(titleInput).setPositiveButton("Save") { _, _ ->
-                api.runAsync { try { api.createTask(titleInput.text.toString(), ""); runOnUiThread { showTasks() } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not create task") } } }
-            }.setNegativeButton("Cancel", null).show()
-        }
+        shell("Tasks")
+        val add = Button(this).apply { text = "+ New Task" }; body.addView(add, lp()); add.setOnClickListener { showCreateTask() }
         api.runAsync {
-            try {
-                val rows = api.tasks()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        scroll.addView(card(o.optString("title"), "${o.optString("priority")} • ${o.optString("status")} • ${o.optString("due_at")}"))
-                    }
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load tasks") } }
+            try { val rows = api.list("Task", "id,name,status,priority,dateEnd", 100); runOnUiThread {
+                for (i in 0 until rows.length()) { val row = rows.getJSONObject(i); body.addView(card(row.optString("name").ifBlank { "Task" }, row.optString("priority") + " • " + row.optString("status") + " • " + row.optString("dateEnd")) {
+                    if (row.optString("status") != "Completed") api.runAsync { try { api.completeTask(row.optString("id")); runOnUiThread { showTasks() } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not complete task") } } }
+                }) }
+            } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load tasks") } }
         }
     }
 
-    private fun showProducts() {
-        setupShell("Products / Services")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try {
-                val rows = api.products()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        scroll.addView(card(o.optString("name"), "₹${o.optString("price")} / ${o.optString("unit")}"))
-                    }
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load products") } }
-        }
-    }
-
-    private fun showQuotations() {
-        setupShell("Quotations")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try {
-                val rows = api.quotations()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        scroll.addView(card(o.optString("quote_number"), "${o.optString("status")} • ₹${o.optString("total")}"))
-                    }
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load quotations") } }
-        }
-    }
-
-    private fun showOrders() {
-        setupShell("Orders / Sales")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try {
-                val rows = api.orders()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        scroll.addView(card(o.optString("order_number"), "${o.optString("status")} • ₹${o.optString("total")}"))
-                    }
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load orders") } }
-        }
-    }
-
-    private fun showPayments() {
-        setupShell("Payments")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try {
-                val rows = api.payments()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        scroll.addView(card("₹${o.optString("amount")}", "${o.optString("method")} • ${o.optString("status")} • ${o.optString("reference")}"))
-                    }
-                }
-            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load payments") } }
-        }
-    }
-
-    private fun showNotifications() {
-        setupShell("Notifications")
-        val scroll = contentScroll()
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        api.runAsync {
-            try {
-                val rows = api.notifications()
-                runOnUiThread {
-                    for (i in 0 until rows.length()) {
-                        val o = rows.getJSONObject(i)
-                        val id = o.optString("id")
-                        val read = !o.isNull("read_at")
-                        val titleText = if (read) o.optString("data") else "NEW · " + o.optString("data")
-                        scroll.addView(card(titleText, o.optString("created_at")) {
-                            if (!read) {
-                                api.runAsync {
-                                    try { api.markNotificationRead(id) } catch (_: Exception) {}
-                                    runOnUiThread { showNotifications() }
-                                }
-                            }
-                        })
-                    }
-                }
-            } catch (e: Exception) {
-                runOnUiThread { toast(e.message ?: "Could not load notifications") }
+    private fun showCreateTask() {
+        shell("New Task")
+        val name = edit("Task name"); val description = edit("Description"); val priority = edit("Priority (Low / Normal / High)")
+        listOf(name, description, priority).forEach { body.addView(it, lp()) }
+        val save = Button(this).apply { text = "Create task" }; body.addView(save, lp())
+        save.setOnClickListener {
+            if (name.text.isNullOrBlank()) { toast("Task name is required."); return@setOnClickListener }
+            save.isEnabled = false
+            api.runAsync {
+                try { api.createTask(name.text.toString().trim(), description.text.toString().trim(), priority.text.toString().trim().ifBlank { "Normal" }); runOnUiThread { showTasks() } }
+                catch (e: Exception) { runOnUiThread { save.isEnabled = true; toast(e.message ?: "Could not create task") } }
             }
         }
     }
 
+    private fun showWhatsApp() {
+        shell("WhatsApp Inbox")
+        api.runAsync {
+            try { val rows = api.list("WhatsAppMessage", "id,name,direction,status,messageType,fromNumber,toNumber,textBody,receivedAt,sentAt", 100); runOnUiThread {
+                if (rows.length() == 0) addText(body, "No WhatsApp messages yet. Configure the Cloud API and webhook on the server.", 14f, false)
+                for (i in 0 until rows.length()) { val row = rows.getJSONObject(i); body.addView(card(row.optString("direction") + " • " + row.optString("status"), row.optString("fromNumber") + " → " + row.optString("toNumber") + "\n" + row.optString("textBody"))) }
+            } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load WhatsApp messages") } }
+        }
+    }
+
+    private fun leadName(row: JSONObject): String {
+        return (row.optString("firstName") + " " + row.optString("lastName")).trim().ifBlank { row.optString("name").ifBlank { row.optString("id") } }
+    }
+
+    private fun leadSubtitle(row: JSONObject): String {
+        return listOf(row.optString("accountName"), row.optString("phoneNumber"), row.optString("leadStage"), row.optString("status")).filter { it.isNotBlank() }.joinToString(" • ")
+    }
+
+    private fun addText(parent: LinearLayout, text: String, size: Float, bold: Boolean, params: LinearLayout.LayoutParams = lp()) {
+        val view = TextView(this).apply { this.text = text; textSize = size; setTextColor(Color.rgb(20, 30, 50)); setPadding(0, 8, 0, 8); if (bold) setTypeface(null, 1) }
+        parent.addView(view, params)
+    }
+
+    private fun edit(hintText: String): EditText = EditText(this).apply { hint = hintText; setPadding(12, 10, 12, 10) }
+
+    private fun card(title: String, subtitle: String, click: (() -> Unit)? = null): LinearLayout {
+        val view = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(14, 12, 14, 12); setBackgroundColor(Color.WHITE) }
+        addText(view, title, 17f, true); addText(view, subtitle, 14f, false); click?.let { view.setOnClickListener { it() } }
+        view.layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 6, 0, 6) }
+        return view
+    }
+
+    private fun lp(): LinearLayout.LayoutParams = LinearLayout.LayoutParams(-1, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 7, 0, 7) }
+    private fun toast(message: String) = android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show()
 }
