@@ -1,39 +1,65 @@
 <?php
-
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LeadController;
+use App\Http\Controllers\CallController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\SaasController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TemplateController;
-use App\Http\Controllers\CallController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route('dashboard'));
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/',fn()=>redirect()->route('dashboard'));
+Route::get('/login',[AuthController::class,'showLogin'])->name('login');
+Route::post('/login',[AuthController::class,'login'])->name('login.post');
+Route::get('/signup',[SaasController::class,'showSignup'])->name('signup');
+Route::post('/signup',[SaasController::class,'signup'])->name('signup.post');
+Route::post('/logout',[AuthController::class,'logout'])->name('logout');
 
-Route::middleware('crm.auth')->group(function () {
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
-
-    Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
-    Route::get('/leads/create', [LeadController::class, 'create'])->name('leads.create');
-    Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
-    Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');
-    Route::post('/leads/{lead}/convert', [LeadController::class, 'convert'])->name('leads.convert');
-
-    Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
-    Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('contacts.show');
-    Route::post('/contacts/{contact}/convert', [ContactController::class, 'convert'])->name('contacts.convert');
-
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
-
-    Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
-    Route::post('/templates', [TemplateController::class, 'store'])->name('templates.store');
-
-    Route::post('/calls', [CallController::class, 'store'])->name('calls.store');
-    Route::get('/admin/calls/{call}/recording', [CallController::class, 'recording'])
-        ->middleware('crm.role:super_admin,admin')->name('calls.recording');
+Route::middleware(['crm.auth','workspace'])->group(function(){
+Route::get('/dashboard',DashboardController::class)->name('dashboard');
+Route::get('/leads',[LeadController::class,'index'])->name('leads.index');
+Route::get('/leads/create',[LeadController::class,'create'])->name('leads.create');
+Route::post('/leads',[LeadController::class,'store'])->name('leads.store');
+Route::get('/leads/{lead}',[LeadController::class,'show'])->name('leads.show');
+Route::post('/leads/{lead}/convert',[LeadController::class,'convert'])->name('leads.convert');
+Route::get('/contacts',[ContactController::class,'index'])->name('contacts.index');
+Route::get('/contacts/{contact}',[ContactController::class,'show'])->name('contacts.show');
+Route::post('/contacts/{contact}/convert',[ContactController::class,'convert'])->name('contacts.convert');
+Route::get('/customers',[CustomerController::class,'index'])->name('customers.index');
+Route::get('/customers/{customer}',[CustomerController::class,'show'])->name('customers.show');
+Route::get('/companies',[CompanyController::class,'index'])->name('companies.index');
+Route::post('/companies',[CompanyController::class,'store'])->name('companies.store');
+Route::get('/templates',[TemplateController::class,'index'])->name('templates.index');
+Route::post('/templates',[TemplateController::class,'store'])->name('templates.store');
+Route::post('/calls',[CallController::class,'store'])->name('calls.store');
+Route::get('/admin/calls/{call}/recording',[CallController::class,'recording'])->middleware('crm.role:super_admin,admin')->name('calls.recording');
+Route::get('/tasks',[TaskController::class,'index'])->name('tasks.index');
+Route::post('/tasks',[TaskController::class,'store'])->name('tasks.store');
+Route::post('/tasks/{task}/complete',[TaskController::class,'complete'])->name('tasks.complete');
+Route::get('/products',[ProductController::class,'index'])->name('products.index');
+Route::post('/products',[ProductController::class,'store'])->name('products.store');
+Route::post('/products/{product}/archive',[ProductController::class,'archive'])->name('products.archive');
+Route::get('/quotations',[QuotationController::class,'index'])->name('quotations.index');
+Route::post('/quotations',[QuotationController::class,'store'])->name('quotations.store');
+Route::get('/quotations/{quotation}',[QuotationController::class,'show'])->name('quotations.show');
+Route::get('/orders',[OrderController::class,'index'])->name('orders.index');
+Route::post('/orders',[OrderController::class,'store'])->name('orders.store');
+Route::get('/orders/{order}',[OrderController::class,'show'])->name('orders.show');
+Route::get('/payments',[PaymentController::class,'index'])->name('payments.index');
+Route::post('/payments',[PaymentController::class,'store'])->name('payments.store');
+Route::get('/imports/leads',[ImportController::class,'show'])->name('imports.leads');
+Route::post('/imports/leads',[ImportController::class,'leads'])->name('imports.leads.post');
+Route::middleware('crm.role:super_admin,admin')->group(function(){
+Route::get('/team',[TeamController::class,'index'])->name('team.index');
+Route::post('/team',[TeamController::class,'store'])->name('team.store');
+});
 });
