@@ -101,7 +101,7 @@ class CallWebhookService
             'omniGoCRMTranscript' => $this->nullableString($payload, 'transcript'),
         ]);
 
-        if ($payload->recordingDuration !== null ?? false) {
+        if (isset($payload->recordingDuration)) {
             $call->set('omniGoCRMRecordingDuration', max(0, (int) $payload->recordingDuration));
         }
 
