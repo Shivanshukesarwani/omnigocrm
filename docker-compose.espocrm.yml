@@ -1,0 +1,43 @@
+services:
+  omnigocrm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omnigocrm
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      ESPOCRM_DATABASE_PLATFORM: Mysql
+      ESPOCRM_DATABASE_HOST: db
+      ESPOCRM_DATABASE_NAME: omnigocrm
+      ESPOCRM_DATABASE_USER: omnigocrm
+      ESPOCRM_DATABASE_PASSWORD: change-me
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - omnigocrm_data:/var/www/html/data
+      - omnigocrm_custom:/var/www/html/custom
+
+  db:
+    image: mariadb:11
+    container_name: omnigocrm-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: omnigocrm
+      MARIADB_USER: omnigocrm
+      MARIADB_PASSWORD: change-me
+      MARIADB_ROOT_PASSWORD: change-root-password
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - omnigocrm_db:/var/lib/mysql
+
+volumes:
+  omnigocrm_data:
+  omnigocrm_custom:
+  omnigocrm_db:
