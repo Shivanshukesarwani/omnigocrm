@@ -1,0 +1,13 @@
+/*
+ * OmniGoCRM custom UI layer.
+ *
+ * Keep EspoCRM core styles untouched. Add product-specific styling here.
+ */
+
+:root {
+    --omni-primary: #2563eb;
+}
+
+.omni-go-crm-brand {
+    font-weight: 700;
+}
