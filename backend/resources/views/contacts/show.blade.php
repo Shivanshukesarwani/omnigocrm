@@ -3,5 +3,8 @@
 @section('content')
 <div class="page-head"><div><h1>{{ $contact->first_name }} {{ $contact->last_name }}</h1><p class="muted">{{ $contact->company ?: 'Contact' }} · {{ $contact->mobile }}</p></div><div class="actions">@if($contact->whatsapp || $contact->mobile)<a class="btn primary" target="_blank" href="https://wa.me/{{ preg_replace('/\D+/','',$contact->whatsapp ?: $contact->mobile) }}">WhatsApp</a>@endif @if($contact->customer)<a class="btn" href="{{ route('customers.show',$contact->customer) }}">Open Customer</a>@else<form method="POST" action="{{ route('contacts.convert',$contact) }}">@csrf<button class="btn">Convert to Customer</button></form>@endif</div></div>
 <div class="panel"><div class="detail-grid"><span>Email</span><strong>{{ $contact->email ?: '—' }}</strong><span>Designation</span><strong>{{ $contact->designation ?: '—' }}</strong><span>Address</span><strong>{{ $contact->address ?: '—' }}</strong></div><hr><p>{{ $contact->notes ?: 'No notes.' }}</p></div>
+<section class="panel"><h2>Activity timeline</h2>
+@forelse($contact->activities as $a)<p><strong>{{ $a->created_at }}</strong> · {{ str_replace('_',' ',ucwords($a->action,'_')) }} · {{ $a->description ?: 'Activity recorded' }} · {{ optional($a->user)->name }}</p>@empty<p>No activity recorded yet.</p>@endforelse
+</section>
 @if($contact->calls->count())<section class="panel"><h2>Calls</h2><table><thead><tr><th>Date</th><th>Phone</th><th>Direction</th><th>Duration</th></tr></thead><tbody>@foreach($contact->calls as $call)<tr><td>{{ $call->called_at }}</td><td>{{ $call->phone }}</td><td>{{ $call->direction }}</td><td>{{ $call->durationLabel() }}</td></tr>@endforeach</tbody></table></section>@endif
 @endsection
