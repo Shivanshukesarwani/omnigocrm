@@ -34,7 +34,7 @@ class CallTrackingService : Service() {
     }
     @Suppress("DEPRECATION")
     private val legacyListener = object : PhoneStateListener() {
-        override fun onCallState(state: Int, incomingNumber: String?) { handleState(state) }
+        override fun onCallStateChanged(state: Int, phoneNumber: String?) { handleState(state) }
     }
 
     override fun onCreate() {
@@ -93,7 +93,7 @@ class CallTrackingService : Service() {
         executor.execute {
             try {
                 val api = ApiClient(this)
-                val callId = api.logCallSimple(subjectType, subjectId, phone, duration)
+                val callId = api.logCall(subjectType, subjectId.toString(), phone, duration)
                 if (callId > 0 && file?.exists() == true) {
                     api.uploadRecording(callId, file)
                     // Keep the file in the app-private directory. The app has no playback UI for sales users.
