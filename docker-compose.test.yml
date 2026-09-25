@@ -4,6 +4,9 @@ services:
   db-test:
     image: mariadb:11
     container_name: omnigocrm-test-db
+    command:
+      - --general-log=1
+      - --general-log-file=/var/lib/mysql/general.log
     restart: unless-stopped
     environment:
       MARIADB_DATABASE: omnigocrm_test
