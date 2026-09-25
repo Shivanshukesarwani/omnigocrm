@@ -1,5 +1,19 @@
 {
-  "labels": {
-    "OmniGoCRM": "OmniGoCRM"
-  }
+    "labels": {
+        "OmniGoCRM": "OmniGoCRM",
+        "OmniGoCRMLeadFields": "OmniGoCRM Lead Fields",
+        "WhatsAppMessage": "WhatsApp Message",
+        "WhatsAppConversation": "WhatsApp Conversation",
+        "WhatsAppTemplate": "WhatsApp Template"
+    },
+    "scopeNames": {
+        "WhatsAppMessage": "WhatsApp Message",
+        "WhatsAppConversation": "WhatsApp Conversation",
+        "WhatsAppTemplate": "WhatsApp Template"
+    },
+    "scopeNamesPlural": {
+        "WhatsAppMessage": "WhatsApp Messages",
+        "WhatsAppConversation": "WhatsApp Conversations",
+        "WhatsAppTemplate": "WhatsApp Templates"
+    }
 }
