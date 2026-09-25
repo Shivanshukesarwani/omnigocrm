@@ -37,5 +37,10 @@
         "route": "/OmniGoCRM/Calling/log",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostCallLog"
+    },
+    {
+        "route": "/OmniGoCRM/WhatsApp/conversationAction",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWhatsAppConversationAction"
     }
 ]
