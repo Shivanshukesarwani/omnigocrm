@@ -2,7 +2,7 @@ services:
   omnigocrm:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.espocrm
     container_name: omnigocrm
     restart: unless-stopped
     ports:
