@@ -81,7 +81,7 @@ struct DashboardView: View {
     }
 }
 
-enum RecordListKind {
+enum RecordListKind: Equatable {
     case leads
     case tasks
     case generic
