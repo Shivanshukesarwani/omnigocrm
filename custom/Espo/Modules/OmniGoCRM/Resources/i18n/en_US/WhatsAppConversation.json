@@ -8,6 +8,10 @@
         "lastMessageAt": "Last Message At",
         "lastMessagePreview": "Last Message",
         "assignedUser": "Assigned User",
+        "assignedTeam": "Assigned Team",
+        "providerPhoneNumberId": "Provider Phone Number ID",
+        "lastInboundAt": "Last Inbound At",
+        "lastOutboundAt": "Last Outbound At",
         "lead": "Lead",
         "contact": "Contact"
     },
