@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y git ca-certificates python3 make g++ &&
 
 WORKDIR /build
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 
 COPY . .
 RUN npm run build
