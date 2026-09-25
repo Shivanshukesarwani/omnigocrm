@@ -252,6 +252,17 @@ class ApiClient(context: Context) {
     }
 
     fun registerFcmToken(token: String, deviceName: String): JSONObject {
-        return JSONObject().put("accepted", false).put("reason", "Device token entity not enabled yet").put("tokenPresent", token.isNotBlank()).put("deviceName", deviceName)
+        return JSONObject(
+            request(
+                "POST",
+                "OmniGoCRM/Devices/register",
+                JSONObject()
+                    .put("platform", "Android")
+                    .put("pushProvider", "FCM")
+                    .put("pushToken", token)
+                    .put("deviceName", deviceName)
+                    .toString()
+            )
+        )
     }
 }
