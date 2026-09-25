@@ -10,12 +10,14 @@ use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\Crm\Entities\Lead;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppCloudApi;
+use Espo\Modules\OmniGoCRM\Services\WhatsAppConversationService;
 
 class PostWhatsAppSendText implements Action
 {
     public function __construct(
         private WhatsAppCloudApi $client,
         private EntityManager $entityManager,
+        private WhatsAppConversationService $conversationService,
     ) {}
 
     public function process(Request $request): Response
@@ -68,6 +70,11 @@ class PostWhatsAppSendText implements Action
             body: $body,
         );
 
+        $conversation = $this->conversationService->findOrCreate(
+            waId: $recipient,
+            lead: $lead,
+        );
+
         $message = $this->entityManager->getNewEntity('WhatsAppMessage');
 
         $message->set([
@@ -80,11 +87,13 @@ class PostWhatsAppSendText implements Action
             'textBody' => $body,
             'leadId' => $leadId,
             'externalLeadId' => $lead->get('externalLeadId'),
+            'conversationId' => $conversation->getId(),
             'sentAt' => gmdate('Y-m-d H:i:s'),
             'rawPayload' => json_encode($result->response, JSON_UNESCAPED_SLASHES),
         ]);
 
         $this->entityManager->saveEntity($message);
+        $this->conversationService->outgoing($conversation, $body, $message->get('sentAt'));
 
         return ResponseComposer::json([
             'accepted' => true,
