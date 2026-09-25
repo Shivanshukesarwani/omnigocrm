@@ -82,5 +82,10 @@
         "route": "/OmniGoCRM/Sales/payment",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostPaymentCreate"
+    },
+    {
+        "route": "/OmniGoCRM/Sales/orderItem",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostOrderItemAdd"
     }
 ]
