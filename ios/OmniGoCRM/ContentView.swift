@@ -295,7 +295,7 @@ struct CreateLeadView: View {
             .navigationTitle("New Lead")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { presentationMode.wrappedValue.dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -310,7 +310,7 @@ struct CreateLeadView: View {
                                     sourceDetail: source,
                                     description: description
                                 )
-                                dismiss()
+                                presentationMode.wrappedValue.dismiss()
                             } catch {
                                 self.error = error.localizedDescription
                             }
@@ -341,7 +341,7 @@ struct CreateTaskView: View {
             }
             .navigationTitle("New Task")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { presentationMode.wrappedValue.dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         Task {
@@ -351,7 +351,7 @@ struct CreateTaskView: View {
                                     description: description,
                                     priority: priority
                                 )
-                                dismiss()
+                                presentationMode.wrappedValue.dismiss()
                             } catch {
                                 self.error = error.localizedDescription
                             }
@@ -368,12 +368,12 @@ struct SendWhatsAppView: View {
     @Environment(.dismiss) private var dismiss
     @ObservedObject var session: SessionStore
     let leadId: String
-    @State private var body = ""
+    @State private var messageBody = ""
     @State private var error = ""
 
     var bodyView: some View {
         Form {
-            TextEditor(text: $body).frame(minHeight: 140)
+            TextEditor(text: $messageBody).frame(minHeight: 140)
             if !error.isEmpty { Text(error).foregroundStyle(.red) }
         }
     }
@@ -383,22 +383,22 @@ struct SendWhatsAppView: View {
             bodyView
                 .navigationTitle("WhatsApp")
                 .toolbar {
-                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { presentationMode.wrappedValue.dismiss() } }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Send") {
                             Task {
                                 do {
                                     try await APIClient(session: session).sendWhatsApp(
                                         leadId: leadId,
-                                        body: body
+                                        body: messageBody
                                     )
-                                    dismiss()
+                                    presentationMode.wrappedValue.dismiss()
                                 } catch {
                                     self.error = error.localizedDescription
                                 }
                             }
                         }
-                        .disabled(body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(messageBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
         }
