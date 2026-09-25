@@ -1,0 +1,8 @@
+{
+    "module": "OmniGoCRM",
+    "entity": true,
+    "object": true,
+    "acl": true,
+    "tab": true,
+    "notifications": true
+}
