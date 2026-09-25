@@ -1,0 +1,89 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "waId": {
+            "type": "varchar",
+            "maxLength": 32,
+            "index": true,
+            "isPersonalData": true
+        },
+        "phoneNumber": {
+            "type": "phone",
+            "typeList": ["Mobile", "WhatsApp", "Other"],
+            "defaultType": "WhatsApp",
+            "isPersonalData": true
+        },
+        "customerDisplayName": {
+            "type": "varchar",
+            "maxLength": 255,
+            "isPersonalData": true
+        },
+        "status": {
+            "type": "enum",
+            "options": ["Open", "Closed"],
+            "default": "Open",
+            "displayAsLabel": true
+        },
+        "unreadCount": {
+            "type": "int",
+            "default": 0,
+            "min": 0
+        },
+        "lastMessageAt": {
+            "type": "datetime"
+        },
+        "lastMessagePreview": {
+            "type": "varchar",
+            "maxLength": 1000,
+            "isPersonalData": true
+        },
+        "assignedUser": {
+            "type": "link"
+        },
+        "lead": {
+            "type": "link",
+            "readOnly": true
+        },
+        "contact": {
+            "type": "link",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User",
+            "foreign": "whatsAppConversations"
+        },
+        "lead": {
+            "type": "belongsTo",
+            "entity": "Lead",
+            "foreign": "whatsAppConversations"
+        },
+        "contact": {
+            "type": "belongsTo",
+            "entity": "Contact",
+            "foreign": "whatsAppConversations"
+        },
+        "messages": {
+            "type": "hasMany",
+            "entity": "WhatsAppMessage",
+            "foreign": "conversation",
+            "layout": true
+        }
+    },
+    "indexes": {
+        "waId": {
+            "columns": ["waId", "deleted"]
+        },
+        "status": {
+            "columns": ["status", "deleted"]
+        },
+        "lastMessageAt": {
+            "columns": ["lastMessageAt", "deleted"]
+        }
+    }
+}
