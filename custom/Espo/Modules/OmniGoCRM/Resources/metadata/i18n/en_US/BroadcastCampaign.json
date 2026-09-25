@@ -1,0 +1,23 @@
+{
+    "fields":{
+        "name":"Campaign Name",
+        "status":"Status",
+        "scheduledAt":"Scheduled At",
+        "startedAt":"Started At",
+        "completedAt":"Completed At",
+        "templateName":"Template Name",
+        "languageCode":"Language Code",
+        "componentsJson":"Components JSON",
+        "audienceDescription":"Audience",
+        "totalRecipients":"Total Recipients",
+        "sentCount":"Sent",
+        "failedCount":"Failed",
+        "notes":"Notes"
+    },
+    "options":{
+        "status":{
+            "Draft":"Draft","Scheduled":"Scheduled","Running":"Running","Completed":"Completed","Canceled":"Canceled"
+        }
+    },
+    "labels":{"BroadcastCampaign":"WhatsApp Broadcast Campaign"}
+}
