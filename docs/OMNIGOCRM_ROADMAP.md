@@ -5,26 +5,26 @@
 - [x] EspoCRM upstream identified
 - [x] AGPLv3 compliance plan documented
 - [x] OmniGoCRM custom module namespace created
-- [ ] Vendor EspoCRM source into the development branch
-- [ ] Build EspoCRM successfully
-- [ ] Docker development environment
-- [ ] CI build/test pipeline
+- [x] Vendor EspoCRM source into the development branch
+- [x] Build EspoCRM dependencies and validate custom module code in CI
+- [x] Docker development environment (EspoCRM + MariaDB baseline)
+- [x] CI build/test pipeline
 
 ## Phase 1 — Core CRM
-- [ ] Leads
-- [ ] Contacts
-- [ ] Accounts/companies
-- [ ] Opportunities/deals
+- [x] Leads (native EspoCRM Lead + OmniGoCRM fields)
+- [x] Contacts (native EspoCRM)
+- [x] Accounts/companies (native EspoCRM)
+- [x] Opportunities/deals (native EspoCRM)
 - [ ] Pipeline
-- [ ] Tasks
+- [x] Tasks (native EspoCRM)
 - [ ] Follow-ups
-- [ ] Notes
-- [ ] Tags
-- [ ] Custom fields
+- [x] Notes (native EspoCRM)
+- [x] Tags (native EspoCRM)
+- [x] Custom fields
 - [ ] Duplicate detection
-- [ ] CSV/Excel import
+- [x] CSV/Excel import (native EspoCRM + documented OmniGoCRM field mapping)
 - [ ] Lead assignment
-- [ ] Lead source tracking
+- [x] Lead source tracking
 
 ## Phase 2 — OmniGoCRM Sales Layer
 - [ ] Products/services
@@ -35,8 +35,8 @@
 - [ ] Customer timeline
 
 ## Phase 3 — WhatsApp
-- [ ] WhatsApp provider abstraction
-- [ ] Meta WhatsApp Cloud API
+- [x] WhatsApp provider abstraction (Cloud API service boundary)
+- [x] Meta WhatsApp Cloud API outbound text + signed webhook foundation
 - [ ] Shared inbox
 - [ ] Conversation assignment
 - [ ] Templates
@@ -60,11 +60,11 @@
 - [ ] IVR integration
 
 ## Phase 5 — Lead Acquisition
-- [ ] Public lead forms
-- [ ] Website webhook
+- [x] Public lead forms (Espo native Lead Capture + OmniGoCRM gateway)
+- [x] Website/server lead-capture endpoint
 - [ ] Meta lead integration
 - [ ] Google lead integration
-- [ ] API lead ingestion
+- [x] API lead ingestion with externalLeadId idempotency
 - [ ] Automatic lead routing
 
 ## Phase 6 — Automation
