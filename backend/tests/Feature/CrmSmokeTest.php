@@ -61,4 +61,43 @@ class CrmSmokeTest extends TestCase
             ->assertOk()
             ->assertJsonPath('contact.source_lead_id', $lead->id);
     }
+
+    public function test_workspace_cannot_access_another_workspace_lead(): void
+    {
+        $workspaceA = Workspace::create(['name'=>'Workspace A','slug'=>'workspace-a','plan'=>'trial','status'=>'active']);
+        $workspaceB = Workspace::create(['name'=>'Workspace B','slug'=>'workspace-b','plan'=>'trial','status'=>'active']);
+
+        $userA = User::create([
+            'workspace_id'=>$workspaceA->id,
+            'name'=>'User A',
+            'email'=>'a@test.local',
+            'role'=>'super_admin',
+            'password'=>Hash::make('secret-password'),
+        ]);
+
+        $userB = User::create([
+            'workspace_id'=>$workspaceB->id,
+            'name'=>'User B',
+            'email'=>'b@test.local',
+            'role'=>'super_admin',
+            'password'=>Hash::make('secret-password'),
+        ]);
+
+        $tokenB = $this->postJson('/api/login',[
+            'email'=>$userB->email,
+            'password'=>'secret-password',
+            'device'=>'phpunit',
+        ])->json('token');
+
+        $leadA = Lead::create([
+            'workspace_id'=>$workspaceA->id,
+            'first_name'=>'Private',
+            'mobile'=>'9000000000',
+            'status'=>'new',
+        ]);
+
+        $this->withHeader('Authorization','Bearer '.$tokenB)
+            ->getJson('/api/leads/'.$leadA->id)
+            ->assertNotFound();
+    }
 }
