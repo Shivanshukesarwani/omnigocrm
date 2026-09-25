@@ -13,6 +13,8 @@ This is the simplest way to run a disposable local test instance before connecti
 From the repository root:
 
 ```bash
+git pull
+
 docker compose -f docker-compose.test.yml up -d --build
 ```
 
