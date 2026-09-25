@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title','· Products & Services')
+@section('content')
+<div class="page-head"><div><h1>Products & Services</h1><p class="muted">Reusable items for quotations and orders.</p></div></div>
+<div class="two-col"><section class="panel"><h2>Add item</h2><form method="post" action="{{ route('products.store') }}">@csrf<div class="form-grid"><div class="span-2"><label>Name<input name="name" required></label></div><div><label>SKU<input name="sku"></label></div><div><label>Unit<input name="unit" value="item" required></label></div><div><label>Price<input name="price" type="number" step="0.01" required></label></div><div class="span-2"><label>Description<textarea name="description"></textarea></label></div></div><button class="btn primary">Save</button></form></section><section class="panel"><h2>Catalog</h2><table><thead><tr><th>Name</th><th>SKU</th><th>Price</th><th>Unit</th><th>Status</th></tr></thead><tbody>@foreach($products as $p)<tr><td>{{ $p->name }}</td><td>{{ $p->sku ?: '—' }}</td><td>₹{{ number_format($p->price,2) }}</td><td>{{ $p->unit }}</td><td>{{ $p->active?'Active':'Archived' }}</td></tr>@endforeach</tbody></table>{{ $products->links() }}</section></div>
+@endsection
