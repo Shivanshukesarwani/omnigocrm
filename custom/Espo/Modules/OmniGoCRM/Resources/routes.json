@@ -32,5 +32,10 @@
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostCallWebhook",
         "noAuth": true
+    },
+    {
+        "route": "/OmniGoCRM/Calling/log",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostCallLog"
     }
 ]
