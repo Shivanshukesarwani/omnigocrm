@@ -1,0 +1,30 @@
+{
+    "fields": {
+    "name": "Name",
+    "paymentNumber": "Payment Number",
+    "status": "Status",
+    "paymentDate": "Payment Date",
+    "amount": "Amount",
+    "currency": "Currency",
+    "method": "Method",
+    "provider": "Provider",
+    "providerPaymentId": "Provider Payment Id",
+    "referenceNumber": "Reference Number",
+    "notes": "Notes",
+    "orderId": "Order Id",
+    "quoteId": "Quote Id",
+    "leadId": "Lead Id",
+    "contactId": "Contact Id",
+    "accountId": "Account Id",
+    "workspaceId": "Workspace Id",
+    "order": "Order",
+    "quote": "Quote",
+    "lead": "Lead",
+    "contact": "Contact",
+    "account": "Account",
+    "omniGoCRMWorkspaceId": "Omni Go C R M Workspace Id"
+},
+    "labels": {
+        "Payment": "Payment"
+    }
+}
