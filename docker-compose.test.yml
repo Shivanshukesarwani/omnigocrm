@@ -1,0 +1,50 @@
+# Local-only integration test stack. Do not use these credentials in production.
+services:
+  omnigocrm-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.espocrm
+    container_name: omnigocrm-test
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      ESPOCRM_DATABASE_PLATFORM: Mysql
+      ESPOCRM_DATABASE_HOST: db-test
+      ESPOCRM_DATABASE_NAME: omnigocrm_test
+      ESPOCRM_DATABASE_USER: omnigocrm_test
+      ESPOCRM_DATABASE_PASSWORD: omnigocrm_test_password
+    depends_on:
+      db-test:
+        condition: service_healthy
+    volumes:
+      - omnigocrm_test_data:/var/www/html/data
+      - omnigocrm_test_custom:/var/www/html/custom
+    healthcheck:
+      test: ["CMD", "php", "-r", "$$f=@fsockopen('127.0.0.1',80,$$e,$$s,2); exit($$f ? 0 : 1);"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  db-test:
+    image: mariadb:11
+    container_name: omnigocrm-test-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: omnigocrm_test
+      MARIADB_USER: omnigocrm_test
+      MARIADB_PASSWORD: omnigocrm_test_password
+      MARIADB_ROOT_PASSWORD: omnigocrm_test_root_password
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    volumes:
+      - omnigocrm_test_db:/var/lib/mysql
+
+volumes:
+  omnigocrm_test_data:
+  omnigocrm_test_custom:
+  omnigocrm_test_db:
