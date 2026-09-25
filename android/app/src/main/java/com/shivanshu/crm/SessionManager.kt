@@ -21,11 +21,16 @@ class SessionManager(context: Context) {
         get() = prefs.getString("email", null)
         private set(value) { prefs.edit().putString("email", value).apply() }
 
-    fun save(token: String, name: String, username: String, email: String?) {
+    var baseUrl: String?
+        get() = prefs.getString("base_url", null)
+        private set(value) { prefs.edit().putString("base_url", value).apply() }
+
+    fun save(token: String, name: String, username: String, email: String?, baseUrl: String) {
         this.token = token
         userName = name
         this.username = username
         this.email = email
+        this.baseUrl = baseUrl
     }
 
     fun clear() { prefs.edit().clear().apply() }
