@@ -1,8 +1,8 @@
 <?php
 
-namespace EspoModulesOmniGoCRMControllers;
+namespace Espo\Modules\OmniGoCRM\Controllers;
 
-use EspoCoreControllersRecord;
+use Espo\Core\Controllers\Record;
 
 class WhatsAppConversation extends Record
 {}
