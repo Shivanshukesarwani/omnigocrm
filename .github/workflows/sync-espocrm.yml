@@ -1,0 +1,43 @@
+name: Sync EspoCRM Upstream
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "EspoCRM branch/tag to import"
+        required: false
+        default: "master"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OmniGoCRM
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Import EspoCRM core
+        env:
+          ESPOCRM_REF: ${{ inputs.ref }}
+        run: |
+          chmod +x scripts/sync-espocrm.sh
+          ./scripts/sync-espocrm.sh
+
+      - name: Commit upstream snapshot
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No upstream changes."
+            exit 0
+          fi
+          git commit -m "Sync EspoCRM upstream"
+          git push
