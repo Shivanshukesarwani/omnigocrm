@@ -49,7 +49,7 @@ jobs:
           '
 
       - name: PHPStan analysis for OmniGoCRM
-        run: vendor/bin/phpstan analyse custom/Espo/Modules/OmniGoCRM --no-progress --memory-limit=1G
+        run: vendor/bin/phpstan analyse custom/Espo/Modules/OmniGoCRM --level=5 --no-progress --memory-limit=1G
 
       - name: PHP syntax check for OmniGoCRM code
         run: |
