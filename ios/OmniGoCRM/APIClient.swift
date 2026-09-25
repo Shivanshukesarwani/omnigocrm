@@ -63,7 +63,7 @@ final class APIClient: ObservableObject {
         )
         let result = try JSONDecoder().decode(AppUserResponse.self, from: data)
         let name = result.user.name ?? result.user.firstName ?? username
-        session.save(token: result.token, username: username, userName: name)
+        session.save(token: result.token, username: username, userName: name, baseURL: session.baseURL)
     }
 
     func list(entityType: String, select: String, maxSize: Int = 100) async throws -> [Record] {
@@ -75,7 +75,7 @@ final class APIClient: ObservableObject {
             URLQueryItem(name: "select", value: select),
         ]
 
-        let data = try await request(method: "GET", path: entityType + "?" + (components.percentEncodedQuery ?? ""))
+        let data = try await request(method: "GET", path: "../" + entityType + "?" + (components.percentEncodedQuery ?? ""))
         return try JSONDecoder().decode(EspoListResponse.self, from: data).list
     }
 
