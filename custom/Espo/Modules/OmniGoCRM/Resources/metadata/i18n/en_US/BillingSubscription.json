@@ -1,0 +1,23 @@
+{
+    "fields":{
+        "name":"Name",
+        "workspaceId":"Workspace ID",
+        "provider":"Provider",
+        "providerCustomerId":"Provider Customer ID",
+        "providerSubscriptionId":"Provider Subscription ID",
+        "plan":"Plan",
+        "status":"Status",
+        "currentPeriodStart":"Period Start",
+        "currentPeriodEnd":"Period End",
+        "cancelAtPeriodEnd":"Cancel At Period End",
+        "currency":"Currency",
+        "amount":"Amount",
+        "metadataJson":"Metadata",
+        "externalEventId":"External Event ID",
+        "eventType":"Event Type",
+        "payloadJson":"Payload",
+        "errorMessage":"Error",
+        "processedAt":"Processed At"
+    },
+    "labels":{"BillingSubscription":"BillingSubscription"}
+}
