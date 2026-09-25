@@ -118,6 +118,31 @@
             "readOnly": true,
             "index": true,
             "utility": true
+        },
+        "mediaId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "mediaMimeType": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "mediaCaption": {
+            "type": "varchar",
+            "maxLength": 1000
+        },
+        "mediaUrl": {
+            "type": "varchar",
+            "maxLength": 2000
+        },
+        "unread": {
+            "type": "bool",
+            "default": true
+        },
+        "providerPhoneNumberId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "index": true
         }
     },
     "indexes": {
