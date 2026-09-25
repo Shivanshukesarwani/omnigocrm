@@ -21,6 +21,10 @@ class BeforeRead
             return;
         }
 
+        if ($this->user->isSystem()) {
+            return;
+        }
+
         if ((bool) $this->config->get('omniGoCRMSaaSAdminBypass') && $this->user->isAdmin()) {
             return;
         }
