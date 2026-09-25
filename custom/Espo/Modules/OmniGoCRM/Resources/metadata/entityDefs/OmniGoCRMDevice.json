@@ -1,0 +1,65 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "externalDeviceId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "platform": {
+            "type": "enum",
+            "options": ["Android", "iOS", "Web"],
+            "required": true
+        },
+        "pushProvider": {
+            "type": "enum",
+            "options": ["FCM", "APNs", "WebPush"],
+            "required": true
+        },
+        "pushToken": {
+            "type": "varchar",
+            "maxLength": 4096,
+            "isPersonalData": true
+        },
+        "appVersion": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "active": {
+            "type": "bool",
+            "default": true
+        },
+        "lastSeenAt": {
+            "type": "datetime"
+        },
+        "userId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "required": true
+        },
+        "user": {
+            "type": "link",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "user": {
+            "type": "belongsTo",
+            "entity": "User",
+            "foreign": "omniGoCRMDevices"
+        }
+    },
+    "indexes": {
+        "externalDeviceId": {
+            "columns": ["externalDeviceId", "deleted"]
+        },
+        "pushToken": {
+            "columns": ["pushToken", "deleted"]
+        },
+        "user": {
+            "columns": ["userId", "deleted"]
+        }
+    }
+}
