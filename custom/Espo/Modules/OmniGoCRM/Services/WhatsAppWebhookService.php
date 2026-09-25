@@ -7,6 +7,7 @@ use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\ORM\EntityManager;
 use Espo\Core\Utils\Config;
 use Espo\Modules\Crm\Entities\Lead;
+use Espo\Modules\Crm\Entities\Contact;
 use stdClass;
 
 class WhatsAppWebhookService
@@ -194,6 +195,7 @@ class WhatsAppWebhookService
             'externalLeadId' => $lead?->get('externalLeadId'),
             'conversationId' => $conversation->getId(),
             'receivedAt' => $this->getMessageDateTime($message->timestamp ?? null),
+            'conversationId' => $conversation->getId(),
             'rawPayload' => json_encode($message, JSON_UNESCAPED_SLASHES),
         ]);
 
@@ -231,6 +233,29 @@ class WhatsAppWebhookService
             ->findOne();
 
         return $lead;
+    }
+
+    private function findContact(string $from): ?\Espo\Modules\Crm\Entities\Contact
+    {
+        $digits = preg_replace('/\D+/', '', $from) ?? '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        /** @var ?\Espo\Modules\Crm\Entities\Contact $contact */
+        $contact = $this->entityManager
+            ->getRDBRepositoryByClass(\Espo\Modules\Crm\Entities\Contact::class)
+            ->where([
+                'OR' => [
+                    ['phoneNumber' => $from],
+                    ['phoneNumber*' => '%' . $digits . '%'],
+                ],
+                'deleted' => false,
+            ])
+            ->findOne();
+
+        return $contact;
     }
 
     private function createLead(string $from, ?string $profileName): Lead
