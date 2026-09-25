@@ -38,7 +38,7 @@ class CrmApiController extends Controller
   return response()->json(['lead'=>Lead::create($d)],201);
  }
 
- public function lead(Lead $lead){return ['lead'=>$lead->load(['assignee','followUps','calls']);}
+ public function lead(Lead $lead){return ['lead'=>$lead->load(['assignee','followUps','calls','activities.user']);}
 
  public function convertLead(Lead $lead){
   if($lead->converted_contact_id)return response()->json(['message'=>'Already converted'],422);
@@ -48,10 +48,10 @@ class CrmApiController extends Controller
  }
 
  public function contacts(){return Contact::with('customer')->latest()->paginate(20);}
- public function contact(Contact $contact){return ['contact'=>$contact->load(['customer','followUps','calls']);}
+ public function contact(Contact $contact){return ['contact'=>$contact->load(['customer','followUps','calls','activities.user']);}
  public function convertContact(Contact $contact){if($contact->customer)return ['customer'=>$contact->customer];$c=Customer::create(['workspace_id'=>$contact->workspace_id,'contact_id'=>$contact->id,'customer_code'=>'CUS-'.str_pad($contact->id,6,'0',STR_PAD_LEFT),'company_id'=>$contact->company_id]);return response()->json(['customer'=>$c->load('contact')],201);}
  public function customers(){return Customer::with('contact')->latest()->paginate(20);}
- public function customer(Customer $customer){return ['customer'=>$customer->load(['contact','followUps','calls','quotations','orders','payments']);}
+ public function customer(Customer $customer){return ['customer'=>$customer->load(['contact','followUps','calls','quotations','orders','payments','activities.user']);}
 
  public function templates(Request $r){return MessageTemplate::where('active',true)->when($r->filled('situation'),fn($q)=>$q->where('situation',$r->situation))->orderBy('situation')->get();}
 
