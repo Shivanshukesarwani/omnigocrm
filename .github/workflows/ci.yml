@@ -1,0 +1,46 @@
+name: OmniGoCRM CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sqlite3, pdo_sqlite, pdo_mysql
+          coverage: none
+      - name: Validate Composer
+        working-directory: backend
+        run: composer validate --no-check-publish
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare SQLite
+        working-directory: backend
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+      - name: Prepare environment
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+      - name: PHP syntax
+        working-directory: backend
+        run: |
+          find app bootstrap config database routes -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Migrate and seed
+        working-directory: backend
+        run: php artisan migrate --seed --force
+      - name: Tests
+        working-directory: backend
+        run: php artisan test
