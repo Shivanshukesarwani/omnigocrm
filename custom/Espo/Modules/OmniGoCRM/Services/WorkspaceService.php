@@ -105,6 +105,13 @@ class WorkspaceService
         return $result;
     }
 
+    public function currentId(): ?string
+    {
+        $id = trim((string) $this->user->get('omniGoCRMCurrentWorkspaceId'));
+
+        return $id !== '' ? $id : null;
+    }
+
     public function switch(string $workspaceId): Entity
     {
         $membership = $this->entityManager
