@@ -20,6 +20,9 @@
         },
         "omniGoCRMCallingDefaultAssignedUserId": {
             "level": "admin"
+        },
+        "omniGoCRMSaaSAdminBypass": {
+            "level": "admin"
         }
     }
 }
