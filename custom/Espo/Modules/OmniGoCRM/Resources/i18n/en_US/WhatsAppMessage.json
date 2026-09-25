@@ -1,0 +1,48 @@
+{
+    "fields": {
+        "providerMessageId": "Provider Message ID",
+        "direction": "Direction",
+        "status": "Status",
+        "messageType": "Message Type",
+        "fromNumber": "From",
+        "toNumber": "To",
+        "textBody": "Message",
+        "templateName": "Template",
+        "errorCode": "Error Code",
+        "errorMessage": "Error Message",
+        "externalLeadId": "External Lead ID",
+        "leadId": "Lead ID",
+        "contactId": "Contact ID",
+        "sentAt": "Sent At",
+        "receivedAt": "Received At",
+        "rawPayload": "Raw Provider Payload"
+    },
+    "options": {
+        "direction": {
+            "Inbound": "Inbound",
+            "Outbound": "Outbound"
+        },
+        "status": {
+            "Queued": "Queued",
+            "Sent": "Sent",
+            "Delivered": "Delivered",
+            "Read": "Read",
+            "Failed": "Failed",
+            "Received": "Received"
+        },
+        "messageType": {
+            "Text": "Text",
+            "Template": "Template",
+            "Image": "Image",
+            "Document": "Document",
+            "Audio": "Audio",
+            "Video": "Video",
+            "Interactive": "Interactive",
+            "Unknown": "Unknown"
+        }
+    },
+    "labels": {
+        "WhatsAppMessage": "WhatsApp Message",
+        "Create WhatsAppMessage": "Create WhatsApp Message"
+    }
+}
