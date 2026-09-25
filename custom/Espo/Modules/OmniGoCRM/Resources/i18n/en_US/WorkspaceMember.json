@@ -1,0 +1,30 @@
+{
+    "fields": {
+        "name": "Membership",
+        "workspaceId": "Workspace ID",
+        "workspace": "Workspace",
+        "userId": "User ID",
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "joinedAt": "Joined At"
+    },
+    "options": {
+        "role": {
+            "Owner": "Owner",
+            "Admin": "Admin",
+            "Manager": "Manager",
+            "Agent": "Agent",
+            "Viewer": "Viewer"
+        },
+        "status": {
+            "Invited": "Invited",
+            "Active": "Active",
+            "Suspended": "Suspended",
+            "Removed": "Removed"
+        }
+    },
+    "labels": {
+        "WorkspaceMember": "Workspace Member"
+    }
+}
