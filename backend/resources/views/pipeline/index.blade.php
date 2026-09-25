@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title','· Pipeline')
+@section('content')
+<div class="page-head"><div><h1>Sales Pipeline</h1><p class="muted">Move leads through qualification, proposal, negotiation and close.</p></div></div>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(180px,1fr));gap:12px;overflow:auto">@foreach($groups as $stage=>$leads)<section class="panel" style="min-height:420px"><h2>{{ ucwords(str_replace('_',' ',$stage)) }} <span class="badge">{{ $leads->count() }}</span></h2>@foreach($leads as $lead)<article class="card" style="margin-bottom:10px"><strong>{{ $lead->first_name }} {{ $lead->last_name }}</strong><div class="muted">{{ $lead->company ?: $lead->mobile }}</div><form method="post" action="{{ route('pipeline.move',$lead) }}" style="margin-top:10px">@csrf<select name="pipeline_stage" onchange="this.form.submit()">@foreach(['new','contacted','qualified','proposal','negotiation','won','lost'] as $s)<option value="{{ $s }}" @selected($lead->pipeline_stage===$s)>{{ ucwords($s) }}</option>@endforeach</select></form></article>@endforeach</section>@endforeach</div>
+@endsection
