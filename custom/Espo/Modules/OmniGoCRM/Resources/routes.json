@@ -97,5 +97,10 @@
         "route": "/OmniGoCRM/Broadcast/schedule",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBroadcastSchedule"
+    },
+    {
+        "route": "/OmniGoCRM/Dashboard/summary",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetDashboardSummary"
     }
 ]
