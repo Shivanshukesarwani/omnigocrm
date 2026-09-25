@@ -1,20 +1,123 @@
 {
     "fields": {
-        "whatsappNumber": {"type":"phone","typeList":["Mobile","WhatsApp","Other"],"defaultType":"WhatsApp","isPersonalData":true,"audited":true},
-        "whatsappOptIn": {"type":"bool","default":false,"audited":true},
-        "leadSourceDetail": {"type":"varchar","maxLength":255,"audited":true},
-        "leadScore": {"type":"int","min":0,"max":100,"default":0,"audited":true},
-        "leadStage": {"type":"enum","options":["New","Contacted","Qualified","Proposal","Negotiation","Won","Lost"],"default":"New","audited":true,"displayAsLabel":true,"style":{"Contacted":"primary","Qualified":"primary","Proposal":"warning","Negotiation":"warning","Won":"success","Lost":"danger"}},
-        "nextFollowUpAt": {"type":"datetime","audited":true},
-        "lastContactedAt": {"type":"datetime","audited":true,"readOnly":true},
-        "preferredContactChannel": {"type":"enum","options":["WhatsApp","Phone","Email","SMS","Any"],"default":"WhatsApp","audited":true},
-        "campaignName": {"type":"varchar","maxLength":255,"audited":true},
-        "externalLeadId": {"type":"varchar","maxLength":255,"audited":true},
-        "consentCapturedAt": {"type":"datetime","audited":true}
+        "whatsappNumber": {
+            "type": "phone",
+            "typeList": [
+                "Mobile",
+                "WhatsApp",
+                "Other"
+            ],
+            "defaultType": "WhatsApp",
+            "isPersonalData": true,
+            "audited": true
+        },
+        "whatsappOptIn": {
+            "type": "bool",
+            "default": false,
+            "audited": true
+        },
+        "leadSourceDetail": {
+            "type": "varchar",
+            "maxLength": 255,
+            "audited": true
+        },
+        "leadScore": {
+            "type": "int",
+            "min": 0,
+            "max": 100,
+            "default": 0,
+            "audited": true
+        },
+        "leadStage": {
+            "type": "enum",
+            "options": [
+                "New",
+                "Contacted",
+                "Qualified",
+                "Proposal",
+                "Negotiation",
+                "Won",
+                "Lost"
+            ],
+            "default": "New",
+            "audited": true,
+            "displayAsLabel": true,
+            "style": {
+                "Contacted": "primary",
+                "Qualified": "primary",
+                "Proposal": "warning",
+                "Negotiation": "warning",
+                "Won": "success",
+                "Lost": "danger"
+            }
+        },
+        "nextFollowUpAt": {
+            "type": "datetime",
+            "audited": true
+        },
+        "lastContactedAt": {
+            "type": "datetime",
+            "audited": true,
+            "readOnly": true
+        },
+        "preferredContactChannel": {
+            "type": "enum",
+            "options": [
+                "WhatsApp",
+                "Phone",
+                "Email",
+                "SMS",
+                "Any"
+            ],
+            "default": "WhatsApp",
+            "audited": true
+        },
+        "campaignName": {
+            "type": "varchar",
+            "maxLength": 255,
+            "audited": true
+        },
+        "externalLeadId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "audited": true
+        },
+        "consentCapturedAt": {
+            "type": "datetime",
+            "audited": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
+        }
     },
     "indexes": {
-        "externalLeadId": {"columns":["externalLeadId","deleted"]},
-        "nextFollowUpAt": {"columns":["nextFollowUpAt","deleted"]},
-        "whatsappNumber": {"columns":["whatsappNumber","deleted"]}
+        "externalLeadId": {
+            "columns": [
+                "externalLeadId",
+                "deleted"
+            ]
+        },
+        "nextFollowUpAt": {
+            "columns": [
+                "nextFollowUpAt",
+                "deleted"
+            ]
+        },
+        "whatsappNumber": {
+            "columns": [
+                "whatsappNumber",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
+        }
     }
 }
