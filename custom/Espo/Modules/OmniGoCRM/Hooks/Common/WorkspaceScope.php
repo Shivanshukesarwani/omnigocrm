@@ -18,7 +18,11 @@ class WorkspaceScope
 
     public function beforeSave(Entity $entity, array $options): void
     {
-        if (!$entity->hasAttribute('omniGoCRMWorkspaceId')) {
+        $workspaceAware = $entity->hasAttribute('omniGoCRMWorkspaceId');
+        $legacyWorkspaceAware = in_array($entity->getEntityType(), ['AutomationRule', 'AutomationRun', 'BillingEvent'], true)
+            && $entity->hasAttribute('workspaceId');
+
+        if (!$workspaceAware && !$legacyWorkspaceAware) {
             return;
         }
 
@@ -38,12 +42,20 @@ class WorkspaceScope
             throw new Forbidden('Select an active OmniGoCRM workspace before creating or editing CRM records.');
         }
 
-        $storedWorkspaceId = trim((string) $entity->get('omniGoCRMWorkspaceId'));
+        $storedWorkspaceId = $workspaceAware
+            ? trim((string) $entity->get('omniGoCRMWorkspaceId'))
+            : trim((string) $entity->get('workspaceId'));
 
         if ($storedWorkspaceId !== '' && $storedWorkspaceId !== $workspaceId) {
             throw new Forbidden('This CRM record belongs to a different workspace.');
         }
 
-        $entity->set('omniGoCRMWorkspaceId', $workspaceId);
+        if ($workspaceAware) {
+            $entity->set('omniGoCRMWorkspaceId', $workspaceId);
+        }
+
+        if ($legacyWorkspaceAware) {
+            $entity->set('workspaceId', $workspaceId);
+        }
     }
 }
