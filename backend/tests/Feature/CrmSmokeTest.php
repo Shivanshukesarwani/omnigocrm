@@ -60,6 +60,22 @@ class CrmSmokeTest extends TestCase
             ->postJson('/api/leads/'.$lead->id.'/convert-contact')
             ->assertOk()
             ->assertJsonPath('contact.source_lead_id', $lead->id);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'workspace_id' => $workspace->id,
+            'action' => 'lead.converted',
+            'subject_id' => $lead->id,
+        ]);
+
+        $tokenResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/device-tokens', [
+                'token' => 'test-fcm-token',
+                'platform' => 'android',
+                'device_name' => 'PHPUnit Android',
+            ]);
+
+        $tokenResponse->assertOk()->assertJsonPath('registered', true);
+
     }
 
     public function test_workspace_cannot_access_another_workspace_lead(): void
