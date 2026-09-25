@@ -3,6 +3,7 @@ use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\CrmApiController;
 use App\Http\Controllers\Api\SaaSApiController;
 use App\Http\Controllers\Api\NotificationApiController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login',[AuthApiController::class,'login']);
@@ -12,6 +13,8 @@ Route::middleware(['api.token','workspace'])->group(function(){
  Route::post('/logout',[AuthApiController::class,'logout']);
  Route::get('/notifications',[NotificationApiController::class,'index']);
  Route::post('/notifications/{id}/read',[NotificationApiController::class,'read']);
+ Route::post('/device-tokens',[DeviceTokenController::class,'store']);
+ Route::delete('/device-tokens/{id}',[DeviceTokenController::class,'destroy']);
 
  Route::get('/dashboard',[CrmApiController::class,'dashboard']);
  Route::get('/leads',[CrmApiController::class,'leads']);
