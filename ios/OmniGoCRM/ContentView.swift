@@ -14,6 +14,7 @@ struct RootView: View {
 
 struct LoginView: View {
     @ObservedObject var session: SessionStore
+    @State private var serverURL = ""
     @State private var username = ""
     @State private var password = ""
     @State private var busy = false
@@ -23,6 +24,9 @@ struct LoginView: View {
         NavigationStack {
             Form {
                 Section("OmniGoCRM") {
+                    TextField("CRM server URL", text: $serverURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
                     TextField("Username or email", text: $username)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -33,7 +37,11 @@ struct LoginView: View {
                         Task {
                             do {
                                 let api = await APIClient(session: session)
-                                try await api.login(username: username, password: password)
+                                try await api.login(
+                                    baseURL: serverURL,
+                                    username: username,
+                                    password: password
+                                )
                             } catch {
                                 self.error = error.localizedDescription
                             }
@@ -48,6 +56,11 @@ struct LoginView: View {
                 }
             }
             .navigationTitle("OmniGoCRM")
+            .onAppear {
+                if serverURL.isEmpty {
+                    serverURL = session.baseURL
+                }
+            }
         }
     }
 }
