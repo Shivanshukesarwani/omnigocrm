@@ -1,0 +1,27 @@
+{
+    "fields": {
+    "name": "Name",
+    "orderNumber": "Order Number",
+    "status": "Status",
+    "orderDate": "Order Date",
+    "currency": "Currency",
+    "subtotal": "Subtotal",
+    "taxAmount": "Tax Amount",
+    "discountAmount": "Discount Amount",
+    "totalAmount": "Total Amount",
+    "notes": "Notes",
+    "quoteId": "Quote Id",
+    "leadId": "Lead Id",
+    "contactId": "Contact Id",
+    "accountId": "Account Id",
+    "workspaceId": "Workspace Id",
+    "quote": "Quote",
+    "lead": "Lead",
+    "contact": "Contact",
+    "account": "Account",
+    "omniGoCRMWorkspaceId": "Omni Go C R M Workspace Id"
+},
+    "labels": {
+        "Order": "Order"
+    }
+}
