@@ -1,7 +1,6 @@
 <?php
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\CrmApiController;
-use App\Http\Controllers\Api\MobileApiController;
 use App\Http\Controllers\Api\SaaSApiController;
 use App\Http\Controllers\Api\NotificationApiController;
 use Illuminate\Support\Facades\Route;
