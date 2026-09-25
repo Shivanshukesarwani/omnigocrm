@@ -160,5 +160,11 @@
         "route": "/OmniGoCRM/Timeline",
         "method": "get",
         "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\GetCustomerTimeline"
+    },
+    {
+        "route": "/OmniGoCRM/Billing/webhook",
+        "method": "post",
+        "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\PostBillingWebhook",
+        "noAuth": true
     }
 ]
