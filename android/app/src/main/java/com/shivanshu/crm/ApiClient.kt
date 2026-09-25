@@ -114,4 +114,7 @@ class ApiClient(context: Context) {
         return JSONObject(request("POST","payments",b.toString()))
     }
 
+    fun products(): JSONArray = JSONArray(request("GET","products"))
+    fun quotations(): JSONArray = JSONObject(request("GET","quotations")).getJSONArray("data")
+
 }
