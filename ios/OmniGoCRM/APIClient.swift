@@ -75,6 +75,27 @@ final class APIClient: ObservableObject {
         session.save(token: result.token, username: username, userName: name, baseURL: cleanBaseURL)
     }
 
+
+    func myWorkspaces() async throws -> [[String: Any]] {
+        let data = try await request(method: "GET", path: "OmniGoCRM/Workspace/mine")
+        return (try JSONSerialization.jsonObject(with: data) as? [String: Any])?["list"] as? [[String: Any]] ?? []
+    }
+
+    func createWorkspace(name: String, slug: String = "") async throws {
+        var body: [String: Any] = ["name": name]
+        if !slug.isEmpty { body["slug"] = slug }
+        _ = try await request(method: "POST", path: "OmniGoCRM/Workspace/create", body: body)
+    }
+
+    func switchWorkspace(id: String) async throws {
+        _ = try await request(method: "POST", path: "OmniGoCRM/Workspace/switch", body: ["workspaceId": id])
+    }
+
+    func dashboardSummary() async throws -> [String: Any] {
+        let data = try await request(method: "GET", path: "OmniGoCRM/Dashboard/summary")
+        return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+    }
+
     func list(entityType: String, select: String, maxSize: Int = 100) async throws -> [Record] {
         var components = URLComponents(
             string: "https://placeholder.invalid/api/v1/" + entityType
