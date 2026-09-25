@@ -12,5 +12,5 @@ public function followUps(){return $this->morphMany(FollowUp::class,'subject');}
 public function calls(){return $this->morphMany(Call::class,'subject');}
 public function contact(){return $this->belongsTo(Contact::class,'converted_contact_id');}
 public function companyModel(){return $this->belongsTo(Company::class,'company_id');}
-public function tags(){return $this->belongsToMany(Tag::class);}
+public function tags(){return $this->morphToMany(Tag::class,'taggable');}
 }
