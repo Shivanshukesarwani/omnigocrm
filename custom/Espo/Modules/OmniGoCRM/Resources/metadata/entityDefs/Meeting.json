@@ -1,0 +1,16 @@
+{
+    "fields": {
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
+        }
+    },
+    "indexes": {
+        "omniGoCRMWorkspaceId": {
+            "columns": ["omniGoCRMWorkspaceId", "deleted"]
+        }
+    }
+}
