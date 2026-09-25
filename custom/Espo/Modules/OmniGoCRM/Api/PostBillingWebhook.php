@@ -16,8 +16,8 @@ class PostBillingWebhook implements Action
     public function process(Request $request): Response
     {
         $provider = trim((string) $request->getQueryParam('provider'));
-        $raw = $request->getBodyContents();
+        $raw = (string) $request->getBodyContents();
         if ($provider === '' || $raw === '') throw new BadRequest('provider query parameter and raw JSON body are required.');
-        return ResponseComposer::json($this->service->handle($provider, $raw, $request->getHeader('Stripe-Signature') ?: $request->getHeader('X-Razorpay-Signature')));
+        return ResponseComposer::json($this->service->handle($provider, $raw, (string) ($request->getHeader('Stripe-Signature') ?: $request->getHeader('X-Razorpay-Signature'))));
     }
 }
