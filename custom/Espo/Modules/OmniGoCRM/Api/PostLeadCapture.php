@@ -1,13 +1,13 @@
 <?php
 
-namespace Espo\\Modules\\OmniGoCRM\\Api;
+namespace Espo\Modules\OmniGoCRM\Api;
 
-use Espo\\Core\\Api\\Action;
-use Espo\\Core\\Api\\Request;
-use Espo\\Core\\Api\\Response;
-use Espo\\Core\\Api\\ResponseComposer;
-use Espo\\Core\\Exceptions\\BadRequest;
-use Espo\\Modules\\OmniGoCRM\\Services\\LeadCaptureGateway;
+use Espo\Core\Api\Action;
+use Espo\Core\Api\Request;
+use Espo\Core\Api\Response;
+use Espo\Core\Api\ResponseComposer;
+use Espo\Core\Exceptions\BadRequest;
+use Espo\Modules\OmniGoCRM\Services\LeadCaptureGateway;
 
 class PostLeadCapture implements Action
 {
