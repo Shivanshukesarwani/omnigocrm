@@ -1,0 +1,5 @@
+{
+    "accessControlFilterClassNameMap": {
+        "mandatory": "Espo\\Modules\\OmniGoCRM\\Classes\\Select\\Workspace\\AccessControlFilter"
+    }
+}
