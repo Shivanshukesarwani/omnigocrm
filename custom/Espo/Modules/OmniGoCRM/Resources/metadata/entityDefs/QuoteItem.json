@@ -1,0 +1,78 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "quoteId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "required": true
+        },
+        "productId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "description": {
+            "type": "text"
+        },
+        "quantity": {
+            "type": "float",
+            "default": 1,
+            "min": 0
+        },
+        "unitPrice": {
+            "type": "currency",
+            "default": 0,
+            "min": 0
+        },
+        "discountAmount": {
+            "type": "currency",
+            "default": 0,
+            "min": 0
+        },
+        "taxAmount": {
+            "type": "currency",
+            "default": 0,
+            "min": 0
+        },
+        "lineTotal": {
+            "type": "currency",
+            "default": 0,
+            "min": 0
+        },
+        "currency": {
+            "type": "varchar",
+            "maxLength": 10,
+            "default": "INR"
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
+        }
+    },
+    "indexes": {
+        "parent": {
+            "columns": [
+                "quoteId",
+                "deleted"
+            ]
+        },
+        "workspace": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
+        },
+        "product": {
+            "columns": [
+                "productId",
+                "deleted"
+            ]
+        }
+    }
+}
