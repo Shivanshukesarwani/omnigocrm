@@ -38,6 +38,9 @@
         },
         "omniGoCRMGoogleLeadApiKey": {
             "level": "internal"
+        },
+        "omniGoCRMMetaGraphVersion": {
+            "level": "admin"
         }
     }
 }
