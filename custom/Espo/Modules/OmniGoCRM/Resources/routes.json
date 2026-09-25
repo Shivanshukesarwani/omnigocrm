@@ -21,5 +21,10 @@
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWhatsAppWebhook",
         "noAuth": true
+    },
+    {
+        "route": "/OmniGoCRM/WhatsApp/sendTemplate",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWhatsAppSendTemplate"
     }
 ]
