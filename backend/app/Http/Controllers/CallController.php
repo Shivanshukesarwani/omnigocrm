@@ -1,20 +1,7 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\Call;
-use Illuminate\Support\Facades\Storage;
-class CallController extends Controller
-{
-    public function store(\Illuminate\Http\Request $request){
-        $data=$request->validate(['subject_type'=>'required|in:lead,contact,customer','subject_id'=>'required|integer','phone'=>'required|max:30','duration_seconds'=>'nullable|integer|min:0','status'=>'nullable|max:30','direction'=>'nullable|max:20','called_at'=>'nullable|date']);
-        $map=['lead'=>\App\Models\Lead::class,'contact'=>\App\Models\Contact::class,'customer'=>\App\Models\Customer::class];
-        $data['subject_type']=$map[$data['subject_type']]; $data['user_id']=$request->attributes->get('crmUser')->id; $data['called_at']=$data['called_at']??now();
-        unset($data['subject_id']);
-        $call=Call::create(array_merge($data,['subject_id'=>$request->input('subject_id')]));
-        return back()->with('success','Call logged.');
-    }
-    public function recording(Call $call){
-        abort_unless($call->recording_path,404);
-        $stream=Storage::disk('local')->readStream($call->recording_path); $mime=Storage::disk('local')->mimeType($call->recording_path) ?: 'audio/*'; $name=$call->recording_name ?: 'call-recording';
-        return response()->stream(function()use($stream){fpassthru($stream);if(is_resource($stream))fclose($stream);},200,['Content-Type'=>$mime,'Content-Disposition'=>'inline; filename="'.addslashes($name).'"']);
-    }
+use App\Models\Call;use App\Models\Lead;use App\Models\Contact;use App\Models\Customer;use App\Support\Audit;use Illuminate\Support\Facades\Storage;
+class CallController extends Controller{
+public function store(\Illuminate\Http\Request $request){$d=$request->validate(['subject_type'=>'required|in:lead,contact,customer','subject_id'=>'required|integer','phone'=>'required|max:30','duration_seconds'=>'nullable|integer|min:0','status'=>'nullable|max:30','direction'=>'nullable|max:20','called_at'=>'nullable|date']);$map=['lead'=>Lead::class,'contact'=>Contact::class,'customer'=>Customer::class];$subject=$map[$d['subject_type']]::findOrFail($d['subject_id']);$d['subject_type']=$subject::class;$d['subject_id']=$subject->getKey();$d['user_id']=$request->attributes->get('crmUser')->id;$d['called_at']=$d['called_at']??now();$call=Call::create($d);Audit::record($call,'call.logged','Call logged',['phone'=>$call->phone]);return back()->with('success','Call logged.');}
+public function recording(Call $call){abort_unless($call->recording_path,404);Audit::record($call,'call.recording_viewed','Call recording viewed');$stream=Storage::disk('local')->readStream($call->recording_path);$mime=Storage::disk('local')->mimeType($call->recording_path)?:'audio/*';$name=$call->recording_name?:'call-recording';return response()->stream(function()use($stream){fpassthru($stream);if(is_resource($stream))fclose($stream);},200,['Content-Type'=>$mime,'Content-Disposition'=>'inline; filename="'.addslashes($name).'"']);}
 }
