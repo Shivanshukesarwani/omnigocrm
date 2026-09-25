@@ -1,0 +1,19 @@
+{
+    "params": {
+        "omniGoCRMWhatsAppAccessToken": {
+            "level": "internal"
+        },
+        "omniGoCRMWhatsAppAppSecret": {
+            "level": "internal"
+        },
+        "omniGoCRMWhatsAppVerifyToken": {
+            "level": "internal"
+        },
+        "omniGoCRMWhatsAppPhoneNumberId": {
+            "level": "admin"
+        },
+        "omniGoCRMWhatsAppGraphVersion": {
+            "level": "admin"
+        }
+    }
+}
