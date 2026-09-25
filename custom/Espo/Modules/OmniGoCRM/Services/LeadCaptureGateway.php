@@ -32,6 +32,8 @@ class LeadCaptureGateway
         'Lost',
     ];
 
+    private const MAX_TEXT_LENGTH = 10000;
+
     private const CHANNEL_OPTIONS = [
         'WhatsApp',
         'Phone',
@@ -56,6 +58,15 @@ class LeadCaptureGateway
     public function capture(string $apiKey, stdClass $input): array
     {
         $data = $this->normalize($input);
+
+        if (property_exists($data, 'website') && is_string($data->website) && trim($data->website) !== '') {
+            throw new BadRequest('Spam check failed.');
+        }
+
+        if (property_exists($data, 'honeypot') && is_string($data->honeypot) && trim($data->honeypot) !== '') {
+            throw new BadRequest('Spam check failed.');
+        }
+
         $externalLeadId = $data->externalLeadId ?? null;
 
         if ($externalLeadId !== null) {
@@ -155,9 +166,11 @@ class LeadCaptureGateway
             if (!is_string($data->description)) {
                 unset($data->description);
             } else {
-                $data->description = mb_substr(strip_tags($data->description), 0, 10000);
+                $data->description = mb_substr(strip_tags($data->description), 0, self::MAX_TEXT_LENGTH);
             }
         }
+
+        unset($data->honeypot);
 
         if (property_exists($data, 'source')) {
             if (!is_string($data->source) || !in_array($data->source, self::SOURCE_OPTIONS, true)) {
