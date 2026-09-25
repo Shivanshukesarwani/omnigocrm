@@ -126,6 +126,15 @@ class SalesService
             throw new BadRequest('Payment amount must be greater than zero.');
         }
 
+        $orderId = $this->nullableId($data, 'orderId');
+        $quoteId = $this->nullableId($data, 'quoteId');
+        $leadId = $this->nullableId($data, 'leadId');
+        $contactId = $this->nullableId($data, 'contactId');
+        $accountId = $this->nullableId($data, 'accountId');
+
+        if ($orderId) { $this->getInWorkspace('Order', $orderId); }
+        if ($quoteId) { $this->getInWorkspace('Quote', $quoteId); }
+
         $payment = $this->entityManager->getNewEntity('Payment');
 
         $payment->set([
@@ -140,11 +149,11 @@ class SalesService
             'providerPaymentId' => $this->text($data, 'providerPaymentId'),
             'referenceNumber' => $this->text($data, 'referenceNumber'),
             'notes' => $this->text($data, 'notes'),
-            'orderId' => $this->nullableId($data, 'orderId'),
-            'quoteId' => $this->nullableId($data, 'quoteId'),
-            'leadId' => $this->nullableId($data, 'leadId'),
-            'contactId' => $this->nullableId($data, 'contactId'),
-            'accountId' => $this->nullableId($data, 'accountId'),
+            'orderId' => $orderId,
+            'quoteId' => $quoteId,
+            'leadId' => $leadId,
+            'contactId' => $contactId,
+            'accountId' => $accountId,
             'omniGoCRMWorkspaceId' => $this->workspaceId(),
         ]);
 
