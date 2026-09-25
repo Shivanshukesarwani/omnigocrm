@@ -62,5 +62,25 @@
         "route": "/OmniGoCRM/Workspace/switch",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceSwitch"
+    },
+    {
+        "route": "/OmniGoCRM/Sales/quote",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostQuoteCreate"
+    },
+    {
+        "route": "/OmniGoCRM/Sales/quoteItem",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostQuoteItemAdd"
+    },
+    {
+        "route": "/OmniGoCRM/Sales/quoteConvert",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostQuoteConvert"
+    },
+    {
+        "route": "/OmniGoCRM/Sales/payment",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostPaymentCreate"
     }
 ]
