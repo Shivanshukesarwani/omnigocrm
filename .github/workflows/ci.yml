@@ -31,6 +31,23 @@ jobs:
               echo "OK $file"
             done
 
+
+
+      - name: Validate OmniGoCRM route classes
+        run: |
+          php -r '
+            require "vendor/autoload.php";
+            $routes = json_decode(file_get_contents("custom/Espo/Modules/OmniGoCRM/Resources/routes.json"), true, 512, JSON_THROW_ON_ERROR);
+            foreach ($routes as $route) {
+                $class = $route["actionClassName"] ?? "";
+                if ($class === "" || !class_exists($class)) {
+                    fwrite(STDERR, "Missing route action class: " . $class . PHP_EOL);
+                    exit(1);
+                }
+            }
+            echo "OK OmniGoCRM route action classes" . PHP_EOL;
+          '
+
       - name: PHP syntax check for OmniGoCRM code
         run: |
           find custom/Espo/Modules/OmniGoCRM -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l
