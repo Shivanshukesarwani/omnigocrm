@@ -13,4 +13,6 @@ public function quotations(){return $this->hasMany(Quotation::class);}
 public function orders(){return $this->hasMany(Order::class);}
 public function payments(){return $this->hasMany(Payment::class);}
 public function tags(){return $this->morphToMany(Tag::class,'taggable');}
+ public function activities(){return $this->morphMany(ActivityLog::class,'subject')->latest();}
+
 }
