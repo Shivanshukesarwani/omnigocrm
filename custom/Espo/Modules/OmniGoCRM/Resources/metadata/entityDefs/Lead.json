@@ -1,5 +1,12 @@
 {
     "fields": {
+        "assignedTeamId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "index": true,
+            "utility": true,
+            "readOnly": true
+        },
         "whatsappNumber": {
             "type": "phone",
             "typeList": [
@@ -85,6 +92,12 @@
         "consentCapturedAt": {
             "type": "datetime",
             "audited": true
+        },
+        "assignedTeamId": {
+            "columns": [
+                "assignedTeamId",
+                "deleted"
+            ]
         },
         "omniGoCRMWorkspaceId": {
             "type": "varchar",
