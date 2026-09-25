@@ -84,6 +84,44 @@ final class APIClient: ObservableObject {
         return try JSONDecoder().decode(Record.self, from: data)
     }
 
+
+    func listWhatsAppConversations() async throws -> [Record] {
+        try await list(
+            entityType: "WhatsAppConversation",
+            select: "id,name,waId,phoneNumber,customerDisplayName,status,unreadCount,lastMessageAt,lastMessagePreview,leadId,contactId"
+        )
+    }
+
+    func actOnWhatsAppConversation(conversationId: String, action: String) async throws {
+        _ = try await request(
+            method: "POST",
+            path: "OmniGoCRM/WhatsApp/conversationAction",
+            body: [
+                "conversationId": conversationId,
+                "action": action,
+            ]
+        )
+    }
+
+    func logCompletedCall(
+        leadId: String,
+        phoneNumber: String,
+        durationSeconds: Int,
+        status: String = "completed"
+    ) async throws {
+        _ = try await request(
+            method: "POST",
+            path: "OmniGoCRM/Calling/log",
+            body: [
+                "leadId": leadId,
+                "phoneNumber": phoneNumber,
+                "duration": durationSeconds,
+                "status": status,
+                "direction": "Outbound",
+            ]
+        )
+    }
+
     func createLead(firstName: String, lastName: String, company: String, phone: String, whatsapp: String, sourceDetail: String, description: String) async throws {
         var body: [String: Any] = [
             "firstName": firstName,
