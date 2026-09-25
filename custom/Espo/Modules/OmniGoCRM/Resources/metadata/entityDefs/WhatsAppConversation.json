@@ -50,6 +50,20 @@
         "assignedUser": {
             "type": "link"
         },
+        "assignedTeam": {
+            "type": "link"
+        },
+        "providerPhoneNumberId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "index": true
+        },
+        "lastInboundAt": {
+            "type": "datetime"
+        },
+        "lastOutboundAt": {
+            "type": "datetime"
+        },
         "lead": {
             "type": "link",
             "readOnly": true
@@ -70,6 +84,11 @@
         "assignedUser": {
             "type": "belongsTo",
             "entity": "User",
+            "foreign": "whatsAppConversations"
+        },
+        "assignedTeam": {
+            "type": "belongsTo",
+            "entity": "Team",
             "foreign": "whatsAppConversations"
         },
         "lead": {
@@ -93,6 +112,12 @@
         "waId": {
             "columns": [
                 "waId",
+                "deleted"
+            ]
+        },
+        "providerPhoneNumberId": {
+            "columns": [
+                "providerPhoneNumberId",
                 "deleted"
             ]
         },
