@@ -1,0 +1,113 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "quoteNumber": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "status": {
+            "type": "enum",
+            "options": [
+                "Draft",
+                "Sent",
+                "Accepted",
+                "Rejected",
+                "Expired",
+                "Converted"
+            ],
+            "default": "Draft",
+            "displayAsLabel": true
+        },
+        "issueDate": {
+            "type": "date"
+        },
+        "validUntil": {
+            "type": "date"
+        },
+        "currency": {
+            "type": "varchar",
+            "maxLength": 10,
+            "default": "INR"
+        },
+        "subtotal": {
+            "type": "currency",
+            "default": 0
+        },
+        "taxAmount": {
+            "type": "currency",
+            "default": 0
+        },
+        "discountAmount": {
+            "type": "currency",
+            "default": 0
+        },
+        "totalAmount": {
+            "type": "currency",
+            "default": 0
+        },
+        "notes": {
+            "type": "text"
+        },
+        "leadId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "contactId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "accountId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "opportunityId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "workspaceId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "lead": {
+            "type": "link",
+            "readOnly": true
+        },
+        "contact": {
+            "type": "link",
+            "readOnly": true
+        },
+        "account": {
+            "type": "link",
+            "readOnly": true
+        },
+        "opportunity": {
+            "type": "link",
+            "readOnly": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
+        }
+    },
+    "indexes": {
+        "number": {
+            "columns": [
+                "quoteNumber",
+                "deleted"
+            ]
+        },
+        "workspace": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
+        }
+    }
+}
