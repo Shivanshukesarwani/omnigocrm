@@ -1,0 +1,60 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "workspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "required": true
+        },
+        "workspace": {
+            "type": "link",
+            "readOnly": true
+        },
+        "userId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "required": true
+        },
+        "user": {
+            "type": "link",
+            "readOnly": true
+        },
+        "role": {
+            "type": "enum",
+            "options": ["Owner", "Admin", "Manager", "Agent", "Viewer"],
+            "default": "Agent"
+        },
+        "status": {
+            "type": "enum",
+            "options": ["Invited", "Active", "Suspended", "Removed"],
+            "default": "Active"
+        },
+        "joinedAt": {
+            "type": "datetime"
+        }
+    },
+    "links": {
+        "workspace": {
+            "type": "belongsTo",
+            "entity": "Workspace",
+            "foreign": "members"
+        },
+        "user": {
+            "type": "belongsTo",
+            "entity": "User",
+            "foreign": "workspaceMemberships"
+        }
+    },
+    "indexes": {
+        "workspaceUser": {
+            "columns": ["workspaceId", "userId", "deleted"],
+            "unique": true
+        },
+        "user": {
+            "columns": ["userId", "deleted"]
+        }
+    }
+}
