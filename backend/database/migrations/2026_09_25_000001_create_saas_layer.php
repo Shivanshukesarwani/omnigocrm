@@ -1,0 +1,29 @@
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+ public function up(): void {
+  Schema::create('workspaces',function(Blueprint $t){$t->id();$t->string('name');$t->string('slug')->unique();$t->string('plan')->default('trial');$t->string('status')->default('active');$t->dateTime('trial_ends_at')->nullable();$t->timestamps();});
+  Schema::create('companies',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();$t->string('name');$t->string('email')->nullable();$t->string('phone',30)->nullable();$t->string('website')->nullable();$t->text('address')->nullable();$t->timestamps();$t->index(['workspace_id','name']);});
+  foreach(['users','leads','contacts','customers','products','message_templates','follow_ups','calls','quotations'] as $table){Schema::table($table,function(Blueprint $t){$t->foreignId('workspace_id')->nullable()->after('id')->constrained('workspaces')->nullOnDelete();$t->index('workspace_id');});}
+  Schema::table('leads',function(Blueprint $t){$t->foreignId('company_id')->nullable()->after('workspace_id')->constrained('companies')->nullOnDelete();});
+  Schema::table('contacts',function(Blueprint $t){$t->foreignId('company_id')->nullable()->after('workspace_id')->constrained('companies')->nullOnDelete();});
+  Schema::table('customers',function(Blueprint $t){$t->foreignId('company_id')->nullable()->after('workspace_id')->constrained('companies')->nullOnDelete();});
+  Schema::create('tasks',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();$t->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();$t->string('title');$t->text('description')->nullable();$t->string('status',30)->default('pending');$t->string('priority',20)->default('normal');$t->dateTime('due_at')->nullable();$t->nullableMorphs('subject');$t->timestamps();$t->index(['workspace_id','status']);});
+  Schema::create('tags',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();$t->string('name');$t->string('color',20)->nullable();$t->timestamps();$t->unique(['workspace_id','name']);});
+  Schema::create('taggables',function(Blueprint $t){$t->foreignId('tag_id')->constrained('tags')->cascadeOnDelete();$t->morphs('taggable');$t->primary(['tag_id','taggable_id','taggable_type']);});
+  Schema::create('orders',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();$t->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();$t->string('order_number')->unique();$t->string('status',30)->default('pending');$t->decimal('subtotal',14,2)->default(0);$t->decimal('tax',14,2)->default(0);$t->decimal('total',14,2)->default(0);$t->date('ordered_at')->nullable();$t->text('notes')->nullable();$t->timestamps();});
+  Schema::create('order_items',function(Blueprint $t){$t->id();$t->foreignId('order_id')->constrained('orders')->cascadeOnDelete();$t->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();$t->string('description');$t->decimal('qty',14,2)->default(1);$t->decimal('unit_price',14,2)->default(0);$t->decimal('line_total',14,2)->default(0);$t->timestamps();});
+  Schema::create('payments',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();$t->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();$t->foreignId('order_id')->nullable()->constrained('orders')->nullOnDelete();$t->decimal('amount',14,2);$t->string('method',30)->default('other');$t->string('status',30)->default('received');$t->string('reference')->nullable();$t->dateTime('paid_at')->nullable();$t->text('notes')->nullable();$t->timestamps();});
+  Schema::create('audit_logs',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();$t->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();$t->string('action',80);$t->string('entity_type')->nullable();$t->unsignedBigInteger('entity_id')->nullable();$t->json('before')->nullable();$t->json('after')->nullable();$t->ipAddress('ip')->nullable();$t->timestamps();$t->index(['workspace_id','created_at']);});
+  Schema::create('custom_fields',function(Blueprint $t){$t->id();$t->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();$t->string('entity_type');$t->string('name');$t->string('key');$t->string('type',30)->default('text');$t->boolean('active')->default(true);$t->timestamps();$t->unique(['workspace_id','entity_type','key']);});
+  Schema::create('custom_field_values',function(Blueprint $t){$t->id();$t->foreignId('custom_field_id')->constrained('custom_fields')->cascadeOnDelete();$t->morphs('entity');$t->text('value')->nullable();$t->timestamps();});
+ }
+ public function down(): void {
+  Schema::dropIfExists('custom_field_values');Schema::dropIfExists('custom_fields');Schema::dropIfExists('audit_logs');Schema::dropIfExists('payments');Schema::dropIfExists('order_items');Schema::dropIfExists('orders');Schema::dropIfExists('taggables');Schema::dropIfExists('tags');Schema::dropIfExists('tasks');
+  foreach(['quotations','calls','follow_ups','message_templates','products','customers','contacts','leads','users'] as $table){if(Schema::hasColumn($table,'company_id'))Schema::table($table,fn(Blueprint $t)=>$t->dropConstrainedForeignId('company_id'));if(Schema::hasColumn($table,'workspace_id'))Schema::table($table,fn(Blueprint $t)=>$t->dropConstrainedForeignId('workspace_id'));}
+  Schema::dropIfExists('companies');Schema::dropIfExists('workspaces');
+ }
+};
