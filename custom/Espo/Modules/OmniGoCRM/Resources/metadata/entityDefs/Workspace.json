@@ -1,0 +1,77 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "slug": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 100
+        },
+        "status": {
+            "type": "enum",
+            "options": ["Active", "Suspended", "Archived"],
+            "default": "Active",
+            "displayAsLabel": true
+        },
+        "plan": {
+            "type": "enum",
+            "options": ["Free", "Starter", "Business", "Enterprise"],
+            "default": "Free"
+        },
+        "subscriptionStatus": {
+            "type": "enum",
+            "options": ["Trialing", "Active", "Past Due", "Canceled", "None"],
+            "default": "Trialing"
+        },
+        "billingCustomerId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "billingSubscriptionId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "trialEndsAt": {
+            "type": "datetime"
+        },
+        "ownerUserId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "required": true
+        },
+        "ownerUser": {
+            "type": "link",
+            "readOnly": true
+        },
+        "notes": {
+            "type": "text"
+        }
+    },
+    "links": {
+        "ownerUser": {
+            "type": "belongsTo",
+            "entity": "User",
+            "foreign": "ownedWorkspaces"
+        },
+        "members": {
+            "type": "hasMany",
+            "entity": "WorkspaceMember",
+            "foreign": "workspace"
+        }
+    },
+    "indexes": {
+        "slug": {
+            "columns": ["slug", "deleted"],
+            "unique": true
+        },
+        "ownerUserId": {
+            "columns": ["ownerUserId", "deleted"]
+        },
+        "status": {
+            "columns": ["status", "deleted"]
+        }
+    }
+}
