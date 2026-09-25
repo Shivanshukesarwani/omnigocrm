@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -26,6 +27,8 @@ Route::post('/logout',[AuthController::class,'logout'])->name('logout');
 
 Route::middleware(['crm.auth','workspace'])->group(function(){
 Route::get('/dashboard',DashboardController::class)->name('dashboard');
+Route::get('/notifications',[NotificationController::class,'index'])->name('notifications.index');
+Route::post('/notifications/{id}/read',[NotificationController::class,'read'])->name('notifications.read');
 Route::get('/leads',[LeadController::class,'index'])->name('leads.index');
 Route::get('/leads/create',[LeadController::class,'create'])->name('leads.create');
 Route::post('/leads',[LeadController::class,'store'])->name('leads.store');
