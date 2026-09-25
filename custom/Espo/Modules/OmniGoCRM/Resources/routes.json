@@ -87,5 +87,15 @@
         "route": "/OmniGoCRM/Sales/orderItem",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostOrderItemAdd"
+    },
+    {
+        "route": "/OmniGoCRM/Broadcast/recipient",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBroadcastRecipientAdd"
+    },
+    {
+        "route": "/OmniGoCRM/Broadcast/schedule",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBroadcastSchedule"
     }
 ]
