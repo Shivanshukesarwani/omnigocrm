@@ -68,29 +68,223 @@ struct LoginView: View {
 struct DashboardView: View {
     @ObservedObject var session: SessionStore
     @State private var selected = 0
+    @State private var showWorkspace = false
+    @State private var workspaceName = ""
+    @State private var workspaceError = ""
 
     var body: some View {
         TabView(selection: $selected) {
-            RecordListView(session: session, title: "Leads", entityType: "Lead", select: "id,firstName,lastName,accountName,phoneNumber,whatsappNumber,status,leadStage", kind: .leads)
+            DashboardHomeView(session: session) {
+                showWorkspace = true
+            }
+            .tabItem { Label("Dashboard", systemImage: "rectangle.3.group") }
+            .tag(0)
+
+            RecordListView(session: session, title: "Leads", entityType: "Lead", select: "id,firstName,lastName,accountName,phoneNumber,whatsappNumber,status,leadStage,whatsappOptIn", kind: .leads)
                 .tabItem { Label("Leads", systemImage: "person.2") }
-                .tag(0)
+                .tag(1)
 
             RecordListView(session: session, title: "Contacts", entityType: "Contact", select: "id,name,phoneNumber,emailAddress", kind: .generic)
                 .tabItem { Label("Contacts", systemImage: "person.crop.circle") }
-                .tag(1)
+                .tag(2)
 
             RecordListView(session: session, title: "Accounts", entityType: "Account", select: "id,name,phoneNumber,emailAddress", kind: .generic)
                 .tabItem { Label("Accounts", systemImage: "building.2") }
-                .tag(2)
+                .tag(3)
 
             RecordListView(session: session, title: "Tasks", entityType: "Task", select: "id,name,status,priority,dateEnd", kind: .tasks)
                 .tabItem { Label("Tasks", systemImage: "checklist") }
-                .tag(3)
+                .tag(4)
 
             RecordListView(session: session, title: "WhatsApp", entityType: "WhatsAppConversation", select: "id,name,waId,phoneNumber,customerDisplayName,status,unreadCount,lastMessageAt,lastMessagePreview,leadId,contactId", kind: .whatsappConversations)
                 .tabItem { Label("WhatsApp", systemImage: "message") }
-                .tag(4)
+                .tag(5)
         }
+        .task {
+            await ensureWorkspace()
+        }
+        .sheet(isPresented: $showWorkspace) {
+            WorkspaceChooserView(session: session) {
+                workspaceName = $0
+            }
+        }
+    }
+
+    private func ensureWorkspace() async {
+        do {
+            let list = try await APIClient(session: session).myWorkspaces()
+
+            if list.isEmpty {
+                showWorkspace = true
+                return
+            }
+
+            if let active = list.first(where: { ($0["active"] as? Bool) == true }) {
+                workspaceName = active["name"] as? String ?? ""
+                return
+            }
+
+            if let first = list.first, let id = first["id"] as? String {
+                try await APIClient(session: session).switchWorkspace(id: id)
+                workspaceName = first["name"] as? String ?? ""
+            }
+        } catch {
+            workspaceError = error.localizedDescription
+        }
+    }
+}
+
+struct DashboardHomeView: View {
+    @ObservedObject var session: SessionStore
+    let selectWorkspace: () -> Void
+    @State private var counts: [String: Any] = [:]
+    @State private var error = ""
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if !error.isEmpty {
+                    Text(error).foregroundStyle(.red)
+                }
+
+                Section("CRM") {
+                    metric("Leads", "leads")
+                    metric("Contacts", "contacts")
+                    metric("Accounts", "accounts")
+                    metric("Opportunities", "opportunities")
+                }
+
+                Section("Work") {
+                    metric("Open Tasks", "openTasks")
+                    metric("Unread WhatsApp", "unreadWhatsApp")
+                }
+
+                Section("Sales") {
+                    metric("Quotes", "quotes")
+                    metric("Orders", "orders")
+                    metric("Pending Payments", "pendingPayments")
+                }
+
+                Button("Switch / create workspace") {
+                    selectWorkspace()
+                }
+            }
+            .navigationTitle("Dashboard")
+            .refreshable { await load() }
+            .task { await load() }
+        }
+    }
+
+    private func metric(_ title: String, _ key: String) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(String((counts[key] as? NSNumber)?.intValue ?? 0))
+                .font(.headline)
+        }
+    }
+
+    private func load() async {
+        do {
+            let result = try await APIClient(session: session).dashboardSummary()
+            counts = result["counts"] as? [String: Any] ?? [:]
+            error = ""
+        } catch {
+            error = error.localizedDescription
+        }
+    }
+}
+
+struct WorkspaceChooserView: View {
+    @Environment(.presentationMode) private var presentationMode
+    @ObservedObject var session: SessionStore
+    let onSelected: (String) -> Void
+    @State private var workspaces: [[String: Any]] = []
+    @State private var newName = ""
+    @State private var error = ""
+    @State private var busy = false
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Your workspaces") {
+                    ForEach(workspaces.indices, id: .self) { index in
+                        let workspace = workspaces[index]
+                        Button {
+                            Task {
+                                await choose(workspace)
+                            }
+                        } label: {
+                            HStack {
+                                Text(workspace["name"] as? String ?? "Workspace")
+                                Spacer()
+                                if workspace["active"] as? Bool == true {
+                                    Image(systemName: "checkmark.circle.fill")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section("Create workspace") {
+                    TextField("Workspace name", text: $newName)
+                    Button(busy ? "Creating…" : "Create workspace") {
+                        Task { await create() }
+                    }
+                    .disabled(busy || newName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+
+                if !error.isEmpty {
+                    Text(error).foregroundStyle(.red)
+                }
+            }
+            .navigationTitle("Workspace")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }
+            }
+            .task { await load() }
+        }
+    }
+
+    private func load() async {
+        do {
+            workspaces = try await APIClient(session: session).myWorkspaces()
+        } catch {
+            error = error.localizedDescription
+        }
+    }
+
+    private func choose(_ workspace: [String: Any]) async {
+        guard let id = workspace["id"] as? String else { return }
+
+        do {
+            try await APIClient(session: session).switchWorkspace(id: id)
+            onSelected(workspace["name"] as? String ?? "")
+            presentationMode.wrappedValue.dismiss()
+        } catch {
+            error = error.localizedDescription
+        }
+    }
+
+    private func create() async {
+        busy = true
+        do {
+            try await APIClient(session: session).createWorkspace(name: newName.trimmingCharacters(in: .whitespacesAndNewlines))
+            let latest = try await APIClient(session: session).myWorkspaces()
+
+            if let active = latest.first(where: { ($0["active"] as? Bool) == true }) {
+                onSelected(active["name"] as? String ?? "")
+            }
+
+            presentationMode.wrappedValue.dismiss()
+        } catch {
+            error = error.localizedDescription
+        }
+        busy = false
     }
 }
 
