@@ -91,7 +91,7 @@ class MainActivity : Activity() {
 
         val navScroll = ScrollView(this).apply { isHorizontalScrollBarEnabled = false }
         val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(8, 4, 8, 4); setBackgroundColor(Color.WHITE) }
-        listOf("Dashboard", "Leads", "Contacts", "Customers", "Follow-ups").forEach { label ->
+        listOf("Dashboard", "Leads", "Contacts", "Customers", "Follow-ups", "Companies", "Tasks", "Products", "Quotations", "Orders", "Payments").forEach { label ->
             val b = Button(this).apply { text = label }
             nav.addView(b, LinearLayout.LayoutParams(-2, -2))
             b.setOnClickListener {
@@ -101,6 +101,12 @@ class MainActivity : Activity() {
                     "Contacts" -> showContacts()
                     "Customers" -> showCustomers()
                     "Follow-ups" -> showFollowUps()
+                    "Companies" -> showCompanies()
+                    "Tasks" -> showTasks()
+                    "Products" -> showProducts()
+                    "Quotations" -> showQuotations()
+                    "Orders" -> showOrders()
+                    "Payments" -> showPayments()
                 }
             }
         }
@@ -345,4 +351,117 @@ class MainActivity : Activity() {
     private fun card(titleText:String,subtitle:String="",click:(()->Unit)?=null)=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(16,14,16,14);setBackgroundColor(Color.WHITE);addView(TextView(this@MainActivity).apply{text=titleText;textSize=17f;setTypeface(null,1)},lp());if(subtitle.isNotBlank())addView(TextView(this@MainActivity).apply{text=subtitle;textSize=14f;setTextColor(Color.DKGRAY)},lp());click?.let{setOnClickListener{it()}};layoutParams=LinearLayout.LayoutParams(-1,LinearLayout.LayoutParams.WRAP_CONTENT).apply{setMargins(0,7,0,7)}}
     private fun toast(message:String)=android.widget.Toast.makeText(this,message,android.widget.Toast.LENGTH_LONG).show()
     override fun onDestroy(){worker.shutdownNow();super.onDestroy()}
+
+    private fun showCompanies() {
+        setupShell("Companies")
+        val scroll = contentScroll()
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        api.runAsync {
+            try {
+                val rows = api.companies()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        scroll.addView(card(o.optString("name"), "${o.optString("phone")} • ${o.optString("email")}"))
+                    }
+                }
+            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load companies") } }
+        }
+    }
+
+    private fun showTasks() {
+        setupShell("Tasks")
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val add = Button(this).apply { text = "+ New Task" }
+        box.addView(add, lp())
+        val scroll = contentScroll()
+        box.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        root.addView(box, LinearLayout.LayoutParams(-1, 0, 1f))
+        add.setOnClickListener {
+            val titleInput = edit("Task title")
+            AlertDialog.Builder(this).setTitle("New task").setView(titleInput).setPositiveButton("Save") { _, _ ->
+                api.runAsync { try { api.createTask(titleInput.text.toString(), ""); runOnUiThread { showTasks() } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not create task") } } }
+            }.setNegativeButton("Cancel", null).show()
+        }
+        api.runAsync {
+            try {
+                val rows = api.tasks()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        scroll.addView(card(o.optString("title"), "${o.optString("priority")} • ${o.optString("status")} • ${o.optString("due_at")}"))
+                    }
+                }
+            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load tasks") } }
+        }
+    }
+
+    private fun showProducts() {
+        setupShell("Products / Services")
+        val scroll = contentScroll()
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        api.runAsync {
+            try {
+                val rows = api.products()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        scroll.addView(card(o.optString("name"), "₹${o.optString("price")} / ${o.optString("unit")}"))
+                    }
+                }
+            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load products") } }
+        }
+    }
+
+    private fun showQuotations() {
+        setupShell("Quotations")
+        val scroll = contentScroll()
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        api.runAsync {
+            try {
+                val rows = api.quotations()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        scroll.addView(card(o.optString("quote_number"), "${o.optString("status")} • ₹${o.optString("total")}"))
+                    }
+                }
+            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load quotations") } }
+        }
+    }
+
+    private fun showOrders() {
+        setupShell("Orders / Sales")
+        val scroll = contentScroll()
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        api.runAsync {
+            try {
+                val rows = api.orders()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        scroll.addView(card(o.optString("order_number"), "${o.optString("status")} • ₹${o.optString("total")}"))
+                    }
+                }
+            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load orders") } }
+        }
+    }
+
+    private fun showPayments() {
+        setupShell("Payments")
+        val scroll = contentScroll()
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        api.runAsync {
+            try {
+                val rows = api.payments()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        scroll.addView(card("₹${o.optString("amount")}", "${o.optString("method")} • ${o.optString("status")} • ${o.optString("reference")}"))
+                    }
+                }
+            } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load payments") } }
+        }
+    }
+
 }
