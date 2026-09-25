@@ -26,7 +26,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         api = ApiClient(this)
         session = SessionManager(this)
-        if (session.token.isNullOrBlank()) showLogin() else showDashboard()
+        if (session.token.isNullOrBlank()) showLogin() else ensureWorkspace()
     }
 
     private fun showLogin() {
@@ -41,7 +41,7 @@ class MainActivity : Activity() {
             if (username.text.isNullOrBlank() || password.text.isNullOrBlank()) { toast("Username and password are required."); return@setOnClickListener }
             login.isEnabled = false
             api.runAsync {
-                try { api.login(AppConfig.BASE_URL, username.text.toString().trim(), password.text.toString()); runOnUiThread { showDashboard() } }
+                try { api.login(AppConfig.BASE_URL, username.text.toString().trim(), password.text.toString()); runOnUiThread { ensureWorkspace() } }
                 catch (e: Exception) { runOnUiThread { login.isEnabled = true; toast(e.message ?: "Login failed") } }
             }
         }
