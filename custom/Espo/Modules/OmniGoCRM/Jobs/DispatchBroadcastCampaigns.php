@@ -2,14 +2,13 @@
 
 namespace Espo\Modules\OmniGoCRM\Jobs;
 
-use Espo\Core\Job\Job;
-use Espo\Core\Job\Job\Data;
+use Espo\Core\Job\JobDataLess;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppCloudApi;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppConversationService;
 use Throwable;
 
-class DispatchBroadcastCampaigns implements Job
+class DispatchBroadcastCampaigns implements JobDataLess
 {
     private const CAMPAIGN_LIMIT = 10;
     private const RECIPIENT_LIMIT = 100;
@@ -20,7 +19,7 @@ class DispatchBroadcastCampaigns implements Job
         private WhatsAppConversationService $conversationService,
     ) {}
 
-    public function run(Data $data): void
+    public function run(): void
     {
         $now = gmdate('Y-m-d H:i:s');
 
