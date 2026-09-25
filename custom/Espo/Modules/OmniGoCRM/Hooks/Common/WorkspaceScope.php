@@ -22,6 +22,10 @@ class WorkspaceScope
             return;
         }
 
+        if ($this->user->isSystem()) {
+            return;
+        }
+
         $bypass = (bool) $this->config->get('omniGoCRMSaaSAdminBypass');
 
         if ($bypass && $this->user->isAdmin()) {
