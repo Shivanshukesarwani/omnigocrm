@@ -1,0 +1,23 @@
+{
+    "fields":{
+        "name":{"type":"varchar","required":true,"maxLength":255},
+        "workspaceId":{"type":"varchar","maxLength":24,"required":true},
+        "provider":{"type":"enum","options":["None","Stripe","Razorpay","Manual"],"default":"None"},
+        "providerCustomerId":{"type":"varchar","maxLength":255},
+        "providerSubscriptionId":{"type":"varchar","maxLength":255},
+        "plan":{"type":"enum","options":["Free","Starter","Business","Enterprise"],"default":"Free"},
+        "status":{"type":"enum","options":["Trialing","Active","Past Due","Canceled","Incomplete","None"],"default":"Trialing","displayAsLabel":true},
+        "currentPeriodStart":{"type":"datetime"},
+        "currentPeriodEnd":{"type":"datetime"},
+        "cancelAtPeriodEnd":{"type":"bool","default":false},
+        "currency":{"type":"varchar","maxLength":10,"default":"INR"},
+        "amount":{"type":"currency","default":0},
+        "metadataJson":{"type":"text"},
+        "omniGoCRMWorkspaceId":{"type":"varchar","maxLength":24,"readOnly":true,"index":true,"utility":true}
+    },
+    "indexes":{
+        "workspace":{"columns":["workspaceId","deleted"]},
+        "providerSubscription":{"columns":["providerSubscriptionId","deleted"]},
+        "status":{"columns":["status","deleted"]}
+    }
+}
