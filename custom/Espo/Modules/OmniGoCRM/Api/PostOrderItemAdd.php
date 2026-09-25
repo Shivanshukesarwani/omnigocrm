@@ -8,13 +8,10 @@ use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\ORM\EntityManager;
-use Espo\Modules\OmniGoCRM\Services\SalesService;
-
 class PostOrderItemAdd implements Action
 {
     public function __construct(
         private EntityManager $entityManager,
-        private SalesService $service,
     ) {}
 
     public function process(Request $request): Response
