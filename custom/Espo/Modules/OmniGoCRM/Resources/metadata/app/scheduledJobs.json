@@ -1,0 +1,8 @@
+{
+    "DispatchBroadcastCampaigns": {
+        "name": "Dispatch OmniGoCRM WhatsApp Broadcasts",
+        "isSystem": true,
+        "scheduling": "* * * * *",
+        "jobClassName": "Espo\\Modules\\OmniGoCRM\\Jobs\\DispatchBroadcastCampaigns"
+    }
+}
