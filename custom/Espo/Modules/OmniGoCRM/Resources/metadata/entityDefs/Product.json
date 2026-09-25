@@ -6,11 +6,41 @@
             "readOnly": true,
             "index": true,
             "utility": true
+        },
+        "sku": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "price": {
+            "type": "currency",
+            "default": 0,
+            "min": 0
+        },
+        "currency": {
+            "type": "varchar",
+            "maxLength": 10,
+            "default": "INR"
+        },
+        "description": {
+            "type": "text"
+        },
+        "active": {
+            "type": "bool",
+            "default": true
         }
     },
     "indexes": {
         "omniGoCRMWorkspaceId": {
-            "columns": ["omniGoCRMWorkspaceId", "deleted"]
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
+        },
+        "sku": {
+            "columns": [
+                "sku",
+                "deleted"
+            ]
         }
     }
 }
