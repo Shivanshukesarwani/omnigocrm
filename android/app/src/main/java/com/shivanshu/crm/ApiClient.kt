@@ -30,8 +30,9 @@ class ApiClient(context: Context) {
         body: String? = null,
         usernameOverride: String? = null,
         secretOverride: String? = null,
+        baseUrlOverride: String? = null,
     ): String {
-        val apiUrl = (session.baseUrl ?: AppConfig.BASE_URL).trimEnd('/') + "/api/v1/"
+        val apiUrl = (baseUrlOverride ?: session.baseUrl ?: AppConfig.BASE_URL).trim().trimEnd('/') + "/api/v1/"
         val connection = (URL(apiUrl + path.trimStart('/')).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = 15000
@@ -81,7 +82,15 @@ class ApiClient(context: Context) {
         if (!cleanBaseUrl.startsWith("https://") && !cleanBaseUrl.startsWith("http://")) {
             throw IllegalStateException("CRM URL must start with http:// or https://")
         }
-        val response = JSONObject(request("GET", "App/user", usernameOverride = username, secretOverride = password))
+        val response = JSONObject(
+            request(
+                "GET",
+                "App/user",
+                usernameOverride = username,
+                secretOverride = password,
+                baseUrlOverride = cleanBaseUrl
+            )
+        )
         val user = response.optJSONObject("user") ?: JSONObject()
         val token = response.optString("token")
         if (token.isBlank()) throw IllegalStateException("CRM did not return an authentication token.")
