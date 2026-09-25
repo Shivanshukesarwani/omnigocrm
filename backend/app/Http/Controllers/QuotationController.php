@@ -1,0 +1,8 @@
+<?php
+namespace App\Http\Controllers;
+use App\Models\Quotation;use App\Models\QuotationItem;use App\Models\Customer;use App\Models\Product;use Illuminate\Http\Request;use Illuminate\Support\Facades\DB;
+class QuotationController extends Controller{
+public function index(){return view('quotations.index',['quotations'=>Quotation::with('customer.contact')->latest()->paginate(25),'customers'=>Customer::with('contact')->latest()->get(),'products'=>Product::where('active',true)->orderBy('name')->get()]);}
+public function store(Request $r){$d=$r->validate(['customer_id'=>'required|exists:customers,id','valid_until'=>'nullable|date','tax'=>'nullable|numeric|min:0','notes'=>'nullable','items'=>'required|array|min:1','items.*.description'=>'required|max:200','items.*.qty'=>'required|numeric|min:0.01','items.*.unit_price'=>'required|numeric|min:0']);$q=null;DB::transaction(function()use($d,&$q){$subtotal=collect($d['items'])->sum(fn($i)=>(float)$i['qty']*(float)$i['unit_price']);$tax=(float)($d['tax']??0);$q=Quotation::create(['customer_id'=>$d['customer_id'],'quote_number'=>'QTN-'.now()->format('Ymd').'-'.strtoupper(str()->random(6)),'status'=>'draft','subtotal'=>$subtotal,'tax'=>$tax,'total'=>$subtotal+$tax,'valid_until'=>$d['valid_until']??null,'notes'=>$d['notes']??null]);foreach($d['items'] as $i)QuotationItem::create(['quotation_id'=>$q->id,'description'=>$i['description'],'qty'=>$i['qty'],'unit_price'=>$i['unit_price'],'line_total'=>(float)$i['qty']*(float)$i['unit_price']]);});return redirect()->route('quotations.show',$q)->with('success','Quotation created.');}
+public function show(Quotation $quotation){return view('quotations.show',['quotation'=>$quotation->load(['customer.contact','items'])]);}
+}
