@@ -1,0 +1,55 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "providerTemplateId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "provider": {
+            "type": "enum",
+            "options": ["Meta Cloud API"],
+            "default": "Meta Cloud API"
+        },
+        "languageCode": {
+            "type": "varchar",
+            "maxLength": 20,
+            "default": "en_US"
+        },
+        "category": {
+            "type": "enum",
+            "options": ["Marketing", "Utility", "Authentication"],
+            "default": "Utility"
+        },
+        "status": {
+            "type": "enum",
+            "options": ["Draft", "Pending", "Approved", "Rejected", "Paused"],
+            "default": "Draft",
+            "displayAsLabel": true
+        },
+        "body": {
+            "type": "text"
+        },
+        "componentsJson": {
+            "type": "text"
+        },
+        "active": {
+            "type": "bool",
+            "default": true
+        },
+        "lastSyncedAt": {
+            "type": "datetime"
+        }
+    },
+    "indexes": {
+        "providerTemplateId": {
+            "columns": ["providerTemplateId", "deleted"]
+        },
+        "active": {
+            "columns": ["active", "deleted"]
+        }
+    }
+}
