@@ -4,5 +4,11 @@
         "isSystem": true,
         "scheduling": "* * * * *",
         "jobClassName": "Espo\\Modules\\OmniGoCRM\\Jobs\\DispatchBroadcastCampaigns"
+    },
+    "Process OmniGoCRM Automation": {
+        "name": "Process OmniGoCRM Automation",
+        "isSystem": true,
+        "scheduling": "*/5 * * * *",
+        "jobClassName": "Espo\\Modules\\OmniGoCRM\\Jobs\\ProcessAutomation"
     }
 }
