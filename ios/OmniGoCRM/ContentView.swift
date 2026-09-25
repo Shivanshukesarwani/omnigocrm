@@ -269,7 +269,7 @@ struct RecordDetailView: View {
 }
 
 struct CreateLeadView: View {
-    @Environment(.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @ObservedObject var session: SessionStore
     @State private var firstName = ""
     @State private var lastName = ""
@@ -324,7 +324,7 @@ struct CreateLeadView: View {
 }
 
 struct CreateTaskView: View {
-    @Environment(.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @ObservedObject var session: SessionStore
     @State private var name = ""
     @State private var description = ""
@@ -365,7 +365,7 @@ struct CreateTaskView: View {
 }
 
 struct SendWhatsAppView: View {
-    @Environment(.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @ObservedObject var session: SessionStore
     let leadId: String
     @State private var messageBody = ""
