@@ -111,6 +111,13 @@
         "conversation": {
             "type": "link",
             "readOnly": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
         }
     },
     "indexes": {
@@ -141,6 +148,12 @@
         "conversationId": {
             "columns": [
                 "conversationId",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
                 "deleted"
             ]
         }
