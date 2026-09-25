@@ -7,21 +7,24 @@ final class SessionStore: ObservableObject {
     @Published private(set) var token: String?
     @Published private(set) var username: String?
     @Published private(set) var userName: String?
+    @Published private(set) var baseURL: String
 
     init() {
         token = Keychain.read("omnigocrm.token")
         username = UserDefaults.standard.string(forKey: "omnigocrm.username")
         userName = UserDefaults.standard.string(forKey: "omnigocrm.userName")
+        baseURL = UserDefaults.standard.string(forKey: "omnigocrm.baseURL") ?? AppConfig.defaultBaseURL.absoluteString
     }
 
     var isAuthenticated: Bool {
         !(token?.isEmpty ?? true)
     }
 
-    func save(token: String, username: String, userName: String) {
+    func save(token: String, username: String, userName: String, baseURL: String) {
         Keychain.write(token, key: "omnigocrm.token")
         UserDefaults.standard.set(username, forKey: "omnigocrm.username")
         UserDefaults.standard.set(userName, forKey: "omnigocrm.userName")
+        UserDefaults.standard.set(baseURL, forKey: "omnigocrm.baseURL")
         self.token = token
         self.username = username
         self.userName = userName
@@ -34,6 +37,7 @@ final class SessionStore: ObservableObject {
         token = nil
         username = nil
         userName = nil
+        baseURL = AppConfig.defaultBaseURL.absoluteString
     }
 }
 
