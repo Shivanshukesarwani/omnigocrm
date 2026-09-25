@@ -8,17 +8,12 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 git clone --depth 1 --branch "$UPSTREAM_REF" "$UPSTREAM_URL" "$TMP_DIR/espocrm"
 
-# Copy EspoCRM core while preserving OmniGoCRM-owned paths.
-rsync -a --delete \
-  --exclude='.git/' \
-  --exclude='custom/Espo/Modules/OmniGoCRM/' \
-  --exclude='client/custom/modules/omni-go-crm/' \
-  --exclude='docs/' \
-  --exclude='android/' \
-  --exclude='mobile/' \
-  --exclude='backend/' \
-  "$TMP_DIR/espocrm/" ./
+# Overlay upstream EspoCRM without deleting OmniGoCRM-owned files.
+# We intentionally avoid rsync --delete so product files are never removed
+# merely because they do not exist upstream.
+rsync -a   --exclude='.git/'   --exclude='.github/'   --exclude='README.md'   --exclude='docs/'   --exclude='scripts/'   --exclude='Dockerfile*'   --exclude='docker-compose*'   --exclude='custom/Espo/Modules/OmniGoCRM/'   --exclude='client/custom/modules/omni-go-crm/'   --exclude='android/'   --exclude='mobile/'   --exclude='backend/'   "$TMP_DIR/espocrm/" ./
 
-# Keep our custom directories available even when upstream has an empty custom tree.
 mkdir -p custom/Espo/Modules/OmniGoCRM
 mkdir -p client/custom/modules/omni-go-crm
+
+echo "EspoCRM $UPSTREAM_REF synced into OmniGoCRM."
