@@ -1,0 +1,31 @@
+<?php
+
+namespace Espo\Modules\OmniGoCRM\Api;
+
+use Espo\Core\Api\Action;
+use Espo\Core\Api\Request;
+use Espo\Core\Api\Response;
+use Espo\Core\Api\ResponseComposer;
+use Espo\Core\Exceptions\BadRequest;
+use Espo\Modules\OmniGoCRM\Services\SalesService;
+
+class PostQuoteItemAdd implements Action
+{
+    public function __construct(private SalesService $service) {}
+
+    public function process(Request $request): Response
+    {
+        $data = $request->getParsedBody();
+        if ($data === null || empty($data->quoteId) || !is_string($data->quoteId)) {
+            throw new BadRequest('quoteId is required.');
+        }
+
+        $item = $this->service->addQuoteItem(trim($data->quoteId), (array) $data);
+
+        return ResponseComposer::json([
+            'accepted' => true,
+            'quoteItemId' => $item->getId(),
+            'lineTotal' => $item->get('lineTotal'),
+        ]);
+    }
+}
