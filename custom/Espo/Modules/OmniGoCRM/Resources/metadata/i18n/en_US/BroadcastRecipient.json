@@ -1,0 +1,18 @@
+{
+    "fields":{
+        "name":"Recipient",
+        "campaignId":"Campaign ID",
+        "leadId":"Lead ID",
+        "phoneNumber":"WhatsApp Number",
+        "status":"Status",
+        "providerMessageId":"Provider Message ID",
+        "errorMessage":"Error",
+        "sentAt":"Sent At"
+    },
+    "options":{
+        "status":{
+            "Queued":"Queued","Sent":"Sent","Failed":"Failed","Skipped":"Skipped"
+        }
+    },
+    "labels":{"BroadcastRecipient":"Broadcast Recipient"}
+}
