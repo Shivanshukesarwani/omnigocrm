@@ -1,0 +1,19 @@
+{
+    "fields":{
+        "name":{"type":"varchar","required":true,"maxLength":255},
+        "workspaceId":{"type":"varchar","maxLength":24,"required":true},
+        "provider":{"type":"varchar","maxLength":100},
+        "externalEventId":{"type":"varchar","maxLength":255},
+        "eventType":{"type":"varchar","maxLength":255},
+        "status":{"type":"enum","options":["Received","Processed","Ignored","Failed"],"default":"Received"},
+        "payloadJson":{"type":"text"},
+        "errorMessage":{"type":"text"},
+        "processedAt":{"type":"datetime"},
+        "omniGoCRMWorkspaceId":{"type":"varchar","maxLength":24,"readOnly":true,"index":true,"utility":true}
+    },
+    "indexes":{
+        "externalEvent":{"columns":["externalEventId","deleted"],"unique":true},
+        "workspace":{"columns":["workspaceId","deleted"]},
+        "status":{"columns":["status","deleted"]}
+    }
+}
