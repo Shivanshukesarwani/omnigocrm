@@ -37,7 +37,13 @@ jobs:
 
       - name: Show logs on failure
         if: failure()
-        run: docker compose -f docker-compose.test.yml logs --tail=300
+        run: |
+          docker compose -f docker-compose.test.yml logs --tail=300
+          rm -rf /tmp/omnigocrm-espo-logs
+          mkdir -p /tmp/omnigocrm-espo-logs
+          docker cp omnigocrm-test:/var/www/html/data/logs/. /tmp/omnigocrm-espo-logs/ 2>/dev/null || true
+          echo "===== EspoCRM internal logs ====="
+          find /tmp/omnigocrm-espo-logs -type f -maxdepth 2 -print -exec sh -c 'echo "----- $1 -----"; tail -n 300 "$1"' _ {} \; 2>/dev/null || true
 
       - name: Tear down
         if: always()
