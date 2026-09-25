@@ -25,23 +25,24 @@ jobs:
 
       - name: Validate OmniGoCRM module JSON
         run: |
-          php -r 'foreach (glob("custom/Espo/Modules/OmniGoCRM/Resources/**/*.json") as $f) { json_decode(file_get_contents($f), true, 512, JSON_THROW_ON_ERROR); echo "OK $f
-"; }'
+          find custom/Espo/Modules/OmniGoCRM/Resources -type f -name "*.json" -print0 |
+            while IFS= read -r -d '' file; do
+              php -r 'json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);' "$file"
+              echo "OK $file"
+            done
 
       - name: PHP syntax check for OmniGoCRM code
         run: |
-          if [ -d custom/Espo/Modules/OmniGoCRM ]; then
-            find custom/Espo/Modules/OmniGoCRM -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l
-          fi
+          find custom/Espo/Modules/OmniGoCRM -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l
 
   legacy-prototype:
     runs-on: ubuntu-latest
     if: false
     steps:
-      - run: echo "The Laravel prototype is retained for migration reference and is not the active application."
+      - run: echo "Laravel prototype retained for migration reference."
 
   mobile:
     runs-on: ubuntu-latest
     if: false
     steps:
-      - run: echo "Mobile builds will be enabled once the native OmniGoCRM clients are established against the EspoCRM API."
+      - run: echo "Native mobile clients will be enabled after API client implementation."
