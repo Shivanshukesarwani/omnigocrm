@@ -178,6 +178,11 @@ class MainActivity : Activity() {
         api.runAsync {
             try {
                 val leads = api.list("Lead", "id,firstName,lastName,accountName,phoneNumber,whatsappNumber,status,leadStage", 5)
+                val contacts = api.list("Contact", "id,name", 5)
+                val accounts = api.list("Account", "id,name", 5)
+                val opportunities = api.list("Opportunity", "id,name", 5)
+                val tasks = api.list("Task", "id,name,status", 5)
+                val messages = api.list("WhatsAppMessage", "id,name,direction,status,textBody", 5)
                 runOnUiThread {
                     summary.text = "Leads: " + leads.length() + "   Contacts: " + contacts.length() + "\n" +
                         "Accounts: " + accounts.length() + "   Opportunities: " + opportunities.length() + "\n" +
@@ -224,6 +229,7 @@ class MainActivity : Activity() {
     private fun showLead(id: String) {
         shell("Lead")
         api.runAsync { try { val row = api.read("Lead", id); runOnUiThread { renderLeadDetail(row) } } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load lead") } } }
+    }
 
     private fun renderLeadDetail(row: JSONObject) {
         addText(body, leadName(row), 28f, true)
