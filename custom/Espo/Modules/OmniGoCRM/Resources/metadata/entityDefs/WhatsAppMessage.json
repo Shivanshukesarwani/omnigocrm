@@ -1,0 +1,97 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "providerMessageId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "audited": true
+        },
+        "direction": {
+            "type": "enum",
+            "options": ["Inbound", "Outbound"],
+            "default": "Outbound",
+            "audited": true,
+            "displayAsLabel": true
+        },
+        "status": {
+            "type": "enum",
+            "options": ["Queued", "Sent", "Delivered", "Read", "Failed", "Received"],
+            "default": "Queued",
+            "audited": true,
+            "displayAsLabel": true
+        },
+        "messageType": {
+            "type": "enum",
+            "options": [
+                "Text", "Template", "Image", "Document",
+                "Audio", "Video", "Interactive", "Unknown"
+            ],
+            "default": "Text"
+        },
+        "fromNumber": {
+            "type": "phone",
+            "typeList": ["Mobile", "WhatsApp", "Other"],
+            "defaultType": "WhatsApp",
+            "isPersonalData": true
+        },
+        "toNumber": {
+            "type": "phone",
+            "typeList": ["Mobile", "WhatsApp", "Other"],
+            "defaultType": "WhatsApp",
+            "isPersonalData": true
+        },
+        "textBody": {
+            "type": "text",
+            "isPersonalData": true
+        },
+        "templateName": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "errorCode": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "errorMessage": {
+            "type": "text"
+        },
+        "externalLeadId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "leadId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "contactId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "sentAt": {
+            "type": "datetime"
+        },
+        "receivedAt": {
+            "type": "datetime"
+        },
+        "rawPayload": {
+            "type": "text"
+        }
+    },
+    "indexes": {
+        "providerMessageId": {
+            "columns": ["providerMessageId", "deleted"]
+        },
+        "externalLeadId": {
+            "columns": ["externalLeadId", "deleted"]
+        },
+        "leadId": {
+            "columns": ["leadId", "deleted"]
+        },
+        "contactId": {
+            "columns": ["contactId", "deleted"]
+        }
+    }
+}
