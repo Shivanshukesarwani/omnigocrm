@@ -10,12 +10,20 @@
         },
         "platform": {
             "type": "enum",
-            "options": ["Android", "iOS", "Web"],
+            "options": [
+                "Android",
+                "iOS",
+                "Web"
+            ],
             "required": true
         },
         "pushProvider": {
             "type": "enum",
-            "options": ["FCM", "APNs", "WebPush"],
+            "options": [
+                "FCM",
+                "APNs",
+                "WebPush"
+            ],
             "required": true
         },
         "pushToken": {
@@ -42,6 +50,13 @@
         "user": {
             "type": "link",
             "readOnly": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
         }
     },
     "links": {
@@ -53,13 +68,28 @@
     },
     "indexes": {
         "externalDeviceId": {
-            "columns": ["externalDeviceId", "deleted"]
+            "columns": [
+                "externalDeviceId",
+                "deleted"
+            ]
         },
         "pushToken": {
-            "columns": ["pushToken", "deleted"]
+            "columns": [
+                "pushToken",
+                "deleted"
+            ]
         },
         "user": {
-            "columns": ["userId", "deleted"]
+            "columns": [
+                "userId",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
         }
     }
 }
