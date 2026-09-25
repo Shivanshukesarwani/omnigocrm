@@ -1,0 +1,5 @@
+@extends('layouts.app') @section('title','· Leads') @section('content')
+<div class="page-head"><div><h1>Leads</h1><p class="muted">Potential customers and opportunities.</p></div><a class="btn primary" href="{{ route('leads.create') }}">+ New Lead</a></div>
+<form class="toolbar" method="GET"><input name="search" placeholder="Search name, company or mobile" value="{{ request('search') }}"><button class="btn">Search</button></form>
+<div class="panel"><table><thead><tr><th>Name</th><th>Company</th><th>Mobile</th><th>Status</th><th>Owner</th></tr></thead><tbody>@forelse($leads as $lead)<tr><td><a href="{{ route('leads.show',$lead) }}">{{ $lead->first_name }} {{ $lead->last_name }}</a></td><td>{{ $lead->company ?: '—' }}</td><td>{{ $lead->mobile }}</td><td><span class="badge">{{ $lead->status }}</span></td><td>{{ $lead->assignee?->name ?: 'Unassigned' }}</td></tr>@empty<tr><td colspan="5">No leads found.</td></tr>@endforelse</tbody></table><div class="pagination">{{ $leads->links() }}</div></div>
+@endsection
