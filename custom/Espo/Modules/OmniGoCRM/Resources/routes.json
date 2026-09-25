@@ -150,5 +150,15 @@
         "method": "post",
         "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\PostGoogleLeadWebhook",
         "noAuth": true
+    },
+    {
+        "route": "/OmniGoCRM/WhatsApp/inbox",
+        "method": "get",
+        "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\GetWhatsAppInbox"
+    },
+    {
+        "route": "/OmniGoCRM/Timeline",
+        "method": "get",
+        "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\GetCustomerTimeline"
     }
 ]
