@@ -160,6 +160,50 @@ class ApiClient(context: Context) {
         return JSONObject(request("POST", "Call", payload.toString())).optString("id")
     }
 
+
+    fun listWhatsAppConversations(): JSONArray {
+        return list(
+            "WhatsAppConversation",
+            "id,name,waId,phoneNumber,customerDisplayName,status,unreadCount,lastMessageAt,lastMessagePreview,leadId,contactId",
+            100
+        )
+    }
+
+    fun actOnWhatsAppConversation(conversationId: String, action: String): JSONObject {
+        require(action == "read" || action == "close" || action == "open")
+        return JSONObject(
+            request(
+                "POST",
+                "OmniGoCRM/WhatsApp/conversationAction",
+                JSONObject()
+                    .put("conversationId", conversationId)
+                    .put("action", action)
+                    .toString()
+            )
+        )
+    }
+
+    fun logCompletedCall(
+        leadId: String,
+        phoneNumber: String,
+        durationSeconds: Int,
+        status: String = "completed",
+    ): JSONObject {
+        return JSONObject(
+            request(
+                "POST",
+                "OmniGoCRM/Calling/log",
+                JSONObject()
+                    .put("leadId", leadId)
+                    .put("phoneNumber", phoneNumber)
+                    .put("duration", durationSeconds)
+                    .put("status", status)
+                    .put("direction", "Outbound")
+                    .toString()
+            )
+        )
+    }
+
     fun entityItems(entityType: String): List<EntityItem> {
         val rows = list(entityType, "id,name,status", 100)
         val result = mutableListOf<EntityItem>()
