@@ -227,6 +227,20 @@ class MainActivity : Activity() {
             val c = calls.getJSONObject(i)
             box.addView(card(c.optString("phone"), "${c.optString("direction")} • ${c.optInt("duration_seconds")} sec"))
         }
+
+        addText(box, "Activity timeline", 18f, true)
+        val activities = o.optJSONArray("activities") ?: org.json.JSONArray()
+        if (activities.length() == 0) {
+            addText(box, "No activity recorded yet.", 14f, false)
+        } else {
+            for (i in 0 until activities.length()) {
+                val a = activities.getJSONObject(i)
+                box.addView(card(
+                    a.optString("action").replace('_',' '),
+                    "${a.optString("created_at")} • ${a.optString("description")}"
+                ))
+            }
+        }
         scroll.addView(box)
     }
 
@@ -274,6 +288,14 @@ class MainActivity : Activity() {
                     val phone=o.optString("whatsapp").ifBlank{o.optString("mobile")}
                     call.setOnClickListener{startTrackedCall("contact",id,phone)};wa.setOnClickListener{chooseTemplate("contact",id)}
                     if(o.optJSONObject("customer")!=null){convert.text="Already a Customer";convert.isEnabled=false}else convert.setOnClickListener{convertContact(id)}
+
+                    addText(box, "Activity timeline", 18f, true)
+                    val activities=o.optJSONArray("activities") ?: org.json.JSONArray()
+                    if(activities.length()==0) addText(box,"No activity recorded yet.",14f,false)
+                    else for(i in 0 until activities.length()){
+                        val a=activities.getJSONObject(i)
+                        box.addView(card(a.optString("action").replace('_',' '), "${a.optString("created_at")} • ${a.optString("description")}"))
+                    }
                     scroll.addView(box); root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f))
                 }
             } catch(e:Exception){runOnUiThread{toast(e.message ?: "Could not load contact")}}
@@ -302,6 +324,14 @@ class MainActivity : Activity() {
                     val call=Button(this).apply{text="📞 Call"};val wa=Button(this).apply{text="💬 WhatsApp"};box.addView(call,lp());box.addView(wa,lp())
                     val phone=c?.optString("whatsapp")?.ifBlank{c.optString("mobile")} ?: ""
                     call.setOnClickListener{startTrackedCall("customer",id,phone)};wa.setOnClickListener{chooseTemplate("customer",id)}
+
+                    addText(box, "Activity timeline", 18f, true)
+                    val activities=o.optJSONArray("activities") ?: org.json.JSONArray()
+                    if(activities.length()==0) addText(box,"No activity recorded yet.",14f,false)
+                    else for(i in 0 until activities.length()){
+                        val a=activities.getJSONObject(i)
+                        box.addView(card(a.optString("action").replace('_',' '), "${a.optString("created_at")} • ${a.optString("description")}"))
+                    }
                     scroll.addView(box);root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f))
                 }
             } catch(e:Exception){runOnUiThread{toast(e.message ?: "Could not load customer")}}
