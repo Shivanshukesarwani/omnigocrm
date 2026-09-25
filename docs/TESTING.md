@@ -29,7 +29,12 @@ Then open:
 
 **http://localhost:8081**
 
-The first startup uses the normal EspoCRM setup wizard. Create a local administrator account in that wizard. Do not reuse a production password.
+The test stack provisions the administrator automatically from `docker-compose.test.yml`:
+
+- Username: `admin`
+- Password: `admin12345`
+
+These credentials are for local testing only. Change them before any non-local deployment.
 
 The test database credentials are intentionally non-secret and exist only in `docker-compose.test.yml`.
 
