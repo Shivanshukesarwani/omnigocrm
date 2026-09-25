@@ -1,0 +1,15 @@
+{
+    "fields": {
+        "name": {"type": "varchar", "required": true, "maxLength": 255},
+        "active": {"type": "bool", "default": true},
+        "event": {"type": "enum", "options": ["LeadCreated", "LeadStageChanged", "LeadFollowUpDue", "WhatsAppReceived", "DealStageChanged", "CallMissed"], "default": "LeadCreated"},
+        "conditionsJson": {"type": "text"},
+        "actionsJson": {"type": "text"},
+        "delayMinutes": {"type": "int", "default": 0, "min": 0},
+        "workspaceId": {"type": "varchar", "maxLength": 24, "index": true, "utility": true}
+    },
+    "indexes": {
+        "workspaceId": {"columns": ["workspaceId", "deleted"]},
+        "active": {"columns": ["active", "deleted"]}
+    }
+}
