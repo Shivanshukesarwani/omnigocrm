@@ -40,4 +40,21 @@ class ApiClient(context:Context){
  fun completeTask(id:Long)=JSONObject(call("POST","tasks/$id/complete")).getJSONObject("task")
  fun quotations()=JSONObject(call("GET","quotations")).getJSONArray("data")
  fun payments()=JSONObject(call("GET","payments")).getJSONArray("data")
+ fun logCall(type:String,id:Long,phone:String,duration:Int,file:java.io.File?){
+  val body=JSONObject().put("subject_type",type).put("subject_id",id).put("phone",phone).put("duration_seconds",duration).put("direction","outgoing").put("status","completed")
+  val callId=JSONObject(call("POST","calls",body.toString())).optLong("id")
+  if(callId>0 && file?.exists()==true) uploadRecording(callId,file)
+ }
+ private fun uploadRecording(id:Long,file:java.io.File){
+  val boundary="----Omni"+System.currentTimeMillis()
+  val c=(URL(base()+"calls/"+id+"/recording").openConnection() as HttpURLConnection)
+  c.requestMethod="POST";c.doOutput=true;c.setRequestProperty("Authorization","Bearer "+session.token);c.setRequestProperty("Content-Type","multipart/form-data; boundary="+boundary)
+  c.outputStream.use{out->
+   fun w(s:String)=out.write(s.toByteArray())
+   w("--"+boundary+"\\r\\nContent-Disposition: form-data; name=\"recording\"; filename=\""+file.name+"\"\\r\\nContent-Type: audio/mp4\\r\\n\\r\\n")
+   file.inputStream().use{it.copyTo(out)}
+   w("\\r\\n--"+boundary+"--\\r\\n")
+  }
+  c.inputStream.close();c.disconnect()
+ }
 }
