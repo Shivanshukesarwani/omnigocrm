@@ -9,6 +9,9 @@ use App\Models\Payment;
 use App\Models\Tag;
 use App\Models\AuditLog;
 use App\Models\Lead;
+use App\Models\Product;
+use App\Models\Quotation;
+use App\Models\QuotationItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -28,4 +31,46 @@ class SaaSApiController extends Controller {
  public function payments(Request $r){return Payment::with(['customer.contact','order'])->where('workspace_id',$this->workspace($r))->latest('paid_at')->paginate(30);}
  public function storePayment(Request $r){$d=$r->validate(['customer_id'=>'nullable|exists:customers,id','order_id'=>'nullable|exists:orders,id','amount'=>'required|numeric|min:0.01','method'=>'required|max:30','reference'=>'nullable|max:190','status'=>'nullable|max:30','paid_at'=>'nullable|date','notes'=>'nullable']);$p=Payment::create($d+['workspace_id'=>$this->workspace($r),'status'=>$d['status']??'received','paid_at'=>$d['paid_at']??now()]);$this->audit($r,'payment.created','payment',$p->id,$p->toArray());return response()->json($p,201);}
  public function importLeads(Request $r){$data=$r->validate(['rows'=>'required|array|max:5000']);$created=0;foreach($data['rows'] as $row){if(empty($row['first_name'])||empty($row['mobile']))continue;Lead::create(['workspace_id'=>$this->workspace($r),'first_name'=>$row['first_name'],'last_name'=>$row['last_name']??null,'company'=>$row['company']??null,'email'=>$row['email']??null,'mobile'=>$row['mobile'],'whatsapp'=>$row['whatsapp']??$row['mobile'],'source'=>$row['source']??'import','status'=>$row['status']??'new','requirement'=>$row['requirement']??null,'notes'=>$row['notes']??null,'assigned_to'=>$this->user($r)->role==='sales'?$this->user($r)->id:($row['assigned_to']??null),'created_by'=>$this->user($r)->id]);$created++;} $this->audit($r,'lead.import','lead',null,['created'=>$created]);return ['created'=>$created];}
+ public function products(Request $r){return Product::where('workspace_id',$this->workspace($r))->where('active',true)->orderBy('name')->get();}
+
+ public function quotations(Request $r){return Quotation::with(['customer.contact','items.product'])->where('workspace_id',$this->workspace($r))->latest()->paginate(20);}
+
+ public function storeQuotation(Request $r){
+  $d=$r->validate([
+   'customer_id'=>'nullable|exists:customers,id',
+   'quote_number'=>'nullable|max:80',
+   'status'=>'nullable|max:30',
+   'tax'=>'nullable|numeric',
+   'valid_until'=>'nullable|date',
+   'notes'=>'nullable',
+   'items'=>'required|array|min:1',
+   'items.*.product_id'=>'nullable|exists:products,id',
+   'items.*.description'=>'required|max:190',
+   'items.*.qty'=>'required|numeric|min:0.01',
+   'items.*.unit_price'=>'required|numeric|min:0'
+  ]);
+  $subtotal=0;
+  DB::beginTransaction();
+  try {
+   $q=Quotation::create([
+    'workspace_id'=>$this->workspace($r),
+    'customer_id'=>$d['customer_id']??null,
+    'quote_number'=>$d['quote_number']??('QTN-'.now()->format('YmdHis')),
+    'status'=>$d['status']??'draft',
+    'tax'=>$d['tax']??0,
+    'valid_until'=>$d['valid_until']??null,
+    'notes'=>$d['notes']??null
+   ]);
+   foreach($d['items'] as $item){
+    $line=$item['qty']*$item['unit_price'];
+    $subtotal+=$line;
+    QuotationItem::create($item+['quotation_id'=>$q->id,'line_total'=>$line]);
+   }
+   $q->update(['subtotal'=>$subtotal,'total'=>$subtotal+(float)$q->tax]);
+   DB::commit();
+   $this->audit($r,'quotation.created','quotation',$q->id,$q->toArray());
+   return response()->json($q->load('items'),201);
+  } catch(\Throwable $e) { DB::rollBack(); throw $e; }
+ }
+
 }
