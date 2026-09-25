@@ -4,8 +4,7 @@ use App\Support\WorkspaceOwned;
 use Illuminate\Database\Eloquent\Model;
 class Lead extends Model{
 use WorkspaceOwned;
-protected $fillable=['workspace_id','first_name','last_name','company','email','mobile','whatsapp','source','status','pipeline_stage','requirement','notes','assigned_to','created_by','converted_contact_id','company_id','custom_values'];
-protected $casts=['custom_values'=>'array'];
+protected $fillable=['workspace_id','first_name','last_name','company','email','mobile','whatsapp','source','status','pipeline_stage','requirement','notes','assigned_to','created_by','converted_contact_id','company_id'];
 public function assignee(){return $this->belongsTo(User::class,'assigned_to');}
 public function creator(){return $this->belongsTo(User::class,'created_by');}
 public function followUps(){return $this->morphMany(FollowUp::class,'subject');}
