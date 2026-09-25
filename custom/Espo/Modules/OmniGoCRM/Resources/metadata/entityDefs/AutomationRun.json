@@ -1,0 +1,19 @@
+{
+    "fields": {
+        "name": {"type": "varchar", "maxLength": 255},
+        "ruleId": {"type": "varchar", "maxLength": 24, "index": true},
+        "entityType": {"type": "varchar", "maxLength": 100},
+        "entityId": {"type": "varchar", "maxLength": 24, "index": true},
+        "status": {"type": "enum", "options": ["Queued", "Running", "Completed", "Failed", "Skipped"], "default": "Queued"},
+        "scheduledAt": {"type": "datetime"},
+        "startedAt": {"type": "datetime"},
+        "completedAt": {"type": "datetime"},
+        "errorMessage": {"type": "text"},
+        "resultJson": {"type": "text"},
+        "workspaceId": {"type": "varchar", "maxLength": 24, "index": true, "utility": true}
+    },
+    "indexes": {
+        "ruleEntity": {"columns": ["ruleId", "entityId", "deleted"]},
+        "workspaceId": {"columns": ["workspaceId", "deleted"]}
+    }
+}
