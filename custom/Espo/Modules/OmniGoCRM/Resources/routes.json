@@ -4,5 +4,10 @@
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostLeadCapture",
         "noAuth": true
+    },
+    {
+        "route": "/OmniGoCRM/WhatsApp/sendText",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWhatsAppSendText"
     }
 ]
