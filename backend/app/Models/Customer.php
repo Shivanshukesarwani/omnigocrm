@@ -4,8 +4,8 @@ use App\Support\WorkspaceOwned;
 use Illuminate\Database\Eloquent\Model;
 class Customer extends Model{
 use WorkspaceOwned;
-protected $fillable=['workspace_id','contact_id','customer_code','lifetime_value','status','notes','company_id','custom_values'];
-protected $casts=['lifetime_value'=>'decimal:2','custom_values'=>'array'];
+protected $fillable=['workspace_id','contact_id','customer_code','lifetime_value','status','notes','company_id'];
+protected $casts=['lifetime_value'=>'decimal:2'];
 public function contact(){return $this->belongsTo(Contact::class);}
 public function followUps(){return $this->morphMany(FollowUp::class,'subject');}
 public function calls(){return $this->morphMany(Call::class,'subject');}
