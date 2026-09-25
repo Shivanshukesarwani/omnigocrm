@@ -23,6 +23,21 @@
         },
         "omniGoCRMSaaSAdminBypass": {
             "level": "admin"
+        },
+        "omniGoCRMMetaLeadVerifyToken": {
+            "level": "internal"
+        },
+        "omniGoCRMMetaLeadAppSecret": {
+            "level": "internal"
+        },
+        "omniGoCRMMetaLeadApiKey": {
+            "level": "internal"
+        },
+        "omniGoCRMGoogleLeadVerifyToken": {
+            "level": "internal"
+        },
+        "omniGoCRMGoogleLeadApiKey": {
+            "level": "internal"
         }
     }
 }
