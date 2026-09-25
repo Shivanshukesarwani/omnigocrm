@@ -7,6 +7,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
@@ -46,6 +47,9 @@ Route::get('/templates',[TemplateController::class,'index'])->name('templates.in
 Route::post('/templates',[TemplateController::class,'store'])->name('templates.store');
 Route::post('/calls',[CallController::class,'store'])->name('calls.store');
 Route::get('/admin/calls/{call}/recording',[CallController::class,'recording'])->middleware('crm.role:super_admin,admin')->name('calls.recording');
+Route::get('/follow-ups',[FollowUpController::class,'index'])->name('followups.index');
+Route::post('/follow-ups',[FollowUpController::class,'store'])->name('followups.store');
+Route::post('/follow-ups/{followUp}/complete',[FollowUpController::class,'complete'])->name('followups.complete');
 Route::get('/tasks',[TaskController::class,'index'])->name('tasks.index');
 Route::post('/tasks',[TaskController::class,'store'])->name('tasks.store');
 Route::post('/tasks/{task}/complete',[TaskController::class,'complete'])->name('tasks.complete');
