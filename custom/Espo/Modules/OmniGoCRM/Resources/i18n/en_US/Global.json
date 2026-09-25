@@ -4,16 +4,22 @@
         "OmniGoCRMLeadFields": "OmniGoCRM Lead Fields",
         "WhatsAppMessage": "WhatsApp Message",
         "WhatsAppConversation": "WhatsApp Conversation",
-        "WhatsAppTemplate": "WhatsApp Template"
+        "WhatsAppTemplate": "WhatsApp Template",
+        "Workspace": "Workspace",
+        "WorkspaceMember": "Workspace Member"
     },
     "scopeNames": {
         "WhatsAppMessage": "WhatsApp Message",
         "WhatsAppConversation": "WhatsApp Conversation",
-        "WhatsAppTemplate": "WhatsApp Template"
+        "WhatsAppTemplate": "WhatsApp Template",
+        "Workspace": "Workspace",
+        "WorkspaceMember": "Workspace Member"
     },
     "scopeNamesPlural": {
         "WhatsAppMessage": "WhatsApp Messages",
         "WhatsAppConversation": "WhatsApp Conversations",
-        "WhatsAppTemplate": "WhatsApp Templates"
+        "WhatsAppTemplate": "WhatsApp Templates",
+        "Workspace": "Workspaces",
+        "WorkspaceMember": "Workspace Members"
     }
 }
