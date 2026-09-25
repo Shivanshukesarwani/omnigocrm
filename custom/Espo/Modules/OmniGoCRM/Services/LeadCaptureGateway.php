@@ -1,11 +1,11 @@
 <?php
 
-namespace Espo\\Modules\\OmniGoCRM\\Services;
+namespace Espo\Modules\OmniGoCRM\Services;
 
-use Espo\\Core\\Exceptions\\BadRequest;
-use Espo\\Core\\ORM\\EntityManager;
-use Espo\\Modules\\Crm\\Entities\\Lead;
-use Espo\\Tools\\LeadCapture\\CaptureService;
+use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\ORM\EntityManager;
+use Espo\Modules\Crm\Entities\Lead;
+use Espo\Tools\LeadCapture\CaptureService;
 use stdClass;
 
 class LeadCaptureGateway
