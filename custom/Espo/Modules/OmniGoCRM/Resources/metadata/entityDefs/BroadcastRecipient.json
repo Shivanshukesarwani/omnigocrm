@@ -1,0 +1,19 @@
+{
+    "fields":{
+        "name":{"type":"varchar","maxLength":255},
+        "campaignId":{"type":"varchar","maxLength":24,"required":true},
+        "leadId":{"type":"varchar","maxLength":24},
+        "phoneNumber":{"type":"phone","typeList":["Mobile","WhatsApp","Other"],"defaultType":"WhatsApp","isPersonalData":true},
+        "status":{"type":"enum","options":["Queued","Sent","Failed","Skipped"],"default":"Queued","displayAsLabel":true},
+        "providerMessageId":{"type":"varchar","maxLength":255},
+        "errorMessage":{"type":"text"},
+        "sentAt":{"type":"datetime"},
+        "omniGoCRMWorkspaceId":{"type":"varchar","maxLength":24,"readOnly":true,"index":true,"utility":true}
+    },
+    "indexes":{
+        "campaign":{"columns":["campaignId","deleted"]},
+        "provider":{"columns":["providerMessageId","deleted"]},
+        "workspace":{"columns":["omniGoCRMWorkspaceId","deleted"]},
+        "status":{"columns":["status","deleted"]}
+    }
+}
