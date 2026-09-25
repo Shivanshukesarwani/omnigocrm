@@ -195,7 +195,9 @@ class WhatsAppWebhookService
             'externalLeadId' => $lead?->get('externalLeadId'),
             'conversationId' => $conversation->getId(),
             'receivedAt' => $this->getMessageDateTime($message->timestamp ?? null),
-            'conversationId' => $conversation->getId(),
+            'mediaId' => $this->extractMediaId($message, $type),
+            'mediaMimeType' => $this->extractMediaMimeType($message, $type),
+            'mediaCaption' => $this->extractMediaCaption($message, $type),
             'rawPayload' => json_encode($message, JSON_UNESCAPED_SLASHES),
         ]);
 
@@ -209,6 +211,24 @@ class WhatsAppWebhookService
         );
 
         return true;
+    }
+
+    private function extractMediaId(stdClass $message, string $type): ?string
+    {
+        $media = $message->{$type} ?? null;
+        return is_object($media) && isset($media->id) && is_string($media->id) ? $media->id : null;
+    }
+
+    private function extractMediaMimeType(stdClass $message, string $type): ?string
+    {
+        $media = $message->{$type} ?? null;
+        return is_object($media) && isset($media->mime_type) && is_string($media->mime_type) ? $media->mime_type : null;
+    }
+
+    private function extractMediaCaption(stdClass $message, string $type): ?string
+    {
+        $media = $message->{$type} ?? null;
+        return is_object($media) && isset($media->caption) && is_string($media->caption) ? mb_substr($media->caption, 0, 1000) : null;
     }
 
     private function findLead(string $from): ?Lead
