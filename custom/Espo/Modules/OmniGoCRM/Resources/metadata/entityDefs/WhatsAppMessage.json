@@ -11,14 +11,24 @@
         },
         "direction": {
             "type": "enum",
-            "options": ["Inbound", "Outbound"],
+            "options": [
+                "Inbound",
+                "Outbound"
+            ],
             "default": "Outbound",
             "audited": true,
             "displayAsLabel": true
         },
         "status": {
             "type": "enum",
-            "options": ["Queued", "Sent", "Delivered", "Read", "Failed", "Received"],
+            "options": [
+                "Queued",
+                "Sent",
+                "Delivered",
+                "Read",
+                "Failed",
+                "Received"
+            ],
             "default": "Queued",
             "audited": true,
             "displayAsLabel": true
@@ -26,20 +36,34 @@
         "messageType": {
             "type": "enum",
             "options": [
-                "Text", "Template", "Image", "Document",
-                "Audio", "Video", "Interactive", "Unknown"
+                "Text",
+                "Template",
+                "Image",
+                "Document",
+                "Audio",
+                "Video",
+                "Interactive",
+                "Unknown"
             ],
             "default": "Text"
         },
         "fromNumber": {
             "type": "phone",
-            "typeList": ["Mobile", "WhatsApp", "Other"],
+            "typeList": [
+                "Mobile",
+                "WhatsApp",
+                "Other"
+            ],
             "defaultType": "WhatsApp",
             "isPersonalData": true
         },
         "toNumber": {
             "type": "phone",
-            "typeList": ["Mobile", "WhatsApp", "Other"],
+            "typeList": [
+                "Mobile",
+                "WhatsApp",
+                "Other"
+            ],
             "defaultType": "WhatsApp",
             "isPersonalData": true
         },
@@ -78,20 +102,64 @@
         },
         "rawPayload": {
             "type": "text"
+        },
+        "conversationId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "index": true
+        },
+        "conversation": {
+            "type": "link",
+            "readOnly": true
         }
     },
     "indexes": {
         "providerMessageId": {
-            "columns": ["providerMessageId", "deleted"]
+            "columns": [
+                "providerMessageId",
+                "deleted"
+            ]
         },
         "externalLeadId": {
-            "columns": ["externalLeadId", "deleted"]
+            "columns": [
+                "externalLeadId",
+                "deleted"
+            ]
         },
         "leadId": {
-            "columns": ["leadId", "deleted"]
+            "columns": [
+                "leadId",
+                "deleted"
+            ]
         },
         "contactId": {
-            "columns": ["contactId", "deleted"]
+            "columns": [
+                "contactId",
+                "deleted"
+            ]
+        },
+        "conversationId": {
+            "columns": [
+                "conversationId",
+                "deleted"
+            ]
+        }
+    },
+    "links": {
+        "conversation": {
+            "type": "belongsTo",
+            "entity": "WhatsAppConversation",
+            "foreign": "messages"
+        },
+        "lead": {
+            "type": "belongsTo",
+            "entity": "Lead",
+            "foreign": "whatsAppMessages"
+        },
+        "contact": {
+            "type": "belongsTo",
+            "entity": "Contact",
+            "foreign": "whatsAppMessages"
         }
     }
 }
