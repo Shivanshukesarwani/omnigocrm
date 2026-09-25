@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 final class APIClient: ObservableObject {
@@ -21,7 +22,7 @@ final class APIClient: ObservableObject {
         username: String? = nil,
         secret: String? = nil
     ) async throws -> Data {
-        let url = AppConfig.apiURL.appendingPathComponent(path)
+        guard let url = URL(string: AppConfig.apiURL.absoluteString + path) else { throw APIError.invalidURL }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -140,11 +141,14 @@ final class APIClient: ObservableObject {
 }
 
 enum APIError: LocalizedError {
+    case invalidURL
     case invalidResponse
     case http(status: Int, body: String)
 
     var errorDescription: String? {
         switch self {
+        case .invalidURL:
+            return "The CRM URL is invalid."
         case .invalidResponse:
             return "The CRM returned an invalid response."
         case let .http(status, body):
