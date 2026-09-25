@@ -1,0 +1,28 @@
+{
+    "fields": {
+    "name": "Name",
+    "quoteNumber": "Quote Number",
+    "status": "Status",
+    "issueDate": "Issue Date",
+    "validUntil": "Valid Until",
+    "currency": "Currency",
+    "subtotal": "Subtotal",
+    "taxAmount": "Tax Amount",
+    "discountAmount": "Discount Amount",
+    "totalAmount": "Total Amount",
+    "notes": "Notes",
+    "leadId": "Lead Id",
+    "contactId": "Contact Id",
+    "accountId": "Account Id",
+    "opportunityId": "Opportunity Id",
+    "workspaceId": "Workspace Id",
+    "lead": "Lead",
+    "contact": "Contact",
+    "account": "Account",
+    "opportunity": "Opportunity",
+    "omniGoCRMWorkspaceId": "Omni Go C R M Workspace Id"
+},
+    "labels": {
+        "Quote": "Quote"
+    }
+}
