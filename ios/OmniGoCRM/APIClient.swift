@@ -59,7 +59,7 @@ final class APIClient: ObservableObject {
 
     func login(baseURL: String, username: String, password: String) async throws {
         let cleanBaseURL = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard URL(string: cleanBaseURL), cleanBaseURL.hasPrefix("http://") || cleanBaseURL.hasPrefix("https://") else {
+        guard URL(string: cleanBaseURL) != nil, cleanBaseURL.hasPrefix("http://") || cleanBaseURL.hasPrefix("https://") else {
             throw APIError.invalidURL
         }
 
