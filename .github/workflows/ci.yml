@@ -21,7 +21,7 @@ jobs:
         run: composer validate --no-check-publish
 
       - name: Install EspoCRM dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress --no-dev
+        run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Validate OmniGoCRM module JSON
         run: |
@@ -47,6 +47,9 @@ jobs:
             }
             echo "OK OmniGoCRM route action classes" . PHP_EOL;
           '
+
+      - name: PHPStan analysis for OmniGoCRM
+        run: vendor/bin/phpstan analyse custom/Espo/Modules/OmniGoCRM --no-progress --memory-limit=1G
 
       - name: PHP syntax check for OmniGoCRM code
         run: |
