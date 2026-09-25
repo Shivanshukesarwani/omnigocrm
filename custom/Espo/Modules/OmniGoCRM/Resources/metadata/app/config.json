@@ -14,6 +14,12 @@
         },
         "omniGoCRMWhatsAppGraphVersion": {
             "level": "admin"
+        },
+        "omniGoCRMCallingWebhookSecret": {
+            "level": "internal"
+        },
+        "omniGoCRMCallingDefaultAssignedUserId": {
+            "level": "admin"
         }
     }
 }
