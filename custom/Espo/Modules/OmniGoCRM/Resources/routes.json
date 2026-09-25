@@ -102,5 +102,25 @@
         "route": "/OmniGoCRM/Dashboard/summary",
         "method": "get",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetDashboardSummary"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/members",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetWorkspaceMembers"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/member",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceMemberAdd"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/memberRole",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceMemberRole"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/memberStatus",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceMemberStatus"
     }
 ]
