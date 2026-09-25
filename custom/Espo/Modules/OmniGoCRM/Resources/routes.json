@@ -122,5 +122,15 @@
         "route": "/OmniGoCRM/Workspace/memberStatus",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceMemberStatus"
+    },
+    {
+        "route": "/OmniGoCRM/Billing/entitlements",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetBillingEntitlements"
+    },
+    {
+        "route": "/OmniGoCRM/Billing/setPlan",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBillingSetPlan"
     }
 ]
