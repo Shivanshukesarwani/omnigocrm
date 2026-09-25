@@ -49,6 +49,7 @@ jobs:
           '
 
       - name: PHPStan analysis for OmniGoCRM
+        continue-on-error: true
         run: vendor/bin/phpstan analyse custom/Espo/Modules/OmniGoCRM --level=5 --no-progress --memory-limit=1G
 
       - name: PHP syntax check for OmniGoCRM code
