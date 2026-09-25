@@ -9,7 +9,7 @@ use Espo\Modules\OmniGoCRM\Services\LeadSourceWebhookService;
 class PostMetaLeadWebhook implements Action {
     public function __construct(private LeadSourceWebhookService $service) {}
     public function process(Request $request): Response {
-        $raw = $request->getBodyContents();
+        $raw = (string) $request->getBodyContents();
         $this->service->verifyMetaSignature($raw, $request->getHeader('X-Hub-Signature-256'));
         $data = $request->getParsedBody();
         if ($data === null) throw new BadRequest('A JSON payload is required.');
