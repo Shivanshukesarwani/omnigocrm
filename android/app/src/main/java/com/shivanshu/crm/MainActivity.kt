@@ -41,7 +41,7 @@ class MainActivity : Activity() {
             if (username.text.isNullOrBlank() || password.text.isNullOrBlank()) { toast("Username and password are required."); return@setOnClickListener }
             login.isEnabled = false
             api.runAsync {
-                try { api.login(username.text.toString().trim(), password.text.toString()); runOnUiThread { showDashboard() } }
+                try { api.login(AppConfig.BASE_URL, username.text.toString().trim(), password.text.toString()); runOnUiThread { showDashboard() } }
                 catch (e: Exception) { runOnUiThread { login.isEnabled = true; toast(e.message ?: "Login failed") } }
             }
         }
