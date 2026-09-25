@@ -1,132 +1,25 @@
 {
     "fields": {
-        "name": {
-            "type": "varchar",
-            "required": true,
-            "maxLength": 255
-        },
-        "paymentNumber": {
-            "type": "varchar",
-            "maxLength": 100
-        },
-        "status": {
-            "type": "enum",
-            "options": [
-                "Pending",
-                "Authorized",
-                "Paid",
-                "Partially Paid",
-                "Failed",
-                "Refunded",
-                "Canceled"
-            ],
-            "default": "Pending",
-            "displayAsLabel": true
-        },
-        "paymentDate": {
-            "type": "date"
-        },
-        "amount": {
-            "type": "currency",
-            "default": 0
-        },
-        "currency": {
-            "type": "varchar",
-            "maxLength": 10,
-            "default": "INR"
-        },
-        "method": {
-            "type": "enum",
-            "options": [
-                "Cash",
-                "UPI",
-                "Bank Transfer",
-                "Card",
-                "Cheque",
-                "Gateway",
-                "Other"
-            ],
-            "default": "Other"
-        },
-        "provider": {
-            "type": "varchar",
-            "maxLength": 100
-        },
-        "providerPaymentId": {
-            "type": "varchar",
-            "maxLength": 255
-        },
-        "referenceNumber": {
-            "type": "varchar",
-            "maxLength": 255
-        },
-        "notes": {
-            "type": "text"
-        },
-        "orderId": {
-            "type": "varchar",
-            "maxLength": 24
-        },
-        "quoteId": {
-            "type": "varchar",
-            "maxLength": 24
-        },
-        "leadId": {
-            "type": "varchar",
-            "maxLength": 24
-        },
-        "contactId": {
-            "type": "varchar",
-            "maxLength": 24
-        },
-        "accountId": {
-            "type": "varchar",
-            "maxLength": 24
-        },
-        "workspaceId": {
-            "type": "varchar",
-            "maxLength": 24
-        },
-        "order": {
-            "type": "link",
-            "readOnly": true
-        },
-        "quote": {
-            "type": "link",
-            "readOnly": true
-        },
-        "lead": {
-            "type": "link",
-            "readOnly": true
-        },
-        "contact": {
-            "type": "link",
-            "readOnly": true
-        },
-        "account": {
-            "type": "link",
-            "readOnly": true
-        },
-        "omniGoCRMWorkspaceId": {
-            "type": "varchar",
-            "maxLength": 24,
-            "readOnly": true,
-            "index": true,
-            "utility": true
-        }
+        "name": {"type":"varchar","required":true,"maxLength":255},
+        "paymentNumber": {"type":"varchar","maxLength":100},
+        "status": {"type":"enum","options":["Pending","Authorized","Paid","Partially Paid","Failed","Refunded","Canceled"],"default":"Pending","displayAsLabel":true},
+        "paymentDate": {"type":"date"},
+        "amount": {"type":"currency","default":0},
+        "currency": {"type":"varchar","maxLength":10,"default":"INR"},
+        "method": {"type":"enum","options":["Cash","UPI","Bank Transfer","Card","Cheque","Gateway","Other"],"default":"Other"},
+        "provider": {"type":"varchar","maxLength":100},
+        "providerPaymentId": {"type":"varchar","maxLength":255},
+        "referenceNumber": {"type":"varchar","maxLength":255},
+        "notes": {"type":"text"},
+        "orderId": {"type":"varchar","maxLength":24},
+        "quoteId": {"type":"varchar","maxLength":24},
+        "leadId": {"type":"varchar","maxLength":24},
+        "contactId": {"type":"varchar","maxLength":24},
+        "accountId": {"type":"varchar","maxLength":24},
+        "omniGoCRMWorkspaceId": {"type":"varchar","maxLength":24,"readOnly":true,"index":true,"utility":true}
     },
     "indexes": {
-        "number": {
-            "columns": [
-                "paymentNumber",
-                "deleted"
-            ]
-        },
-        "workspace": {
-            "columns": [
-                "omniGoCRMWorkspaceId",
-                "deleted"
-            ]
-        }
+        "number": {"columns":["paymentNumber","deleted"]},
+        "workspace": {"columns":["omniGoCRMWorkspaceId","deleted"]}
     }
 }
