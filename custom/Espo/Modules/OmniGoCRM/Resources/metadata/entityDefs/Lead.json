@@ -1,12 +1,5 @@
 {
     "fields": {
-        "assignedTeamId": {
-            "type": "varchar",
-            "maxLength": 24,
-            "index": true,
-            "utility": true,
-            "readOnly": true
-        },
         "whatsappNumber": {
             "type": "phone",
             "typeList": [
@@ -93,12 +86,6 @@
             "type": "datetime",
             "audited": true
         },
-        "assignedTeamId": {
-            "columns": [
-                "assignedTeamId",
-                "deleted"
-            ]
-        },
         "omniGoCRMWorkspaceId": {
             "type": "varchar",
             "maxLength": 24,
@@ -117,12 +104,6 @@
         "nextFollowUpAt": {
             "columns": [
                 "nextFollowUpAt",
-                "deleted"
-            ]
-        },
-        "whatsappNumber": {
-            "columns": [
-                "whatsappNumber",
                 "deleted"
             ]
         },
