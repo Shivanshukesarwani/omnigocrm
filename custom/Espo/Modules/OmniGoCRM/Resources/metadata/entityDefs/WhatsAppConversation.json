@@ -12,7 +12,11 @@
         },
         "phoneNumber": {
             "type": "phone",
-            "typeList": ["Mobile", "WhatsApp", "Other"],
+            "typeList": [
+                "Mobile",
+                "WhatsApp",
+                "Other"
+            ],
             "defaultType": "WhatsApp",
             "isPersonalData": true
         },
@@ -23,7 +27,10 @@
         },
         "status": {
             "type": "enum",
-            "options": ["Open", "Closed"],
+            "options": [
+                "Open",
+                "Closed"
+            ],
             "default": "Open",
             "displayAsLabel": true
         },
@@ -50,6 +57,13 @@
         "contact": {
             "type": "link",
             "readOnly": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
         }
     },
     "links": {
@@ -77,13 +91,28 @@
     },
     "indexes": {
         "waId": {
-            "columns": ["waId", "deleted"]
+            "columns": [
+                "waId",
+                "deleted"
+            ]
         },
         "status": {
-            "columns": ["status", "deleted"]
+            "columns": [
+                "status",
+                "deleted"
+            ]
         },
         "lastMessageAt": {
-            "columns": ["lastMessageAt", "deleted"]
+            "columns": [
+                "lastMessageAt",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
         }
     }
 }
