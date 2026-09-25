@@ -1,0 +1,33 @@
+{
+    "fields": {
+        "providerTemplateId": "Provider Template ID",
+        "provider": "Provider",
+        "languageCode": "Language Code",
+        "category": "Category",
+        "status": "Approval Status",
+        "body": "Template Body",
+        "componentsJson": "Provider Components JSON",
+        "active": "Active",
+        "lastSyncedAt": "Last Synced At"
+    },
+    "options": {
+        "provider": {
+            "Meta Cloud API": "Meta Cloud API"
+        },
+        "category": {
+            "Marketing": "Marketing",
+            "Utility": "Utility",
+            "Authentication": "Authentication"
+        },
+        "status": {
+            "Draft": "Draft",
+            "Pending": "Pending",
+            "Approved": "Approved",
+            "Rejected": "Rejected",
+            "Paused": "Paused"
+        }
+    },
+    "labels": {
+        "WhatsAppTemplate": "WhatsApp Template"
+    }
+}
