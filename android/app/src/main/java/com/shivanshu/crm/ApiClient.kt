@@ -117,4 +117,7 @@ class ApiClient(context: Context) {
     fun products(): JSONArray = JSONArray(request("GET","products"))
     fun quotations(): JSONArray = JSONObject(request("GET","quotations")).getJSONArray("data")
 
+    fun notifications(): JSONArray = JSONObject(request("GET","notifications")).getJSONArray("data")
+    fun markNotificationRead(id: String) { request("POST","notifications/$id/read", "{}") }
+
 }
