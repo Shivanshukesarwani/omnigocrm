@@ -26,6 +26,9 @@ Route::middleware('api.token')->group(function () {
  Route::post('/calls',[CrmApiController::class,'storeCall']);
  Route::post('/calls/{call}/recording',[CrmApiController::class,'uploadRecording']);
 
+ Route::get('/products',[SaaSApiController::class,'products']);
+ Route::get('/quotations',[SaaSApiController::class,'quotations']);
+ Route::post('/quotations',[SaaSApiController::class,'storeQuotation']);
  Route::get('/companies',[SaaSApiController::class,'companies']);
  Route::post('/companies',[SaaSApiController::class,'storeCompany']);
  Route::get('/tasks',[SaaSApiController::class,'tasks']);
