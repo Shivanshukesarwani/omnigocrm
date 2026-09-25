@@ -94,7 +94,7 @@ class CallTrackingService : Service() {
             try {
                 val api = ApiClient(this)
                 val callId = api.logCall(subjectType, subjectId.toString(), phone, duration)
-                if (callId > 0 && file?.exists() == true) {
+                if (callId.isNotBlank() && file?.exists() == true) {
                     api.uploadRecording(callId, file)
                     // Keep the file in the app-private directory. The app has no playback UI for sales users.
                 }
