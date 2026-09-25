@@ -36,7 +36,7 @@ struct LoginView: View {
                         error = ""
                         Task {
                             do {
-                                let api = await APIClient(session: session)
+                                let api = APIClient(session: session)
                                 try await api.login(
                                     baseURL: serverURL,
                                     username: username,
