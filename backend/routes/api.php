@@ -1,7 +1,6 @@
 <?php
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\CrmApiController;
-use App\Http\Controllers\Api\MobileApiController;
 use App\Http\Controllers\Api\SaaSApiController;
 use App\Http\Controllers\Api\NotificationApiController;
 use Illuminate\Support\Facades\Route;
@@ -29,12 +28,6 @@ Route::middleware(['api.token','workspace'])->group(function(){
  Route::get('/follow-ups',[CrmApiController::class,'followUps']);
  Route::post('/follow-ups',[CrmApiController::class,'storeFollowUp']);
  Route::post('/calls',[CrmApiController::class,'storeCall']);
-Route::get('/companies',[MobileApiController::class,'companies']);
-Route::post('/companies',[MobileApiController::class,'storeCompany']);
-Route::get('/tasks',[MobileApiController::class,'tasks']);
-Route::post('/tasks',[MobileApiController::class,'storeTask']);
-Route::post('/tasks/{task}/complete',[MobileApiController::class,'completeTask']);
-
  Route::post('/calls/{call}/recording',[SaaSApiController::class,'uploadRecording']);
 
  Route::get('/companies',[SaaSApiController::class,'companies']);
