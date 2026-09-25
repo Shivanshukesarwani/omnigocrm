@@ -31,7 +31,8 @@ class ApiClient(context: Context) {
         usernameOverride: String? = null,
         secretOverride: String? = null,
     ): String {
-        val connection = (URL(AppConfig.API_URL + path.trimStart('/')).openConnection() as HttpURLConnection).apply {
+        val apiUrl = (session.baseUrl ?: AppConfig.BASE_URL).trimEnd('/') + "/api/v1/"
+        val connection = (URL(apiUrl + path.trimStart('/')).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = 15000
             readTimeout = 30000
@@ -75,7 +76,11 @@ class ApiClient(context: Context) {
         }
     }
 
-    fun login(username: String, password: String): JSONObject {
+    fun login(baseUrl: String, username: String, password: String): JSONObject {
+        val cleanBaseUrl = baseUrl.trim().trimEnd('/') + "/"
+        if (!cleanBaseUrl.startsWith("https://") && !cleanBaseUrl.startsWith("http://")) {
+            throw IllegalStateException("CRM URL must start with http:// or https://")
+        }
         val response = JSONObject(request("GET", "App/user", usernameOverride = username, secretOverride = password))
         val user = response.optJSONObject("user") ?: JSONObject()
         val token = response.optString("token")
@@ -83,7 +88,7 @@ class ApiClient(context: Context) {
         val name = user.optString("name").ifBlank { user.optString("userName") }.ifBlank { username }
         val resolvedUsername = user.optString("userName").ifBlank { username }
         val email = user.optString("emailAddress").ifBlank { username }
-        session.save(token, name, resolvedUsername, email)
+        session.save(token, name, resolvedUsername, email, cleanBaseUrl)
         return response
     }
 
