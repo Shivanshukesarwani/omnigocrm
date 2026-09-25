@@ -1,0 +1,110 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "orderNumber": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "status": {
+            "type": "enum",
+            "options": [
+                "Draft",
+                "Confirmed",
+                "Processing",
+                "Shipped",
+                "Delivered",
+                "Canceled"
+            ],
+            "default": "Draft",
+            "displayAsLabel": true
+        },
+        "orderDate": {
+            "type": "date"
+        },
+        "currency": {
+            "type": "varchar",
+            "maxLength": 10,
+            "default": "INR"
+        },
+        "subtotal": {
+            "type": "currency",
+            "default": 0
+        },
+        "taxAmount": {
+            "type": "currency",
+            "default": 0
+        },
+        "discountAmount": {
+            "type": "currency",
+            "default": 0
+        },
+        "totalAmount": {
+            "type": "currency",
+            "default": 0
+        },
+        "notes": {
+            "type": "text"
+        },
+        "quoteId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "leadId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "contactId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "accountId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "workspaceId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "quote": {
+            "type": "link",
+            "readOnly": true
+        },
+        "lead": {
+            "type": "link",
+            "readOnly": true
+        },
+        "contact": {
+            "type": "link",
+            "readOnly": true
+        },
+        "account": {
+            "type": "link",
+            "readOnly": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
+        }
+    },
+    "indexes": {
+        "number": {
+            "columns": [
+                "orderNumber",
+                "deleted"
+            ]
+        },
+        "workspace": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
+        }
+    }
+}
