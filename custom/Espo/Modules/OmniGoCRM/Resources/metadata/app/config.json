@@ -41,6 +41,12 @@
         },
         "omniGoCRMMetaGraphVersion": {
             "level": "admin"
+        },
+        "omniGoCRMStripeWebhookSecret": {
+            "level": "internal"
+        },
+        "omniGoCRMRazorpayWebhookSecret": {
+            "level": "internal"
         }
     }
 }
