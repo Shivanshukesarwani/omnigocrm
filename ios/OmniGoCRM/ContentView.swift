@@ -190,7 +190,7 @@ struct DashboardHomeView: View {
             counts = result["counts"] as? [String: Any] ?? [:]
             error = ""
         } catch {
-            error = error.localizedDescription
+            self.error = error.localizedDescription
         }
     }
 }
@@ -208,7 +208,7 @@ struct WorkspaceChooserView: View {
         NavigationStack {
             Form {
                 Section("Your workspaces") {
-                    ForEach(workspaces.indices, id: .self) { index in
+                    ForEach(workspaces.indices, id: \.self) { index in
                         let workspace = workspaces[index]
                         Button {
                             Task {
@@ -254,7 +254,7 @@ struct WorkspaceChooserView: View {
         do {
             workspaces = try await APIClient(session: session).myWorkspaces()
         } catch {
-            error = error.localizedDescription
+            self.error = error.localizedDescription
         }
     }
 
@@ -266,7 +266,7 @@ struct WorkspaceChooserView: View {
             onSelected(workspace["name"] as? String ?? "")
             presentationMode.wrappedValue.dismiss()
         } catch {
-            error = error.localizedDescription
+            self.error = error.localizedDescription
         }
     }
 
@@ -282,7 +282,7 @@ struct WorkspaceChooserView: View {
 
             presentationMode.wrappedValue.dismiss()
         } catch {
-            error = error.localizedDescription
+            self.error = error.localizedDescription
         }
         busy = false
     }
@@ -376,7 +376,7 @@ struct RecordListView: View {
             )
             error = ""
         } catch {
-            error = error.localizedDescription
+            self.error = error.localizedDescription
         }
     }
 
