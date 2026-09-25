@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-GRADLE_VERSION="9.6"
+GRADLE_VERSION="9.8.0"
 GRADLE_DIR="$PWD/.gradle-bootstrap"
 GRADLE_HOME="$GRADLE_DIR/gradle-$GRADLE_VERSION"
 GRADLE_ZIP="$GRADLE_DIR/gradle-$GRADLE_VERSION-bin.zip"
