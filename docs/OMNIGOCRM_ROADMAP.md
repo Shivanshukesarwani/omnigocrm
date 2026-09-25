@@ -29,8 +29,8 @@
 ## Phase 2 — OmniGoCRM Sales Layer
 - [ ] Products/services
 - [ ] Quotations
-- [ ] Orders
-- [ ] Payments
+- [x] Orders
+- [x] Payments
 - [ ] Sales dashboard
 - [ ] Customer timeline
 
@@ -49,14 +49,14 @@
 
 ## Phase 4 — Calling
 - [ ] Telephony provider abstraction
-- [ ] Click-to-call
+- [x] Click-to-call
 - [ ] Incoming call events
 - [ ] Outgoing call events
-- [ ] Call logs
+- [x] Call logs
 - [ ] Call disposition
 - [ ] Recording metadata
 - [ ] Provider-hosted recordings
-- [ ] Missed-call lead creation
+- [x] Missed-call lead creation
 - [ ] IVR integration
 
 ## Phase 5 — Lead Acquisition
@@ -102,8 +102,24 @@
 - [ ] WhatsApp
 - [ ] Calling
 - [ ] Notifications
-- [ ] Dashboard
+- [x] Dashboard summary API + native mobile dashboard
 
 ## Migration principle
 
 The Laravel prototype is not deleted until the corresponding OmniGoCRM/EspoCRM functionality is implemented and tested.
+
+
+## Remaining before production SaaS launch
+
+The repository is substantially implemented, but these items still require final integration/testing before calling the product production-complete:
+
+- External billing processor webhooks and live checkout (Stripe/Razorpay/etc.).
+- Invitation email delivery and polished workspace/member administration UI.
+- Meta/Google lead-source adapters beyond the generic lead-capture API.
+- Public form security hardening (rate limiting, origin controls and deployment-key strategy).
+- iOS APNs device registration/push delivery.
+- Native mobile sales document and broadcast management screens.
+- Offline sync, background refresh and conflict handling.
+- PDF quote/invoice generation and production document templates.
+- Production Docker secrets, HTTPS/reverse-proxy, backup/restore and migration runbooks.
+- Full integration/E2E tests against a real EspoCRM + MariaDB instance and real WhatsApp provider sandbox.
