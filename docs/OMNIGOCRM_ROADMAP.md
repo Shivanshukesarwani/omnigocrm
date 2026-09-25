@@ -15,20 +15,20 @@
 - [x] Contacts (native EspoCRM)
 - [x] Accounts/companies (native EspoCRM)
 - [x] Opportunities/deals (native EspoCRM)
-- [ ] Pipeline
+- [x] Pipeline
 - [x] Tasks (native EspoCRM)
 - [ ] Follow-ups
 - [x] Notes (native EspoCRM)
 - [x] Tags (native EspoCRM)
 - [x] Custom fields
-- [ ] Duplicate detection
+- [x] externalLeadId idempotency
 - [x] CSV/Excel import (native EspoCRM + documented OmniGoCRM field mapping)
-- [ ] Lead assignment
+- [x] Lead assignment metadata foundation
 - [x] Lead source tracking
 
 ## Phase 2 — OmniGoCRM Sales Layer
-- [ ] Products/services
-- [ ] Quotations
+- [x] Products/services
+- [x] Quotations
 - [x] Orders
 - [x] Payments
 - [ ] Sales dashboard
@@ -37,11 +37,11 @@
 ## Phase 3 — WhatsApp
 - [x] WhatsApp provider abstraction (Cloud API service boundary)
 - [x] Meta WhatsApp Cloud API outbound text + signed webhook foundation
-- [ ] Shared inbox
-- [ ] Conversation assignment
-- [ ] Templates
+- [x] Shared inbox conversation model + unread/read/close actions
+- [x] Conversation assignment metadata
+- [x] Templates + approval-gated sending
 - [ ] Media
-- [ ] Delivery/read states
+- [x] Delivery/read states
 - [ ] Broadcasts
 - [ ] WhatsApp Flows
 - [ ] Automated replies
@@ -65,7 +65,7 @@
 - [ ] Meta lead integration
 - [ ] Google lead integration
 - [x] API lead ingestion with externalLeadId idempotency
-- [ ] Automatic lead routing
+- [x] Lead assignment metadata foundation
 
 ## Phase 6 — Automation
 - [ ] Trigger engine
