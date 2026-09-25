@@ -16,7 +16,7 @@ class ApiClient(private val context:Context){
   if(c.responseCode !in 200..299)throw IllegalStateException("HTTP "+c.responseCode+": "+text)
   return text
  }
- private fun base()="https://crm.example.com/api/"
+ private fun base()=BuildConfig.API_BASE_URL
  fun login(email:String,password:String):JSONObject{val j=JSONObject(request("POST","login",JSONObject().put("email",email).put("password",password).toString()));val u=j.getJSONObject("user");session.save(j.getString("token"),u.getString("name"),u.getString("role"));return j}
  fun logout(){try{request("POST","logout")}catch(_:Exception){}}
  fun dashboard()=JSONObject(request("GET","dashboard"))
