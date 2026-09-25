@@ -136,35 +136,35 @@
     {
         "route": "/OmniGoCRM/LeadSource/meta",
         "method": "get",
-        "actionClassName": "Espo\\Modules\\OmniGoCRM\\\\Api\\\\GetMetaLeadWebhook",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetMetaLeadWebhook",
         "noAuth": true
     },
     {
         "route": "/OmniGoCRM/LeadSource/meta",
         "method": "post",
-        "actionClassName": "Espo\\Modules\\OmniGoCRM\\\\Api\\\\PostMetaLeadWebhook",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostMetaLeadWebhook",
         "noAuth": true
     },
     {
         "route": "/OmniGoCRM/LeadSource/google",
         "method": "post",
-        "actionClassName": "Espo\\Modules\\OmniGoCRM\\\\Api\\\\PostGoogleLeadWebhook",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostGoogleLeadWebhook",
         "noAuth": true
     },
     {
         "route": "/OmniGoCRM/WhatsApp/inbox",
         "method": "get",
-        "actionClassName": "Espo\\Modules\\OmniGoCRM\\\\Api\\\\GetWhatsAppInbox"
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetWhatsAppInbox"
     },
     {
         "route": "/OmniGoCRM/Timeline",
         "method": "get",
-        "actionClassName": "Espo\\Modules\\OmniGoCRM\\\\Api\\\\GetCustomerTimeline"
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetCustomerTimeline"
     },
     {
         "route": "/OmniGoCRM/Billing/webhook",
         "method": "post",
-        "actionClassName": "Espo\\Modules\\OmniGoCRM\\\\Api\\\\PostBillingWebhook",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBillingWebhook",
         "noAuth": true
     }
 ]
