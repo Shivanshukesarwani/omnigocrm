@@ -14,6 +14,7 @@ class WhatsAppWebhookService
     public function __construct(
         private Config $config,
         private EntityManager $entityManager,
+        private WhatsAppConversationService $conversationService,
     ) {}
 
     public function verify(string $mode, string $token, string $challenge): string
@@ -172,6 +173,12 @@ class WhatsAppWebhookService
             $lead = $this->createLead($from, $contacts[$from] ?? null);
         }
 
+        $conversation = $this->conversationService->findOrCreate(
+            waId: $from,
+            lead: $lead,
+            displayName: $contacts[$from] ?? null,
+        );
+
         $messageEntity = $this->entityManager->getNewEntity('WhatsAppMessage');
 
         $messageEntity->set([
@@ -185,11 +192,19 @@ class WhatsAppWebhookService
             'textBody' => $textBody,
             'leadId' => $lead?->getId(),
             'externalLeadId' => $lead?->get('externalLeadId'),
+            'conversationId' => $conversation->getId(),
             'receivedAt' => $this->getMessageDateTime($message->timestamp ?? null),
             'rawPayload' => json_encode($message, JSON_UNESCAPED_SLASHES),
         ]);
 
         $this->entityManager->saveEntity($messageEntity);
+
+        $preview = $textBody ?: ucfirst($type) . ' message';
+        $this->conversationService->incoming(
+            $conversation,
+            $preview,
+            $messageEntity->get('receivedAt'),
+        );
 
         return true;
     }
