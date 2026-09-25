@@ -19,3 +19,4 @@ targets:
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.business
         CODE_SIGNING_ALLOWED: NO
         CODE_SIGNING_REQUIRED: NO
+        GENERATE_INFOPLIST_FILE: YES
