@@ -44,6 +44,13 @@
         "omniGoCRMTranscript": {
             "type": "text",
             "isPersonalData": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
         }
     },
     "indexes": {
@@ -56,6 +63,12 @@
         "provider": {
             "columns": [
                 "omniGoCRMProvider",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
                 "deleted"
             ]
         }
