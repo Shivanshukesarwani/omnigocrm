@@ -1,30 +1,10 @@
 {
     "fields": {
-    "name": "Name",
-    "paymentNumber": "Payment Number",
-    "status": "Status",
-    "paymentDate": "Payment Date",
-    "amount": "Amount",
-    "currency": "Currency",
-    "method": "Method",
-    "provider": "Provider",
-    "providerPaymentId": "Provider Payment Id",
-    "referenceNumber": "Reference Number",
-    "notes": "Notes",
-    "orderId": "Order Id",
-    "quoteId": "Quote Id",
-    "leadId": "Lead Id",
-    "contactId": "Contact Id",
-    "accountId": "Account Id",
-    "workspaceId": "Workspace Id",
-    "order": "Order",
-    "quote": "Quote",
-    "lead": "Lead",
-    "contact": "Contact",
-    "account": "Account",
-    "omniGoCRMWorkspaceId": "Omni Go C R M Workspace Id"
-},
-    "labels": {
-        "Payment": "Payment"
-    }
+        "name":"Name","paymentNumber":"Payment Number","status":"Status","paymentDate":"Payment Date","amount":"Amount","currency":"Currency","method":"Method","provider":"Provider","providerPaymentId":"Provider Payment ID","referenceNumber":"Reference Number","notes":"Notes","orderId":"Order ID","quoteId":"Quote ID","leadId":"Lead ID","contactId":"Contact ID","accountId":"Account ID","omniGoCRMWorkspaceId":"Workspace ID"
+    },
+    "options": {
+        "status":{"Pending":"Pending","Authorized":"Authorized","Paid":"Paid","Partially Paid":"Partially Paid","Failed":"Failed","Refunded":"Refunded","Canceled":"Canceled"},
+        "method":{"Cash":"Cash","UPI":"UPI","Bank Transfer":"Bank Transfer","Card":"Card","Cheque":"Cheque","Gateway":"Gateway","Other":"Other"}
+    },
+    "labels":{"Payment":"Payment"}
 }
