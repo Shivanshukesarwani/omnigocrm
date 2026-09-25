@@ -1,0 +1,28 @@
+{
+    "fields": {
+        "externalDeviceId": "External Device ID",
+        "platform": "Platform",
+        "pushProvider": "Push Provider",
+        "pushToken": "Push Token",
+        "appVersion": "App Version",
+        "active": "Active",
+        "lastSeenAt": "Last Seen",
+        "userId": "User ID",
+        "user": "User"
+    },
+    "options": {
+        "platform": {
+            "Android": "Android",
+            "iOS": "iOS",
+            "Web": "Web"
+        },
+        "pushProvider": {
+            "FCM": "FCM",
+            "APNs": "APNs",
+            "WebPush": "Web Push"
+        }
+    },
+    "labels": {
+        "OmniGoCRMDevice": "Mobile Device"
+    }
+}
