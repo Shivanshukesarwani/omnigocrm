@@ -1,0 +1,42 @@
+name: EspoCRM Base Verification
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "custom/**"
+      - "client/custom/**"
+      - "docs/ESPO_*.md"
+      - "docs/OMNIGOCRM_ROADMAP.md"
+      - ".github/workflows/espo-base.yml"
+
+jobs:
+  verify-espo-base:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OmniGoCRM
+        uses: actions/checkout@v4
+
+      - name: Fetch EspoCRM upstream
+        run: |
+          git clone --depth 1 https://github.com/espocrm/espocrm.git /tmp/espocrm
+
+      - name: Validate upstream license
+        run: |
+          test -f /tmp/espocrm/LICENSE.txt
+          grep -qi "GNU AFFERO GENERAL PUBLIC LICENSE" /tmp/espocrm/LICENSE.txt
+
+      - name: Validate OmniGoCRM module layout
+        run: |
+          test -f custom/Espo/Modules/OmniGoCRM/Resources/module.json
+          test -f custom/Espo/Modules/OmniGoCRM/Resources/metadata/scopes/OmniGoCRM.json
+          test -f custom/Espo/Modules/OmniGoCRM/Resources/i18n/en_US/Global.json
+
+      - name: Show upstream revision
+        run: |
+          cd /tmp/espocrm
+          git log -1 --oneline
+
+      - name: Show migration status
+        run: |
+          echo "OmniGoCRM EspoCRM migration foundation is valid."
