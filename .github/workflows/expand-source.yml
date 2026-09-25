@@ -1,0 +1,21 @@
+name: Expand OmniGoCRM source
+on:
+  push:
+    paths:
+      - omnigocrm-source.tar.gz
+permissions:
+  contents: write
+jobs:
+  expand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Expand source
+        run: |
+          tar -xzf omnigocrm-source.tar.gz
+          rm omnigocrm-source.tar.gz
+      - name: Commit expanded source
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "build: expand OmniGoCRM source"
+          file_pattern: "**/*"
