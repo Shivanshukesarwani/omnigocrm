@@ -1,0 +1,15 @@
+{
+    "fields": {
+        "whatsappNumber": "WhatsApp Number",
+        "whatsappOptIn": "WhatsApp Opt-In",
+        "leadSourceDetail": "Lead Source Detail",
+        "leadScore": "Lead Score",
+        "leadStage": "Sales Stage",
+        "nextFollowUpAt": "Next Follow-Up",
+        "lastContactedAt": "Last Contacted",
+        "preferredContactChannel": "Preferred Contact Channel",
+        "campaignName": "Campaign Name",
+        "externalLeadId": "External Lead ID",
+        "consentCapturedAt": "Consent Captured At"
+    }
+}
