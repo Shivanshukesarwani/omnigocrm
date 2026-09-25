@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CallController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerController;
@@ -62,6 +63,7 @@ Route::post('/payments',[PaymentController::class,'store'])->name('payments.stor
 Route::get('/imports/leads',[ImportController::class,'show'])->name('imports.leads');
 Route::post('/imports/leads',[ImportController::class,'leads'])->name('imports.leads.post');
 Route::middleware('crm.role:super_admin,admin')->group(function(){
+Route::get('/audit-logs',[AuditLogController::class,'index'])->name('audit.index');
 Route::get('/team',[TeamController::class,'index'])->name('team.index');
 Route::post('/team',[TeamController::class,'store'])->name('team.store');
 });
