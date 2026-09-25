@@ -1,0 +1,1 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OmniGoCRM</title></head><body style="font-family:system-ui;margin:40px"><h1>OmniGoCRM</h1><p>CRM dashboard</p><h2>{{ $leadCount }} Leads</h2><a href="{{ route('leads.index') }}">Open Leads</a></body></html>
