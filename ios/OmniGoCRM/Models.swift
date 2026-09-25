@@ -24,6 +24,14 @@ struct Record: Decodable, Identifiable {
     let priority: String?
     let dateEnd: String?
     let amount: Double?
+    let waId: String?
+    let customerDisplayName: String?
+    let unreadCount: Int?
+    let lastMessageAt: String?
+    let lastMessagePreview: String?
+    let providerPhoneNumberId: String?
+    let conversationId: String?
+    let mediaId: String?
 }
 
 struct AppUserResponse: Decodable {
