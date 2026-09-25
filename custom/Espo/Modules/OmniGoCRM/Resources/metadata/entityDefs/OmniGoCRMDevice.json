@@ -73,12 +73,6 @@
                 "deleted"
             ]
         },
-        "pushToken": {
-            "columns": [
-                "pushToken",
-                "deleted"
-            ]
-        },
         "user": {
             "columns": [
                 "userId",
