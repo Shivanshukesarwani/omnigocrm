@@ -1,0 +1,21 @@
+{
+    "fields": {
+        "omniGoCRMProvider": "Provider",
+        "omniGoCRMExternalCallId": "External Call ID",
+        "omniGoCRMRecordingStatus": "Recording Status",
+        "omniGoCRMRecordingExternalUrl": "Recording URL",
+        "omniGoCRMRecordingDuration": "Recording Duration",
+        "omniGoCRMRecordingConsentAt": "Recording Consent At",
+        "omniGoCRMPhoneNumber": "Phone Number",
+        "omniGoCRMTranscript": "Transcript"
+    },
+    "options": {
+        "omniGoCRMRecordingStatus": {
+            "Not Available": "Not Available",
+            "Requested": "Requested",
+            "Available": "Available",
+            "Failed": "Failed",
+            "Deleted": "Deleted"
+        }
+    }
+}
