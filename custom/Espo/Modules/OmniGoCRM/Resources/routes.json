@@ -47,5 +47,20 @@
         "route": "/OmniGoCRM/Devices/register",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostDeviceRegister"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/create",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceCreate"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/mine",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetWorkspaceMine"
+    },
+    {
+        "route": "/OmniGoCRM/Workspace/switch",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWorkspaceSwitch"
     }
 ]
