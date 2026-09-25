@@ -16,19 +16,23 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, pdo_mysql, pdo_sqlite
+          extensions: mbstring, pdo_mysql, pdo_sqlite, gd, zip, xml, xmlreader, xmlwriter, dom
           coverage: none
       - run: composer validate --no-check-publish
       - run: composer install --no-interaction --prefer-dist --no-progress
-      - run: php artisan key:generate
+      - run: cp .env.example .env
+      - run: php artisan key:generate --force
+      - run: mkdir -p database && touch database/database.sqlite
+      - run: php artisan migrate --seed --force
       - run: find app bootstrap config database routes -type f -name "*.php" -print0 | xargs -0 -n1 php -l
       - run: php artisan route:list --no-ansi
+      - run: php artisan test
 
   android:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: mobile
+        working-directory: android
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -36,5 +40,5 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
-      - run: gradle wrapper --gradle-version 9.6
-      - run: ./gradlew assembleDebug
+      - uses: gradle/actions/setup-gradle@v4
+      - run: gradle assembleDebug
