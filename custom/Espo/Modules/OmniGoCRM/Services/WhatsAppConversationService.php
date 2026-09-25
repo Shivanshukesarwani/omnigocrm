@@ -39,6 +39,7 @@ class WhatsAppConversationService
                 'phoneNumber' => $waId,
                 'status' => 'Open',
                 'unreadCount' => 0,
+                'providerPhoneNumberId' => trim((string) $this->entityManager->getRepository('Settings')->findOne()->get('omniGoCRMWhatsAppPhoneNumberId')),
             ]);
         }
 
@@ -75,6 +76,8 @@ class WhatsAppConversationService
             'unreadCount' => $count + 1,
             'lastMessagePreview' => mb_substr($preview, 0, 1000),
             'lastMessageAt' => $when ?: gmdate('Y-m-d H:i:s'),
+            'lastOutboundAt' => $when ?: gmdate('Y-m-d H:i:s'),
+            'lastInboundAt' => $when ?: gmdate('Y-m-d H:i:s'),
         ]);
 
         $this->entityManager->saveEntity($conversation);
