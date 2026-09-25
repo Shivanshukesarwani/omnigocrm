@@ -35,6 +35,7 @@ class AutomationService
                 'status' => $rule->get('delayMinutes') > 0 ? 'Queued' : 'Running',
                 'scheduledAt' => gmdate('Y-m-d H:i:s', time() + ((int) $rule->get('delayMinutes') * 60)),
                 'workspaceId' => $workspaceId ?: $rule->get('workspaceId'),
+                'omniGoCRMWorkspaceId' => $workspaceId ?: $rule->get('omniGoCRMWorkspaceId'),
             ]);
             $this->entityManager->saveEntity($run);
             if ((int) $rule->get('delayMinutes') === 0) {
@@ -74,7 +75,12 @@ class AutomationService
             $actions = $this->json($rule->get('actionsJson'));
             $result = [];
             foreach ($actions as $action) {
-                $result[] = $this->executeAction($action, $run->get('entityType'), $run->get('entityId'));
+                $result[] = $this->executeAction(
+                    $action,
+                    $run->get('entityType'),
+                    $run->get('entityId'),
+                    (string) ($run->get('omniGoCRMWorkspaceId') ?: $run->get('workspaceId')),
+                );
             }
             $run->set(['status' => 'Completed', 'completedAt' => gmdate('Y-m-d H:i:s'), 'resultJson' => json_encode($result)]);
         } catch (\Throwable $e) {
@@ -83,7 +89,12 @@ class AutomationService
         $this->entityManager->saveEntity($run);
     }
 
-    private function executeAction(array $action, string $entityType, string $entityId): array
+    private function executeAction(
+        array $action,
+        string $entityType,
+        string $entityId,
+        string $workspaceId,
+    ): array
     {
         $type = $action['type'] ?? '';
         if ($type === 'createTask') {
@@ -93,6 +104,7 @@ class AutomationService
                 'status' => 'Not Started',
                 'dateStart' => $action['dateStart'] ?? gmdate('Y-m-d H:i:s'),
                 'description' => $action['description'] ?? ('Automation action for ' . $entityType . ' ' . $entityId),
+                'omniGoCRMWorkspaceId' => $workspaceId,
             ]);
             $this->entityManager->saveEntity($task);
             return ['type' => $type, 'id' => $task->getId()];
