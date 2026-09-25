@@ -1,0 +1,16 @@
+{
+    "fields": {
+        "name":"Name",
+        "quoteId":"Quote ID",
+        "productId":"Product ID",
+        "description":"Description",
+        "quantity":"Quantity",
+        "unitPrice":"Unit Price",
+        "discountAmount":"Discount",
+        "taxAmount":"Tax",
+        "lineTotal":"Line Total",
+        "currency":"Currency",
+        "omniGoCRMWorkspaceId":"Workspace ID"
+    },
+    "labels":{"QuoteItem":"QuoteItem"}
+}
