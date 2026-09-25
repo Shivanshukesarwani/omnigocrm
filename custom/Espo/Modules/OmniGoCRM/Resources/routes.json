@@ -42,5 +42,10 @@
         "route": "/OmniGoCRM/WhatsApp/conversationAction",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostWhatsAppConversationAction"
+    },
+    {
+        "route": "/OmniGoCRM/Devices/register",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostDeviceRegister"
     }
 ]
