@@ -196,7 +196,7 @@ struct DashboardHomeView: View {
 }
 
 struct WorkspaceChooserView: View {
-    @Environment(.presentationMode) private var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
     @ObservedObject var session: SessionStore
     let onSelected: (String) -> Void
     @State private var workspaces: [[String: Any]] = []
