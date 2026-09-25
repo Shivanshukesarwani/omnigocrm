@@ -11,7 +11,9 @@
         },
         "provider": {
             "type": "enum",
-            "options": ["Meta Cloud API"],
+            "options": [
+                "Meta Cloud API"
+            ],
             "default": "Meta Cloud API"
         },
         "languageCode": {
@@ -21,12 +23,22 @@
         },
         "category": {
             "type": "enum",
-            "options": ["Marketing", "Utility", "Authentication"],
+            "options": [
+                "Marketing",
+                "Utility",
+                "Authentication"
+            ],
             "default": "Utility"
         },
         "status": {
             "type": "enum",
-            "options": ["Draft", "Pending", "Approved", "Rejected", "Paused"],
+            "options": [
+                "Draft",
+                "Pending",
+                "Approved",
+                "Rejected",
+                "Paused"
+            ],
             "default": "Draft",
             "displayAsLabel": true
         },
@@ -42,14 +54,33 @@
         },
         "lastSyncedAt": {
             "type": "datetime"
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
         }
     },
     "indexes": {
         "providerTemplateId": {
-            "columns": ["providerTemplateId", "deleted"]
+            "columns": [
+                "providerTemplateId",
+                "deleted"
+            ]
         },
         "active": {
-            "columns": ["active", "deleted"]
+            "columns": [
+                "active",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
         }
     }
 }
