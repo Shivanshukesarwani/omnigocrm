@@ -18,6 +18,7 @@ services:
       - omnigocrm_db:/var/lib/mysql
 
   omnigocrm:
+    image: omnigocrm:local
     build:
       context: .
       dockerfile: Dockerfile.espocrm
@@ -50,7 +51,7 @@ services:
       start_period: 60s
 
   omnigocrm-daemon:
-    image: omnigocrm
+    image: omnigocrm:local
     container_name: omnigocrm-daemon
     restart: unless-stopped
     depends_on:
