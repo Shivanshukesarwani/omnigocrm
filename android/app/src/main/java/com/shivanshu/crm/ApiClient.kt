@@ -105,6 +105,32 @@ class ApiClient(context: Context) {
         try { request("POST", "App/destroyAuthToken", "{}") } catch (_: Exception) {}
     }
 
+
+    fun myWorkspaces(): JSONArray {
+        return JSONObject(request("GET", "OmniGoCRM/Workspace/mine"))
+            .optJSONArray("list") ?: JSONArray()
+    }
+
+    fun createWorkspace(name: String, slug: String = ""): JSONObject {
+        val body = JSONObject().put("name", name)
+        if (slug.isNotBlank()) body.put("slug", slug)
+        return JSONObject(request("POST", "OmniGoCRM/Workspace/create", body.toString()))
+    }
+
+    fun switchWorkspace(workspaceId: String): JSONObject {
+        return JSONObject(
+            request(
+                "POST",
+                "OmniGoCRM/Workspace/switch",
+                JSONObject().put("workspaceId", workspaceId).toString()
+            )
+        )
+    }
+
+    fun dashboardSummary(): JSONObject {
+        return JSONObject(request("GET", "OmniGoCRM/Dashboard/summary"))
+    }
+
     fun list(entityType: String, select: String? = null, maxSize: Int = 50, textFilter: String? = null): JSONArray {
         val params = mutableListOf<String>()
         params += "maxSize=" + maxSize
