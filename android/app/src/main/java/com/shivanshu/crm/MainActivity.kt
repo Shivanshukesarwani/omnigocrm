@@ -91,7 +91,7 @@ class MainActivity : Activity() {
 
         val navScroll = ScrollView(this).apply { isHorizontalScrollBarEnabled = false }
         val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(8, 4, 8, 4); setBackgroundColor(Color.WHITE) }
-        listOf("Dashboard", "Leads", "Contacts", "Customers", "Follow-ups", "Companies", "Tasks", "Products", "Quotations", "Orders", "Payments").forEach { label ->
+        listOf("Dashboard", "Leads", "Contacts", "Customers", "Follow-ups", "Companies", "Tasks", "Products", "Quotations", "Orders", "Payments", "Notifications").forEach { label ->
             val b = Button(this).apply { text = label }
             nav.addView(b, LinearLayout.LayoutParams(-2, -2))
             b.setOnClickListener {
@@ -107,6 +107,7 @@ class MainActivity : Activity() {
                     "Quotations" -> showQuotations()
                     "Orders" -> showOrders()
                     "Payments" -> showPayments()
+                    "Notifications" -> showNotifications()
                 }
             }
         }
@@ -461,6 +462,35 @@ class MainActivity : Activity() {
                     }
                 }
             } catch (e: Exception) { runOnUiThread { toast(e.message ?: "Could not load payments") } }
+        }
+    }
+
+    private fun showNotifications() {
+        setupShell("Notifications")
+        val scroll = contentScroll()
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        api.runAsync {
+            try {
+                val rows = api.notifications()
+                runOnUiThread {
+                    for (i in 0 until rows.length()) {
+                        val o = rows.getJSONObject(i)
+                        val id = o.optString("id")
+                        val read = !o.isNull("read_at")
+                        val titleText = if (read) o.optString("data") else "NEW · " + o.optString("data")
+                        scroll.addView(card(titleText, o.optString("created_at")) {
+                            if (!read) {
+                                api.runAsync {
+                                    try { api.markNotificationRead(id) } catch (_: Exception) {}
+                                    runOnUiThread { showNotifications() }
+                                }
+                            }
+                        })
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { toast(e.message ?: "Could not load notifications") }
+            }
         }
     }
 
