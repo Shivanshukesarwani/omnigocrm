@@ -11,4 +11,6 @@ public function followUps(){return $this->morphMany(FollowUp::class,'subject');}
 public function calls(){return $this->morphMany(Call::class,'subject');}
 public function companyModel(){return $this->belongsTo(Company::class,'company_id');}
 public function tags(){return $this->morphToMany(Tag::class,'taggable');}
+ public function activities(){return $this->morphMany(ActivityLog::class,'subject')->latest();}
+
 }
