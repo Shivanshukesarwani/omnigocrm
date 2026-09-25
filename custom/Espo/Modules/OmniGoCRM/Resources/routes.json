@@ -132,5 +132,23 @@
         "route": "/OmniGoCRM/Billing/setPlan",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBillingSetPlan"
+    },
+    {
+        "route": "/OmniGoCRM/LeadSource/meta",
+        "method": "get",
+        "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\GetMetaLeadWebhook",
+        "noAuth": true
+    },
+    {
+        "route": "/OmniGoCRM/LeadSource/meta",
+        "method": "post",
+        "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\PostMetaLeadWebhook",
+        "noAuth": true
+    },
+    {
+        "route": "/OmniGoCRM/LeadSource/google",
+        "method": "post",
+        "actionClassName": "Espo\\\\Modules\\\\OmniGoCRM\\\\Api\\\\PostGoogleLeadWebhook",
+        "noAuth": true
     }
 ]
