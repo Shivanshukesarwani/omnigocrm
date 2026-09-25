@@ -1,0 +1,44 @@
+name: OmniGoCRM Test Stack
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start test stack
+        run: docker compose -f docker-compose.test.yml up -d --build
+
+      - name: Wait for HTTP
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8081/ >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f docker-compose.test.yml ps
+          docker compose -f docker-compose.test.yml logs --tail=200
+          exit 1
+
+      - name: Check database health
+        run: |
+          test "$(docker inspect --format='{{.State.Health.Status}}' omnigocrm-test-db)" = "healthy"
+
+      - name: Show stack status
+        if: always()
+        run: docker compose -f docker-compose.test.yml ps
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.test.yml logs --tail=300
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
