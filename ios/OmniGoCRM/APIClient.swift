@@ -20,9 +20,12 @@ final class APIClient: ObservableObject {
         path: String,
         body: [String: Any]? = nil,
         username: String? = nil,
-        secret: String? = nil
+        secret: String? = nil,
+        baseURL: String? = nil
     ) async throws -> Data {
-        guard let url = URL(string: AppConfig.apiURL.absoluteString + path) else { throw APIError.invalidURL }
+        let root = (baseURL ?? session.baseURL).trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = root.hasSuffix("/") ? root : root + "/"
+        guard let url = URL(string: normalized + "api/v1/" + path) else { throw APIError.invalidURL }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -54,20 +57,28 @@ final class APIClient: ObservableObject {
         return data
     }
 
-    func login(username: String, password: String) async throws {
+    func login(baseURL: String, username: String, password: String) async throws {
+        let cleanBaseURL = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard URL(string: cleanBaseURL), cleanBaseURL.hasPrefix("http://") || cleanBaseURL.hasPrefix("https://") else {
+            throw APIError.invalidURL
+        }
+
         let data = try await request(
             method: "GET",
             path: "App/user",
             username: username,
-            secret: password
+            secret: password,
+            baseURL: cleanBaseURL
         )
         let result = try JSONDecoder().decode(AppUserResponse.self, from: data)
         let name = result.user.name ?? result.user.firstName ?? username
-        session.save(token: result.token, username: username, userName: name, baseURL: session.baseURL)
+        session.save(token: result.token, username: username, userName: name, baseURL: cleanBaseURL)
     }
 
     func list(entityType: String, select: String, maxSize: Int = 100) async throws -> [Record] {
-        var components = URLComponents(url: AppConfig.apiURL.appendingPathComponent(entityType), resolvingAgainstBaseURL: false)!
+        var components = URLComponents(
+            string: "https://placeholder.invalid/api/v1/" + entityType
+        )!
         components.queryItems = [
             URLQueryItem(name: "maxSize", value: String(maxSize)),
             URLQueryItem(name: "orderBy", value: "createdAt"),
@@ -75,7 +86,8 @@ final class APIClient: ObservableObject {
             URLQueryItem(name: "select", value: select),
         ]
 
-        let data = try await request(method: "GET", path: "../" + entityType + "?" + (components.percentEncodedQuery ?? ""))
+        let path = entityType + "?" + (components.percentEncodedQuery ?? "")
+        let data = try await request(method: "GET", path: path)
         return try JSONDecoder().decode(EspoListResponse.self, from: data).list
     }
 
@@ -190,7 +202,7 @@ enum APIError: LocalizedError {
         case .invalidResponse:
             return "The CRM returned an invalid response."
         case let .http(status, body):
-            return "CRM error (status): (body)"
+            return "CRM error \(status): \(body)"
         }
     }
 }
