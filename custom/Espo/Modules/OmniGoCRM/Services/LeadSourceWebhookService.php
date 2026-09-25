@@ -87,7 +87,7 @@ class LeadSourceWebhookService
     {
         $token = $this->metaApiKey();
         try {
-            $response = $this->http->get('https://graph.facebook.com/v23.0/' . rawurlencode($leadgenId), [
+            $response = $this->http->get('https://graph.facebook.com/' . rawurlencode((string) ($this->config->get('omniGoCRMMetaGraphVersion') ?: 'v23.0')) . '/' . rawurlencode($leadgenId), [
                 'headers' => ['Authorization' => 'Bearer ' . $token],
                 'query' => ['fields' => 'field_data'],
             ]);
