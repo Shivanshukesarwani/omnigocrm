@@ -74,7 +74,7 @@ struct DashboardView: View {
                 .tabItem { Label("Tasks", systemImage: "checklist") }
                 .tag(3)
 
-            RecordListView(session: session, title: "WhatsApp", entityType: "WhatsAppMessage", select: "id,name,direction,status,messageType,fromNumber,toNumber,textBody,receivedAt,sentAt", kind: .generic)
+            RecordListView(session: session, title: "WhatsApp", entityType: "WhatsAppConversation", select: "id,name,waId,phoneNumber,customerDisplayName,status,unreadCount,lastMessageAt,lastMessagePreview,leadId,contactId", kind: .whatsappConversations)
                 .tabItem { Label("WhatsApp", systemImage: "message") }
                 .tag(4)
         }
@@ -85,6 +85,7 @@ enum RecordListKind: Equatable {
     case leads
     case tasks
     case generic
+    case whatsappConversations
 }
 
 struct RecordListView: View {
@@ -109,8 +110,18 @@ struct RecordListView: View {
                         RecordDetailView(session: session, entityType: entityType, record: record)
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(recordTitle(record))
-                                .font(.headline)
+                            HStack {
+                                Text(recordTitle(record))
+                                    .font(.headline)
+                                Spacer()
+                                if kind == .whatsappConversations, let unread = record.unreadCount, unread > 0 {
+                                    Text(String(unread))
+                                        .font(.caption.bold())
+                                        .padding(6)
+                                        .background(.blue.opacity(0.12))
+                                        .clipShape(Capsule())
+                                }
+                            }
                             Text(recordSubtitle(record))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
@@ -168,6 +179,10 @@ struct RecordListView: View {
             .filter { !$0.isEmpty }
             .joined(separator: " ")
 
+        if entityType == "WhatsAppConversation" {
+            return record.customerDisplayName ?? record.phoneNumber ?? record.waId ?? record.name ?? record.id
+        }
+
         return person.isEmpty ? (record.name ?? record.id) : person
     }
 
@@ -178,6 +193,17 @@ struct RecordListView: View {
                 record.phoneNumber,
                 record.leadStage,
                 record.status,
+            ]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: " • ")
+        }
+
+        if entityType == "WhatsAppConversation" {
+            return [
+                record.lastMessagePreview,
+                record.status,
+                record.phoneNumber,
             ]
             .compactMap { $0 }
             .filter { !$0.isEmpty }
@@ -212,6 +238,7 @@ struct RecordDetailView: View {
     let entityType: String
     let record: Record
     @State private var showingMessage = false
+    @State private var showingCallLog = false
     @State private var message = ""
 
     var body: some View {
@@ -233,12 +260,53 @@ struct RecordDetailView: View {
                 if let description = record.description { Text(description) }
             }
 
+            if entityType == "WhatsAppConversation" {
+                Section("Conversation") {
+                    if let preview = record.lastMessagePreview {
+                        Text(preview)
+                    }
+                    if let unread = record.unreadCount {
+                        Text("Unread: " + String(unread))
+                    }
+                    Button("Mark as read") {
+                        Task {
+                            do {
+                                try await APIClient(session: session).actOnWhatsAppConversation(
+                                    conversationId: record.id,
+                                    action: "read"
+                                )
+                                message = "Conversation marked as read."
+                            } catch {
+                                message = error.localizedDescription
+                            }
+                        }
+                    }
+                    Button(record.status == "Closed" ? "Reopen" : "Close conversation") {
+                        Task {
+                            do {
+                                try await APIClient(session: session).actOnWhatsAppConversation(
+                                    conversationId: record.id,
+                                    action: record.status == "Closed" ? "open" : "close"
+                                )
+                                message = record.status == "Closed" ? "Conversation reopened." : "Conversation closed."
+                            } catch {
+                                message = error.localizedDescription
+                            }
+                        }
+                    }
+                }
+            }
+
             if entityType == "Lead" {
                 Section("Actions") {
                     Button("Send WhatsApp message") {
                         showingMessage = true
                     }
                     .disabled(!(record.whatsappOptIn ?? false))
+
+                    Button("Log completed call") {
+                        showingCallLog = true
+                    }
 
                     Button("Convert to Contact") {
                         Task {
@@ -256,6 +324,13 @@ struct RecordDetailView: View {
         .navigationTitle(entityType)
         .sheet(isPresented: $showingMessage) {
             SendWhatsAppView(session: session, leadId: record.id)
+        }
+        .sheet(isPresented: $showingCallLog) {
+            LogCallView(
+                session: session,
+                leadId: record.id,
+                phoneNumber: record.whatsappNumber ?? record.phoneNumber ?? ""
+            )
         }
         .alert("OmniGoCRM", isPresented: Binding(
             get: { !message.isEmpty },
@@ -358,6 +433,51 @@ struct CreateTaskView: View {
                         }
                     }
                     .disabled(name.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+
+struct LogCallView: View {
+    @Environment(\.presentationMode) private var presentationMode
+    @ObservedObject var session: SessionStore
+    let leadId: String
+    let phoneNumber: String
+    @State private var duration = "0"
+    @State private var error = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Text(phoneNumber.isEmpty ? "No phone number stored" : phoneNumber)
+                TextField("Duration in seconds", text: $duration)
+                    .keyboardType(.numberPad)
+                if !error.isEmpty {
+                    Text(error).foregroundStyle(.red)
+                }
+            }
+            .navigationTitle("Log Call")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { presentationMode.wrappedValue.dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        Task {
+                            do {
+                                try await APIClient(session: session).logCompletedCall(
+                                    leadId: leadId,
+                                    phoneNumber: phoneNumber,
+                                    durationSeconds: Int(duration) ?? 0
+                                )
+                                presentationMode.wrappedValue.dismiss()
+                            } catch {
+                                self.error = error.localizedDescription
+                            }
+                        }
+                    }
                 }
             }
         }
