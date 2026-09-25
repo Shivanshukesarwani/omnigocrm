@@ -30,5 +30,6 @@ class ApiClient(private val context:Context){
  fun tasks():List<TaskItem>{val a=JSONObject(request("GET","tasks")).optJSONArray("data")?:JSONArray();return(0 until a.length()).map{val o=a.getJSONObject(it);TaskItem(o.getLong("id"),o.optString("title"),o.optString("due_at"),o.optString("priority"),o.optString("status"))}}
  fun completeTask(id:Long)=request("POST","tasks/$id/complete")
  fun followUps()=JSONObject(request("GET","follow-ups")).optJSONArray("data")?:JSONArray()
+ fun logCall(type:String,id:Long,phone:String,duration:Int){request("POST","calls",JSONObject().put("subject_type",type).put("subject_id",id).put("phone",phone).put("duration_seconds",duration).put("direction","outgoing").put("status","completed").toString())}
  fun whatsapp(type:String,id:Long,situation:String):String=JSONObject(request("GET","whatsapp/$type/$id?situation="+URLEncoder.encode(situation,"UTF-8"))).getString("url")
 }
