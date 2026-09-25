@@ -48,6 +48,94 @@ class MainActivity : Activity() {
         setContentView(box)
     }
 
+    private fun ensureWorkspace() {
+        api.runAsync {
+            try {
+                val rows = api.myWorkspaces()
+
+                if (rows.length() == 0) {
+                    runOnUiThread { promptCreateWorkspace() }
+                    return@runAsync
+                }
+
+                val activeIndex = (0 until rows.length())
+                    .firstOrNull { rows.getJSONObject(it).optBoolean("active", false) }
+
+                if (activeIndex != null) {
+                    runOnUiThread { showDashboard() }
+                } else {
+                    api.switchWorkspace(rows.getJSONObject(0).optString("id"))
+                    runOnUiThread { showDashboard() }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { toast(e.message ?: "Could not load workspaces") }
+            }
+        }
+    }
+
+    private fun promptCreateWorkspace() {
+        val input = EditText(this).apply { hint = "Workspace name" }
+
+        AlertDialog.Builder(this)
+            .setTitle("Create your workspace")
+            .setView(input)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Create") { _, _ ->
+                val name = input.text.toString().trim()
+
+                if (name.isBlank()) {
+                    toast("Workspace name is required.")
+                    return@setPositiveButton
+                }
+
+                api.runAsync {
+                    try {
+                        api.createWorkspace(name)
+                        runOnUiThread { showDashboard() }
+                    } catch (e: Exception) {
+                        runOnUiThread { toast(e.message ?: "Could not create workspace") }
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun pickWorkspace() {
+        api.runAsync {
+            try {
+                val rows = api.myWorkspaces()
+                runOnUiThread {
+                    if (rows.length() == 0) {
+                        promptCreateWorkspace()
+                        return@runOnUiThread
+                    }
+
+                    val names = Array(rows.length()) { i ->
+                        rows.getJSONObject(i).optString("name").ifBlank { rows.getJSONObject(i).optString("slug") }
+                    }
+
+                    AlertDialog.Builder(this)
+                        .setTitle("Switch workspace")
+                        .setItems(names) { _, which ->
+                            api.runAsync {
+                                try {
+                                    api.switchWorkspace(rows.getJSONObject(which).optString("id"))
+                                    runOnUiThread { showDashboard() }
+                                } catch (e: Exception) {
+                                    runOnUiThread { toast(e.message ?: "Could not switch workspace") }
+                                }
+                            }
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .setNeutralButton("New workspace") { _, _ -> promptCreateWorkspace() }
+                        .show()
+                }
+            } catch (e: Exception) {
+                runOnUiThread { toast(e.message ?: "Could not load workspaces") }
+            }
+        }
+    }
+
     private fun shell(title: String) {
         root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(Color.rgb(247, 249, 252)) }
         val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(16, 16, 10, 10); setBackgroundColor(Color.WHITE) }
@@ -90,11 +178,6 @@ class MainActivity : Activity() {
         api.runAsync {
             try {
                 val leads = api.list("Lead", "id,firstName,lastName,accountName,phoneNumber,whatsappNumber,status,leadStage", 5)
-                val contacts = api.list("Contact", "id,name", 5)
-                val accounts = api.list("Account", "id,name", 5)
-                val opportunities = api.list("Opportunity", "id,name", 5)
-                val tasks = api.list("Task", "id,name,status", 5)
-                val messages = api.list("WhatsAppMessage", "id,name,direction,status,textBody,toNumber,fromNumber", 5)
                 runOnUiThread {
                     summary.text = "Leads: " + leads.length() + "   Contacts: " + contacts.length() + "\n" +
                         "Accounts: " + accounts.length() + "   Opportunities: " + opportunities.length() + "\n" +
