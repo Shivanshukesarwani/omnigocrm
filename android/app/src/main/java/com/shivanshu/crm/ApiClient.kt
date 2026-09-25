@@ -120,4 +120,13 @@ class ApiClient(context: Context) {
     fun notifications(): JSONArray = JSONObject(request("GET","notifications")).getJSONArray("data")
     fun markNotificationRead(id: String) { request("POST","notifications/$id/read", "{}") }
 
+    fun registerFcmToken(token: String, deviceName: String): JSONObject {
+        val body = JSONObject().apply {
+            put("token", token)
+            put("platform", "android")
+            put("device_name", deviceName)
+        }
+        return JSONObject(request("POST", "device-tokens", body.toString()))
+    }
+
 }
