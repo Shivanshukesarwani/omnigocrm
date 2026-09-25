@@ -109,3 +109,23 @@ Templates are intentionally stored as provider-backed records. `Draft` and `Pend
 ## Provider boundary
 
 All server-initiated messaging uses Meta's official Cloud API. OmniGoCRM does not automate WhatsApp Web, browser sessions, QR logins, or unofficial client protocols.
+
+
+## Shared inbox
+
+The EspoCRM-native `WhatsAppConversation` entity groups messages by WhatsApp ID. The authenticated inbox endpoint is:
+
+```text
+GET /api/v1/OmniGoCRM/WhatsApp/inbox
+POST /api/v1/OmniGoCRM/WhatsApp/conversationAction
+```
+
+Conversation actions are `read`, `close`, and `open`. Conversations retain unread counts, assignment fields, lead/contact links, and last-message metadata. Individual messages retain provider IDs, delivery state, template name, and media metadata.
+
+## Media
+
+Inbound image, document, audio and video webhooks are persisted with the provider media ID, MIME type and optional caption. Media download/storage is intentionally separated from webhook receipt so webhook processing remains fast and idempotent.
+
+## Templates
+
+Only active `WhatsAppTemplate` records with provider status `Approved` can be sent through the CRM template endpoint. CRM-initiated messages continue to require lead WhatsApp opt-in.
