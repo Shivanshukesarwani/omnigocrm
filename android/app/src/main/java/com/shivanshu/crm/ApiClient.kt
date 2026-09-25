@@ -86,4 +86,32 @@ class ApiClient(context: Context) {
             return conn.responseCode in 200..299
         }finally{conn.disconnect()}
     }
+    fun companies(): JSONArray = JSONObject(request("GET","companies")).getJSONArray("data")
+
+    fun createCompany(name:String,phone:String,email:String): JSONObject {
+        val b=JSONObject().apply{put("name",name);put("phone",phone);put("email",email)}
+        return JSONObject(request("POST","companies",b.toString()))
+    }
+
+    fun tasks(): JSONArray = JSONObject(request("GET","tasks")).getJSONArray("data")
+
+    fun createTask(title:String,description:String): JSONObject {
+        val b=JSONObject().apply{put("title",title);put("description",description);put("priority","normal")}
+        return JSONObject(request("POST","tasks",b.toString()))
+    }
+
+    fun orders(): JSONArray = JSONObject(request("GET","orders")).getJSONArray("data")
+
+    fun payments(): JSONArray = JSONObject(request("GET","payments")).getJSONArray("data")
+
+    fun tags(): JSONArray = JSONArray(request("GET","tags"))
+
+    fun createPayment(customerId:Long?,amount:Double,method:String,reference:String): JSONObject {
+        val b=JSONObject().apply{
+            if(customerId!=null)put("customer_id",customerId)
+            put("amount",amount);put("method",method);put("reference",reference)
+        }
+        return JSONObject(request("POST","payments",b.toString()))
+    }
+
 }
