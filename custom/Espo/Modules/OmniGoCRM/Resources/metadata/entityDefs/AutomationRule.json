@@ -1,15 +1,70 @@
 {
     "fields": {
-        "name": {"type": "varchar", "required": true, "maxLength": 255},
-        "active": {"type": "bool", "default": true},
-        "event": {"type": "enum", "options": ["LeadCreated", "LeadStageChanged", "LeadFollowUpDue", "WhatsAppReceived", "DealStageChanged", "CallMissed"], "default": "LeadCreated"},
-        "conditionsJson": {"type": "text"},
-        "actionsJson": {"type": "text"},
-        "delayMinutes": {"type": "int", "default": 0, "min": 0},
-        "workspaceId": {"type": "varchar", "maxLength": 24, "index": true, "utility": true}
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "active": {
+            "type": "bool",
+            "default": true
+        },
+        "event": {
+            "type": "enum",
+            "options": [
+                "LeadCreated",
+                "LeadStageChanged",
+                "LeadFollowUpDue",
+                "WhatsAppReceived",
+                "DealStageChanged",
+                "CallMissed"
+            ],
+            "default": "LeadCreated"
+        },
+        "conditionsJson": {
+            "type": "text"
+        },
+        "actionsJson": {
+            "type": "text"
+        },
+        "delayMinutes": {
+            "type": "int",
+            "default": 0,
+            "min": 0
+        },
+        "workspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "index": true,
+            "utility": true,
+            "readOnly": true
+        },
+        "omniGoCRMWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "index": true,
+            "utility": true
+        }
     },
     "indexes": {
-        "workspaceId": {"columns": ["workspaceId", "deleted"]},
-        "active": {"columns": ["active", "deleted"]}
+        "workspaceId": {
+            "columns": [
+                "workspaceId",
+                "deleted"
+            ]
+        },
+        "active": {
+            "columns": [
+                "active",
+                "deleted"
+            ]
+        },
+        "omniGoCRMWorkspaceId": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted"
+            ]
+        }
     }
 }
