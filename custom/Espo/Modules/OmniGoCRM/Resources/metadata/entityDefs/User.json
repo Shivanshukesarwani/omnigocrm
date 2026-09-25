@@ -1,0 +1,24 @@
+{
+    "fields": {
+        "omniGoCRMCurrentWorkspaceId": {
+            "type": "varchar",
+            "maxLength": 24
+        },
+        "omniGoCRMCurrentWorkspace": {
+            "type": "link",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "omniGoCRMCurrentWorkspace": {
+            "type": "belongsTo",
+            "entity": "Workspace",
+            "foreign": "currentUsers"
+        }
+    },
+    "indexes": {
+        "currentWorkspace": {
+            "columns": ["omniGoCRMCurrentWorkspaceId", "deleted"]
+        }
+    }
+}
