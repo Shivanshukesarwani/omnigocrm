@@ -1,7 +1,7 @@
 package com.shivanshu.crm
 
 import android.content.Context
-import java.io.BufferedInputStream
+import android.util.Base64
 import java.io.File
 import java.io.FileInputStream
 import java.net.HttpURLConnection
@@ -18,115 +18,182 @@ class ApiClient(context: Context) {
 
     fun runAsync(block: () -> Unit) = executor.execute(block)
 
-    private fun request(method: String, path: String, body: String? = null, contentType: String = "application/json"): String {
-        val conn = (URL(AppConfig.API_URL + path).openConnection() as HttpURLConnection).apply {
+    private fun authHeader(username: String, secret: String): String {
+        val raw = username + ":" + secret
+        val encoded = Base64.encodeToString(raw.toByteArray(StandardCharsets.UTF_8), Base64.NO_WRAP)
+        return "Basic " + encoded
+    }
+
+    private fun request(
+        method: String,
+        path: String,
+        body: String? = null,
+        usernameOverride: String? = null,
+        secretOverride: String? = null,
+    ): String {
+        val connection = (URL(AppConfig.API_URL + path.trimStart('/')).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = 15000
-            readTimeout = 20000
+            readTimeout = 30000
             doInput = true
             setRequestProperty("Accept", "application/json")
-            session.token?.let { setRequestProperty("Authorization", "Bearer $it") }
+
+            val username = usernameOverride ?: session.username
+            val secret = secretOverride ?: session.token
+            if (!username.isNullOrBlank() && !secret.isNullOrBlank()) {
+                setRequestProperty("Espo-Authorization", authHeader(username, secret))
+            }
+
             if (body != null) {
                 doOutput = true
-                setRequestProperty("Content-Type", contentType)
+                setRequestProperty("Content-Type", "application/json")
             }
         }
+
         try {
-            if (body != null) conn.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
-            val stream = if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream
-            val text = stream?.bufferedReader()?.use { it.readText() } ?: ""
-            if (conn.responseCode !in 200..299) throw IllegalStateException("HTTP ${conn.responseCode}: $text")
-            return text
-        } finally { conn.disconnect() }
-    }
-
-    fun login(email: String, password: String): JSONObject {
-        val result = request("POST", "login", JSONObject().put("email", email).put("password", password).toString())
-        val json = JSONObject(result); val user = json.getJSONObject("user")
-        session.save(json.getString("token"), user.getString("name"), user.getString("role"))
-        return json
-    }
-
-    fun logout(){ try { request("POST","logout") } catch (_:Exception) {} }
-    fun dashboard(): JSONObject = JSONObject(request("GET", "dashboard"))
-    fun leads(search: String = ""): List<LeadItem> {
-        val q = if (search.isBlank()) "" else "?search=" + URLEncoder.encode(search, "UTF-8")
-        val data = JSONObject(request("GET", "leads$q")); val rows = data.getJSONArray("data"); val out = mutableListOf<LeadItem>()
-        for (i in 0 until rows.length()) { val o=rows.getJSONObject(i); out += LeadItem(o.getLong("id"),o.optString("first_name"),o.optString("last_name"),o.optString("company"),o.optString("mobile"),o.optString("status"),o.optString("requirement")) }
-        return out
-    }
-    fun lead(id: Long): JSONObject = JSONObject(request("GET", "leads/$id")).getJSONObject("lead")
-    fun createLead(first: String,last: String,company:String,mobile:String,source:String,requirement:String): JSONObject {
-        val body=JSONObject().apply{put("first_name",first);put("last_name",last);put("company",company);put("mobile",mobile);put("source",source);put("requirement",requirement);put("status","new")}
-        return JSONObject(request("POST","leads",body.toString())).getJSONObject("lead")
-    }
-    fun convertLead(id:Long):JSONObject=JSONObject(request("POST","leads/$id/convert-contact")).getJSONObject("contact")
-    fun contacts():List<ContactItem>{val rows=JSONObject(request("GET","contacts")).getJSONArray("data");return (0 until rows.length()).map{val o=rows.getJSONObject(it);ContactItem(o.getLong("id"),o.optString("first_name"),o.optString("last_name"),o.optString("company"),o.optString("mobile"),if(o.isNull("customer"))null else o.getJSONObject("customer").optString("customer_code"))}}
-    fun contact(id:Long):JSONObject=JSONObject(request("GET","contacts/$id")).getJSONObject("contact")
-    fun convertContact(id:Long):JSONObject{return JSONObject(request("POST","contacts/$id/convert-customer")).getJSONObject("customer")}
-    fun customer(id:Long):JSONObject=JSONObject(request("GET","customers/$id")).getJSONObject("customer")
-    fun customers():List<CustomerItem>{val rows=JSONObject(request("GET","customers")).getJSONArray("data");return (0 until rows.length()).map{val o=rows.getJSONObject(it);val c=o.optJSONObject("contact");CustomerItem(o.getLong("id"),o.optString("customer_code"),(c?.optString("first_name") ?: "")+" "+(c?.optString("last_name") ?: ""),c?.optString("company")?:"",c?.optString("mobile")?:"")}}
-    fun templates():List<TemplateItem>{val rows=JSONArray(request("GET","message-templates"));return (0 until rows.length()).map{val o=rows.getJSONObject(it);TemplateItem(o.getLong("id"),o.getString("name"),o.getString("situation"),o.getString("body"))}}
-    fun whatsapp(type:String,id:Long,situation:String):JSONObject{return JSONObject(request("GET","whatsapp/$type/$id?situation="+URLEncoder.encode(situation,"UTF-8")))}
-    fun followUps():JSONArray=JSONObject(request("GET","follow-ups")).getJSONArray("data")
-    fun logCallSimple(subjectType:String,subjectId:Long,phone:String,duration:Int):Long{
-        val b=JSONObject().apply{put("subject_type",subjectType);put("subject_id",subjectId);put("phone",phone);put("duration_seconds",duration);put("direction","outgoing");put("status","completed")}
-        return JSONObject(request("POST","calls",b.toString())).optLong("id")
-    }
-
-    fun uploadRecording(callId:Long,file:File):Boolean{
-        val boundary="----CRM"+System.currentTimeMillis(); val conn=(URL(AppConfig.API_URL+"calls/$callId/recording").openConnection() as HttpURLConnection).apply{requestMethod="POST";doOutput=true;doInput=true;connectTimeout=20000;readTimeout=30000;setRequestProperty("Authorization","Bearer ${session.token}");setRequestProperty("Content-Type","multipart/form-data; boundary=$boundary")}
-        try{
-            conn.outputStream.use{out->
-                fun write(s:String)=out.write(s.toByteArray(StandardCharsets.UTF_8))
-                write("--$boundary\r\nContent-Disposition: form-data; name=\"recording\"; filename=\"${file.name}\"\r\nContent-Type: audio/mp4\r\n\r\n")
-                FileInputStream(file).use{input->val buffer=ByteArray(8192);while(true){val n=input.read(buffer);if(n<=0)break;out.write(buffer,0,n)}}
-                write("\r\n--$boundary--\r\n")
+            if (body != null) {
+                connection.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
             }
-            return conn.responseCode in 200..299
-        }finally{conn.disconnect()}
-    }
-    fun companies(): JSONArray = JSONObject(request("GET","companies")).getJSONArray("data")
-
-    fun createCompany(name:String,phone:String,email:String): JSONObject {
-        val b=JSONObject().apply{put("name",name);put("phone",phone);put("email",email)}
-        return JSONObject(request("POST","companies",b.toString()))
-    }
-
-    fun tasks(): JSONArray = JSONObject(request("GET","tasks")).getJSONArray("data")
-
-    fun createTask(title:String,description:String): JSONObject {
-        val b=JSONObject().apply{put("title",title);put("description",description);put("priority","normal")}
-        return JSONObject(request("POST","tasks",b.toString()))
-    }
-
-    fun orders(): JSONArray = JSONObject(request("GET","orders")).getJSONArray("data")
-
-    fun payments(): JSONArray = JSONObject(request("GET","payments")).getJSONArray("data")
-
-    fun tags(): JSONArray = JSONArray(request("GET","tags"))
-
-    fun createPayment(customerId:Long?,amount:Double,method:String,reference:String): JSONObject {
-        val b=JSONObject().apply{
-            if(customerId!=null)put("customer_id",customerId)
-            put("amount",amount);put("method",method);put("reference",reference)
+            val code = connection.responseCode
+            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+            val text = stream?.bufferedReader()?.use { it.readText() } ?: ""
+            if (code !in 200..299) {
+                throw IllegalStateException("HTTP " + code + ": " + extractError(text))
+            }
+            return text
+        } finally {
+            connection.disconnect()
         }
-        return JSONObject(request("POST","payments",b.toString()))
     }
 
-    fun products(): JSONArray = JSONArray(request("GET","products"))
-    fun quotations(): JSONArray = JSONObject(request("GET","quotations")).getJSONArray("data")
+    private fun extractError(text: String): String {
+        return try {
+            val json = JSONObject(text)
+            json.optString("message").ifBlank { text }
+        } catch (_: Exception) {
+            text
+        }
+    }
 
-    fun notifications(): JSONArray = JSONObject(request("GET","notifications")).getJSONArray("data")
-    fun markNotificationRead(id: String) { request("POST","notifications/$id/read", "{}") }
+    fun login(username: String, password: String): JSONObject {
+        val response = JSONObject(request("GET", "App/user", usernameOverride = username, secretOverride = password))
+        val user = response.optJSONObject("user") ?: JSONObject()
+        val token = response.optString("token")
+        if (token.isBlank()) throw IllegalStateException("CRM did not return an authentication token.")
+        val name = user.optString("name").ifBlank { user.optString("userName") }.ifBlank { username }
+        val resolvedUsername = user.optString("userName").ifBlank { username }
+        val email = user.optString("emailAddress").ifBlank { username }
+        session.save(token, name, resolvedUsername, email)
+        return response
+    }
+
+    fun logout() {
+        try { request("POST", "App/destroyAuthToken", "{}") } catch (_: Exception) {}
+    }
+
+    fun list(entityType: String, select: String? = null, maxSize: Int = 50, textFilter: String? = null): JSONArray {
+        val params = mutableListOf<String>()
+        params += "maxSize=" + maxSize
+        params += "orderBy=createdAt"
+        params += "order=desc"
+        if (!select.isNullOrBlank()) params += "select=" + URLEncoder.encode(select, "UTF-8")
+        if (!textFilter.isNullOrBlank()) params += "textFilter=" + URLEncoder.encode(textFilter, "UTF-8")
+        val json = JSONObject(request("GET", entityType + "?" + params.joinToString("&")))
+        return json.optJSONArray("list") ?: JSONArray()
+    }
+
+    fun read(entityType: String, id: String): JSONObject {
+        return JSONObject(request("GET", entityType + "/" + url(id)))
+    }
+
+    private fun url(value: String): String = URLEncoder.encode(value, "UTF-8")
+
+    fun createLead(firstName: String, lastName: String, company: String, phone: String, whatsapp: String, sourceDetail: String, requirement: String): JSONObject {
+        val body = JSONObject()
+        body.put("firstName", firstName)
+        if (lastName.isNotBlank()) body.put("lastName", lastName)
+        if (company.isNotBlank()) body.put("accountName", company)
+        if (phone.isNotBlank()) body.put("phoneNumber", phone)
+        if (whatsapp.isNotBlank()) body.put("whatsappNumber", whatsapp)
+        if (sourceDetail.isNotBlank()) body.put("leadSourceDetail", sourceDetail)
+        if (requirement.isNotBlank()) body.put("description", requirement)
+        body.put("leadStage", "New")
+        body.put("preferredContactChannel", "WhatsApp")
+        return JSONObject(request("POST", "Lead", body.toString()))
+    }
+
+    fun convertLead(id: String): JSONObject {
+        val lead = read("Lead", id)
+        val contact = JSONObject()
+        listOf("firstName", "lastName", "phoneNumber", "emailAddress", "accountName").forEach { key ->
+            val value = lead.optString(key)
+            if (value.isNotBlank()) contact.put(key, value)
+        }
+        val body = JSONObject().put("id", id).put("records", JSONObject().put("Contact", contact))
+        return JSONObject(request("POST", "Lead/action/convert", body.toString()))
+    }
+
+    fun createTask(name: String, description: String, priority: String): JSONObject {
+        val body = JSONObject().put("name", name).put("status", "Not Started").put("priority", priority)
+        if (description.isNotBlank()) body.put("description", description)
+        return JSONObject(request("POST", "Task", body.toString()))
+    }
+
+    fun completeTask(id: String) {
+        request("PUT", "Task/" + url(id), JSONObject().put("status", "Completed").toString())
+    }
+
+    fun sendWhatsAppText(leadId: String, messageBody: String): JSONObject {
+        val payload = JSONObject().put("leadId", leadId).put("body", messageBody)
+        return JSONObject(request("POST", "OmniGoCRM/WhatsApp/sendText", payload.toString()))
+    }
+
+    fun logCall(subjectType: String, subjectId: String, phone: String, duration: Int): String {
+        val payload = JSONObject()
+            .put("name", "Mobile call")
+            .put("status", "Held")
+            .put("direction", "Outbound")
+            .put("duration", duration)
+            .put("description", phone)
+            .put("parentId", subjectId)
+            .put("parentType", subjectType)
+        return JSONObject(request("POST", "Call", payload.toString())).optString("id")
+    }
+
+    fun entityItems(entityType: String): List<EntityItem> {
+        val rows = list(entityType, "id,name,status", 100)
+        val result = mutableListOf<EntityItem>()
+        for (i in 0 until rows.length()) {
+            val row = rows.getJSONObject(i)
+            result += EntityItem(row.optString("id"), row.optString("name").ifBlank { row.optString("id") }, row.optString("status"))
+        }
+        return result
+    }
+
+    fun uploadRecording(callId: String, file: File): Boolean {
+        val boundary = "----OmniGoCRM" + System.currentTimeMillis()
+        val connection = (URL(AppConfig.API_URL + "Attachment").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            doOutput = true
+            doInput = true
+            connectTimeout = 20000
+            readTimeout = 30000
+            setRequestProperty("Espo-Authorization", authHeader(session.username ?: "", session.token ?: ""))
+            setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary)
+        }
+
+        return try {
+            connection.outputStream.use { out ->
+                fun write(text: String) { out.write(text.toByteArray(StandardCharsets.UTF_8)) }
+                write("--" + boundary + "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"" + file.name + "\"\r\nContent-Type: audio/mp4\r\n\r\n")
+                FileInputStream(file).use { input -> input.copyTo(out) }
+                write("\r\n--" + boundary + "--\r\n")
+            }
+            connection.responseCode in 200..299
+        } finally { connection.disconnect() }
+    }
 
     fun registerFcmToken(token: String, deviceName: String): JSONObject {
-        val body = JSONObject().apply {
-            put("token", token)
-            put("platform", "android")
-            put("device_name", deviceName)
-        }
-        return JSONObject(request("POST", "device-tokens", body.toString()))
+        return JSONObject().put("accepted", false).put("reason", "Device token entity not enabled yet").put("tokenPresent", token.isNotBlank()).put("deviceName", deviceName)
     }
-
 }
