@@ -115,5 +115,4 @@ class DashboardService
         ksort($out);
         return $out;
     }
-    }
 }
