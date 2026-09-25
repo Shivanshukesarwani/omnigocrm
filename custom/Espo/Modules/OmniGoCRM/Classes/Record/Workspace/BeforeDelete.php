@@ -3,12 +3,13 @@
 namespace Espo\Modules\OmniGoCRM\Classes\Record\Workspace;
 
 use Espo\Core\Exceptions\Forbidden;
+use Espo\Core\Record\Hook\DeleteHook;
 use Espo\Core\Utils\Config;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\Core\Record\DeleteParams;
 
-class BeforeDelete
+class BeforeDelete implements DeleteHook
 {
     public function __construct(
         private User $user,
