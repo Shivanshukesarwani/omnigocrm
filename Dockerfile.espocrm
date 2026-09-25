@@ -30,8 +30,8 @@ COPY --from=frontend /build /var/www/html
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 RUN chown -R www-data:www-data /var/www/html \
-    && find /var/www/html -type d -exec chmod 755 {} \\; \
-    && find /var/www/html -type f -exec chmod 644 {} \\;
+    && find /var/www/html -type d -exec chmod 755 {} \; \
+    && find /var/www/html -type f -exec chmod 644 {} \;
 
 RUN sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf
 
