@@ -40,7 +40,7 @@ class LeadController extends Controller
  }
 
  public function show(Lead $lead){
-  $lead->load(['assignee','followUps'=>fn($q)=>$q->orderBy('scheduled_for'),'calls'=>fn($q)=>$q->latest('called_at')]);
+  $lead->load(['assignee','followUps'=>fn($q)=>$q->orderBy('scheduled_for'),'calls'=>fn($q)=>$q->latest('called_at'),'activities'=>fn($q)=>$q->with('user')->limit(50)]);
   return view('leads.show',['lead'=>$lead,'templates'=>MessageTemplate::where('active',true)->orderBy('situation')->get(),'users'=>User::orderBy('name')->get()]);
  }
 
