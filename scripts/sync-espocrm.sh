@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Bootstrap sync trigger: this script is also used by CI to import the upstream core.
+
 UPSTREAM_URL="https://github.com/espocrm/espocrm.git"
 UPSTREAM_REF="${ESPOCRM_REF:-master}"
 TMP_DIR="$(mktemp -d)"
