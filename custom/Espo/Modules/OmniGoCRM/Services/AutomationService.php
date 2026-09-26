@@ -65,6 +65,8 @@ class AutomationService
 
     public function executeDue(): int
     {
+        $this->recoverStaleRuns();
+
         $runs = $this->entityManager->getRDBRepository('AutomationRun')->where([
             'status' => 'Queued',
             'scheduledAt<=' => gmdate('Y-m-d H:i:s'),
@@ -73,8 +75,8 @@ class AutomationService
         $count = 0;
         foreach ($runs as $run) {
             $rule = $this->entityManager->getEntityById('AutomationRule', $run->get('ruleId'));
-            $ruleWorkspaceId = trim((string) ($rule?->get('omniGoCRMWorkspaceId') ?: $rule?->get('workspaceId')));
-            $runWorkspaceId = trim((string) ($run->get('omniGoCRMWorkspaceId') ?: $run->get('workspaceId')));
+            $ruleWorkspaceId = $rule ? $this->entityWorkspaceId($rule) : '';
+            $runWorkspaceId = $this->entityWorkspaceId($run);
             if (!$rule || !$rule->get('active') || $ruleWorkspaceId !== $runWorkspaceId) {
                 $run->set('status', 'Skipped');
                 $this->entityManager->saveEntity($run);
@@ -86,8 +88,26 @@ class AutomationService
         return $count;
     }
 
-    private function executeRun($run, $rule): void
+    private function recoverStaleRuns(): void
     {
+        $cutoff = gmdate('Y-m-d H:i:s', time() - 900);
+        $runs = $this->entityManager->getRDBRepository('AutomationRun')->where([
+            'status' => 'Running',
+            'startedAt<=' => $cutoff,
+            'deleted' => false,
+        ])->limit(100)->find();
+
+        foreach ($runs as $run) {
+            $run->set([
+                'status' => 'Queued',
+                'scheduledAt' => gmdate('Y-m-d H:i:s'),
+                'startedAt' => null,
+            ]);
+            $this->entityManager->saveEntity($run);
+        }
+    }
+
+    private function executeRun($run, $rule): void
         $run->set(['status' => 'Running', 'startedAt' => gmdate('Y-m-d H:i:s')]);
         $this->entityManager->saveEntity($run);
         try {
@@ -102,6 +122,15 @@ class AutomationService
 
             $result = $this->json($run->get('resultJson'), 'resultJson');
             $index = max(0, (int) $run->get('actionIndex'));
+            $workspaceId = $this->entityWorkspaceId($run);
+            $target = $this->entityManager->getEntityById(
+                (string) $run->get('entityType'),
+                (string) $run->get('entityId'),
+            );
+            if (!$target) {
+                throw new BadRequest('Automation target record not found.');
+            }
+            $this->assertEntityWorkspace($target, $workspaceId, 'Automation target');
 
             while ($index < count($actions)) {
                 $action = $actions[$index];
@@ -119,7 +148,10 @@ class AutomationService
                         0,
                     );
                     array_splice($actions, $index, 1, $branch);
-                    $run->set('actionsJson', json_encode($actions, JSON_THROW_ON_ERROR));
+                    $run->set([
+                        'actionsJson' => json_encode($actions, JSON_THROW_ON_ERROR),
+                        'startedAt' => gmdate('Y-m-d H:i:s'),
+                    ]);
                     $this->entityManager->saveEntity($run);
                     continue;
                 }
@@ -130,6 +162,7 @@ class AutomationService
                         'status' => 'Queued',
                         'actionIndex' => $index + 1,
                         'scheduledAt' => gmdate('Y-m-d H:i:s', time() + $delay),
+                        'startedAt' => null,
                     ]);
                     $this->entityManager->saveEntity($run);
                     return;
@@ -139,12 +172,13 @@ class AutomationService
                     $action,
                     $run->get('entityType'),
                     $run->get('entityId'),
-                    (string) ($run->get('omniGoCRMWorkspaceId') ?: $run->get('workspaceId')),
+                    $workspaceId,
                 );
                 $index++;
                 $run->set([
                     'actionIndex' => $index,
                     'resultJson' => json_encode($result, JSON_THROW_ON_ERROR),
+                    'startedAt' => gmdate('Y-m-d H:i:s'),
                 ]);
                 $this->entityManager->saveEntity($run);
             }
@@ -186,6 +220,11 @@ class AutomationService
             }
 
             if ($parentId !== '' && in_array($parentType, ['Account', 'Contact', 'Lead', 'Opportunity', 'Case'], true)) {
+                $parent = $this->entityManager->getEntityById($parentType, $parentId);
+                if (!$parent) {
+                    throw new BadRequest('Automation task parent record not found.');
+                }
+                $this->assertEntityWorkspace($parent, $workspaceId, 'Automation task parent');
                 $taskData['parentType'] = $parentType;
                 $taskData['parentId'] = $parentId;
             }
@@ -203,6 +242,10 @@ class AutomationService
             if ($fields === []) {
                 throw new BadRequest('updateRecord requires a non-empty fields object.');
             }
+            if (array_intersect(['workspaceId', 'omniGoCRMWorkspaceId'], array_keys($fields)) !== []) {
+                throw new BadRequest('Automation actions cannot change record workspace ownership.');
+            }
+            $this->assertEntityWorkspace($record, $workspaceId, 'Automation target');
             $record->set($fields);
             $this->entityManager->saveEntity($record);
             return ['type' => $type, 'id' => $entityId];
@@ -401,6 +444,9 @@ class AutomationService
                 if (isset($action['components']) && !is_array($action['components'])) {
                     throw new BadRequest('WhatsApp template components must be an array.');
                 }
+                if (isset($action['languageCode']) && !is_string($action['languageCode'])) {
+                    throw new BadRequest('WhatsApp template languageCode must be a string.');
+                }
             }
         }
     }
@@ -513,18 +559,15 @@ class AutomationService
             throw new BadRequest('sendWhatsAppText requires a body of 1 to 4096 characters.');
         }
 
-        $receivedAtDate = DateTimeImmutable::createFromFormat(
-            '!Y-m-d H:i:s',
-            (string) $message->get('receivedAt'),
-            new DateTimeZone('UTC'),
-        );
-        $receivedAt = $receivedAtDate ? $receivedAtDate->getTimestamp() : false;
-        if ($receivedAt === false || $receivedAt > time() || time() - $receivedAt >= 86400) {
+        if (!$this->isWithinWhatsAppTextWindow((string) $message->get('receivedAt'))) {
             throw new BadRequest('WhatsApp text replies are only allowed within 24 hours of the inbound message.');
         }
 
         $leadId = trim((string) $message->get('leadId'));
         $lead = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+        if ($lead) {
+            $this->assertEntityWorkspace($lead, $workspaceId, 'WhatsApp recipient');
+        }
         $body = $this->personalize($body, $lead);
 
         if (mb_strlen($body) > 4096) {
@@ -558,6 +601,9 @@ class AutomationService
         $message = $this->getInboundWhatsAppMessage($entityType, $entityId, $workspaceId);
         $leadId = trim((string) $message->get('leadId'));
         $lead = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+        if ($lead) {
+            $this->assertEntityWorkspace($lead, $workspaceId, 'WhatsApp recipient');
+        }
 
         if (!$lead || !$lead->get('whatsappOptIn')) {
             throw new BadRequest('WhatsApp opt-in is required to send an automated template.');
@@ -568,7 +614,7 @@ class AutomationService
             throw new BadRequest('sendWhatsAppTemplate requires templateName.');
         }
 
-        $template = $this->entityManager
+        $templateQuery = $this->entityManager
             ->getRDBRepository('WhatsAppTemplate')
             ->where([
                 'name' => $templateName,
@@ -576,15 +622,19 @@ class AutomationService
                 'active' => true,
                 'deleted' => false,
                 'omniGoCRMWorkspaceId' => $workspaceId !== '' ? $workspaceId : null,
-            ])
-            ->findOne();
+            ]);
+        $requestedLanguage = trim((string) ($action['languageCode'] ?? ''));
+        if ($requestedLanguage !== '') {
+            $templateQuery->where(['languageCode' => $requestedLanguage]);
+        }
+        $template = $templateQuery->findOne();
 
         if (!$template) {
-            throw new BadRequest('Automated WhatsApp templates must be active and approved.');
+            throw new BadRequest('An active, approved WhatsApp template is required for this workspace and language.');
         }
+        $this->assertEntityWorkspace($template, $workspaceId, 'WhatsApp template');
 
-        $languageCode = trim((string) ($action['languageCode'] ?? ''))
-            ?: ((string) $template->get('languageCode') ?: 'en_US');
+        $languageCode = trim((string) $template->get('languageCode')) ?: 'en_US';
         $components = $action['components'] ?? [];
         if (!is_array($components)) {
             throw new BadRequest('WhatsApp template components must be an array.');
@@ -622,13 +672,7 @@ class AutomationService
             throw new BadRequest('Automation target is not an inbound WhatsApp message.');
         }
 
-        $messageWorkspaceId = trim((string) (
-            $message->get('omniGoCRMWorkspaceId')
-        ));
-
-        if ($workspaceId !== '' && $messageWorkspaceId !== $workspaceId) {
-            throw new BadRequest('WhatsApp message belongs to a different workspace.');
-        }
+        $this->assertEntityWorkspace($message, $workspaceId, 'WhatsApp message');
 
         return $message;
     }
@@ -651,6 +695,7 @@ class AutomationService
         if (!$conversation) {
             throw new BadRequest('Inbound WhatsApp message has no conversation.');
         }
+        $this->assertEntityWorkspace($conversation, $workspaceId, 'WhatsApp conversation');
 
         $outboundMessage = $this->entityManager->getNewEntity('WhatsAppMessage');
         $outboundMessage->set([
@@ -680,6 +725,35 @@ class AutomationService
             'type' => $templateName === null ? 'sendWhatsAppText' : 'sendWhatsAppTemplate',
             'providerMessageId' => $result->providerMessageId,
         ];
+    }
+
+    private function entityWorkspaceId(Entity $entity): string
+    {
+        return trim((string) ($entity->get('omniGoCRMWorkspaceId') ?: $entity->get('workspaceId')));
+    }
+
+    private function assertEntityWorkspace(Entity $entity, string $workspaceId, string $label): void
+    {
+        if ($this->entityWorkspaceId($entity) !== $workspaceId) {
+            throw new BadRequest($label . ' belongs to a different workspace.');
+        }
+    }
+
+    private function isWithinWhatsAppTextWindow(string $receivedAt, ?int $now = null): bool
+    {
+        $date = DateTimeImmutable::createFromFormat(
+            '!Y-m-d H:i:s',
+            $receivedAt,
+            new DateTimeZone('UTC'),
+        );
+        if (!$date || $date->format('Y-m-d H:i:s') !== $receivedAt) {
+            return false;
+        }
+
+        $timestamp = $date->getTimestamp();
+        $now ??= time();
+
+        return $timestamp <= $now && ($now - $timestamp) < 86400;
     }
 
     private function personalize(string $body, ?Entity $lead): string

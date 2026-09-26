@@ -52,6 +52,9 @@ jobs:
         continue-on-error: true
         run: vendor/bin/phpstan analyse custom/Espo/Modules/OmniGoCRM --level=5 --no-progress --memory-limit=1G
 
+      - name: Test WhatsApp automation service
+        run: vendor/bin/phpunit tests/unit/Espo/Modules/OmniGoCRM/Services/AutomationServiceTest.php
+
       - name: PHP syntax check for OmniGoCRM code
         run: |
           find custom/Espo/Modules/OmniGoCRM -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l

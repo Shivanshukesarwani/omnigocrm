@@ -9,7 +9,7 @@ This plan ports product capabilities from [ArnasDon/wacrm](https://github.com/Ar
 | CRM contacts, tags, custom fields, import, and sales pipeline | Core CRM capabilities already exist in the repository's CRM platform. | Reuse the existing CRM data model and access controls. |
 | Shared WhatsApp inbox | Conversation and message entities, signed inbound webhooks, read/open/close actions, unread counts, and assignment fields exist. | Complete assignment, internal notes, media access, and inbox workflows in Phase 3. |
 | Template broadcasts | Campaigns, recipients, approved-template sending, opt-in checks, and delivery status storage exist. | Add per-recipient template variable rendering and stronger campaign controls in Phase 3. |
-| No-code automation | Rules/runs and inbound WhatsApp dispatch exist; automations can create tasks, update records, and send WhatsApp messages. | Phase 1 adds queued execution, wait steps, branches, and richer conditions. Phase 2 adds a visual builder and more triggers/actions. |
+| No-code automation | Queued inbound WhatsApp rules, grouped conditions, branches, waits, workspace checks, resumable runs, tasks, record updates, and guarded WhatsApp replies are implemented. | Phase 1 is complete. Phase 2 adds a visual builder and more triggers/actions. |
 | AI reply assistant and knowledge base | Not implemented. | Add optional, administrator-configured provider keys and workspace-scoped retrieval in Phase 4. |
 | Team accounts and roles | Workspace membership and role-management APIs exist. | Align inbox assignment and team workflows with the existing workspace model in Phase 3. |
 | Dashboard and activity metrics | A dashboard summary and customer timeline API exist. | Add response-time and inbox activity metrics with the inbox work in Phase 3. |
@@ -19,11 +19,12 @@ This plan ports product capabilities from [ArnasDon/wacrm](https://github.com/Ar
 
 ### Phase 1 — WhatsApp automation execution
 
-- Queue inbound-triggered rules so webhook requests do not wait for provider actions.
+- Queue matching inbound-triggered rules; provider actions run in the scheduled automation job, not in the webhook request.
 - Evaluate exact and text conditions, grouped `all`/`any` conditions, and case-insensitive operators.
-- Support conditional branches and resumable wait steps.
-- Keep outbound text inside WhatsApp's 24-hour service window; require opt-in and an approved template for template sends.
-- Persist action snapshots, progress, and failures so delayed runs can resume and be inspected.
+- Support conditional branches and resumable wait steps. Persist action snapshots and progress; runs interrupted for more than 15 minutes are re-queued from their last checkpoint.
+- Keep outbound text inside WhatsApp's 24-hour service window; require workspace-matched opt-in and an active, approved template for template sends. Template language selection must also be approved.
+- Enforce workspace equality for trigger records, task parents, WhatsApp recipients, templates, and conversations; automation actions cannot change record workspace ownership.
+- Failed actions remain inspectable as failed runs. Recovery is at-least-once for an action interrupted before its checkpoint; administrators should account for possible repeated side effects.
 
 ### Phase 2 — No-code automation authoring
 
@@ -54,4 +55,4 @@ This plan ports product capabilities from [ArnasDon/wacrm](https://github.com/Ar
 
 ## Current implementation checkpoint
 
-Phase 1 is underway. Inbound webhooks now queue `WhatsAppReceived` rules and the automation runner supports action snapshots, waits, branches, grouped conditions, and guarded WhatsApp replies. This is server-side execution only; the visual builder, additional triggers, AI, and MCP remain later phases. Local validation should include PHP lint/static analysis and a live Meta webhook/send test before production use.
+Phase 1 is complete. Inbound webhooks queue `WhatsAppReceived` runs, and the server-side runner supports action snapshots, wait/recovery, branches, grouped conditions, workspace isolation, and guarded WhatsApp replies. Focused PHPUnit coverage and CI syntax/module validation cover this implementation. The visual builder, additional triggers, AI, and MCP remain later phases. Validate against a live Meta webhook/send setup before production use.
