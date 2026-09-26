@@ -5,6 +5,8 @@
         "WhatsAppMessage": "WhatsApp Message",
         "WhatsAppConversation": "WhatsApp Conversation",
         "WhatsAppTemplate": "WhatsApp Template",
+        "AutomationRule": "Automation Rule",
+        "AutomationRun": "Automation Run",
         "Workspace": "Workspace",
         "WorkspaceMember": "Workspace Member"
     },
@@ -12,6 +14,8 @@
         "WhatsAppMessage": "WhatsApp Message",
         "WhatsAppConversation": "WhatsApp Conversation",
         "WhatsAppTemplate": "WhatsApp Template",
+        "AutomationRule": "Automation Rule",
+        "AutomationRun": "Automation Run",
         "Workspace": "Workspace",
         "WorkspaceMember": "Workspace Member"
     },
@@ -19,6 +23,8 @@
         "WhatsAppMessage": "WhatsApp Messages",
         "WhatsAppConversation": "WhatsApp Conversations",
         "WhatsAppTemplate": "WhatsApp Templates",
+        "AutomationRule": "Automation Rules",
+        "AutomationRun": "Automation Runs",
         "Workspace": "Workspaces",
         "WorkspaceMember": "Workspace Members"
     }

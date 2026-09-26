@@ -29,4 +29,4 @@ Google provider-specific field mapping can be expanded without changing the CRM 
 
 ## Security
 
-Do not commit provider tokens or webhook secrets. Use EspoCRM configuration/secret management in each deployment. Public lead endpoints should also be protected by deployment-level rate limiting, HTTPS and origin controls where applicable.
+Do not commit provider tokens or webhook secrets. Use the server's configuration and secret management in each deployment. Public lead endpoints should also be protected by deployment-level rate limiting, HTTPS and origin controls where applicable.

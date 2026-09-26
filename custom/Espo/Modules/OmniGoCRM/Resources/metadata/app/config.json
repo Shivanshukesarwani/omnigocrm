@@ -12,6 +12,9 @@
         "omniGoCRMWhatsAppPhoneNumberId": {
             "level": "admin"
         },
+        "omniGoCRMWhatsAppWorkspaceId": {
+            "level": "admin"
+        },
         "omniGoCRMWhatsAppGraphVersion": {
             "level": "admin"
         },

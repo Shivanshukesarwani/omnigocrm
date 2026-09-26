@@ -78,6 +78,6 @@ class ApplicationConfig
      */
     public function getApplicationName(): string
     {
-        return $this->config->get('applicationName', 'EspoCRM');
+        return $this->config->get('applicationName', 'OmniGoCRM');
     }
 }

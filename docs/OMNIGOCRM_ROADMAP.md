@@ -2,27 +2,27 @@
 
 ## Phase 0 — Foundation
 - [x] Existing OmniGoCRM repository retained
-- [x] EspoCRM upstream identified
+- [x] Core CRM platform selected
 - [x] AGPLv3 compliance plan documented
 - [x] OmniGoCRM custom module namespace created
-- [x] Vendor EspoCRM source into the development branch
-- [x] Build EspoCRM dependencies and validate custom module code in CI
-- [x] Docker development environment (EspoCRM + MariaDB baseline)
+- [x] Add the CRM platform source to the development branch
+- [x] Build platform dependencies and validate custom module code in CI
+- [x] Docker development environment (CRM + MariaDB baseline)
 - [x] CI build/test pipeline
 
 ## Phase 1 — Core CRM
-- [x] Leads (native EspoCRM Lead + OmniGoCRM fields)
-- [x] Contacts (native EspoCRM)
-- [x] Accounts/companies (native EspoCRM)
-- [x] Opportunities/deals (native EspoCRM)
+- [x] Leads (native Lead + OmniGoCRM fields)
+- [x] Contacts (native Contact)
+- [x] Accounts/companies (native Account)
+- [x] Opportunities/deals (native Opportunity)
 - [x] Pipeline
-- [x] Tasks (native EspoCRM)
+- [x] Tasks (native Task)
 - [ ] Follow-ups
-- [x] Notes (native EspoCRM)
-- [x] Tags (native EspoCRM)
+- [x] Notes (native Note)
+- [x] Tags (native Tag)
 - [x] Custom fields
 - [x] externalLeadId idempotency
-- [x] CSV/Excel import (native EspoCRM + documented OmniGoCRM field mapping)
+- [x] CSV/Excel import (native import + documented OmniGoCRM field mapping)
 - [x] Lead assignment metadata foundation
 - [x] Lead source tracking
 
@@ -106,7 +106,7 @@
 
 ## Migration principle
 
-The Laravel prototype is not deleted until the corresponding OmniGoCRM/EspoCRM functionality is implemented and tested.
+The Laravel prototype is not deleted until the corresponding OmniGoCRM functionality is implemented and tested.
 
 
 ## Remaining before production SaaS launch
@@ -122,9 +122,9 @@ The repository is substantially implemented, but these items still require final
 - Offline sync, background refresh and conflict handling.
 - PDF quote/invoice generation and production document templates.
 - Production Docker secrets, HTTPS/reverse-proxy, backup/restore and migration runbooks.
-- Full integration/E2E tests against a real EspoCRM + MariaDB instance and real WhatsApp provider sandbox.
+- Full integration/E2E tests against a real CRM + MariaDB instance and real WhatsApp provider sandbox.
 
 
-## Implementation status — 2026-09-25
+## Implementation status — 2026-09-27
 
-The active EspoCRM branch now includes the shared WhatsApp conversation/inbox layer, media metadata capture, approved template sending, sales dashboard metrics, customer timeline API, Meta Lead Ads webhook/Graph retrieval adapter, Google lead ingestion adapter, and a scheduled automation engine with conditions, delayed runs, task creation and record updates. CI is being used after each implementation batch; production billing checkout, push delivery, offline sync, and deployment hardening remain integration work rather than placeholder claims.
+The active CRM branch includes the shared WhatsApp conversation/inbox layer, media metadata capture, approved template sending, sales dashboard metrics, customer timeline API, Meta Lead Ads webhook/Graph retrieval adapter, Google lead ingestion adapter, and a scheduled automation engine. WhatsApp-triggered automation is being extended with queued, resumable runs, condition groups, branches, waits, and guarded replies. The WACRM feature comparison and phased integration plan is tracked in `docs/WACRM_FEATURE_INTEGRATION.md`; the visual builder, AI/knowledge base, expanded inbox and API/MCP integrations remain later phases. Production billing checkout, push delivery, offline sync, and deployment hardening remain integration work rather than placeholder claims.

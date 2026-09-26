@@ -1,4 +1,4 @@
-package com.shivanshu.crm
+package com.omnigocrm.android
 
 data class EntityItem(val id: String, val title: String, val subtitle: String = "")
 data class LeadItem(

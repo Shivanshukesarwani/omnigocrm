@@ -7,11 +7,11 @@ if (file("google-services.json").exists()) {
 }
 
 android {
-    namespace = "com.shivanshu.crm"
+    namespace = "com.omnigocrm.android"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.shivanshu.crm"
+        applicationId = "com.omnigocrm.android"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

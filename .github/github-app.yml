@@ -2,17 +2,17 @@
 # Review and trust this file in the GitHub Copilot app before enabling scripts.
 
 instructions: |
-  OmniGoCRM is an EspoCRM-based CRM/SaaS application with Docker, PHP,
+  OmniGoCRM is an omnichannel CRM/SaaS application with Docker, PHP,
   Android, and iOS components. Prefer the existing project architecture,
   keep workspace/tenant isolation intact, and run the repository's existing
   validation and CI checks after code changes.
 
 scripts:
   - name: Start OmniGoCRM
-    command: docker compose -f docker-compose.espocrm.yml up -d --build
+    command: docker compose -f docker-compose.omnigocrm.yml up -d --build
 
   - name: Stop OmniGoCRM
-    command: docker compose -f docker-compose.espocrm.yml down
+    command: docker compose -f docker-compose.omnigocrm.yml down
 
   - name: Validate PHP
     command: find custom/Espo/Modules/OmniGoCRM -type f -name '*.php' -print0 | xargs -0 -n1 php -l

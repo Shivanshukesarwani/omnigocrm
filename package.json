@@ -1,10 +1,10 @@
 {
-  "name": "espocrm",
+  "name": "omnigocrm",
   "version": "10.0.8",
-  "description": "Open-source CRM.",
+  "description": "OmniGoCRM — open-source omnichannel CRM.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/espocrm/espocrm.git"
+    "url": "https://github.com/Shivanshukesarwani/omnigocrm.git"
   },
   "scripts": {
     "postinstall": "node js/scripts/postinstall-cleanup && node js/scripts/prepare-lib-original.js",
@@ -16,7 +16,7 @@
     "unit-tests": "php vendor/bin/phpunit ./tests/unit",
     "integration-tests": "php vendor/bin/phpunit ./tests/integration"
   },
-  "homepage": "https://www.espocrm.com",
+  "homepage": "https://github.com/Shivanshukesarwani/omnigocrm",
   "author": "EspoCRM, Inc.",
   "contributors": [
     {

@@ -1,13 +1,16 @@
 # OmniGoCRM image
-# Use the official EspoCRM runtime so installation and entrypoint behavior
-# stay aligned with upstream EspoCRM.
+# Use the supported CRM runtime so installation and entrypoint behavior
+# remain aligned with the base platform.
 ARG ESPOCRM_IMAGE=espocrm/espocrm:latest
 FROM ${ESPOCRM_IMAGE}
+
+LABEL org.opencontainers.image.title="OmniGoCRM" \
+    org.opencontainers.image.description="OmniGoCRM omnichannel sales CRM"
 
 USER root
 WORKDIR /var/www/html
 
-# Add OmniGoCRM extensions on top of the upstream EspoCRM image.
+# Add OmniGoCRM modules and web client extensions.
 COPY custom/ /var/www/html/custom/
 COPY client/custom/ /var/www/html/client/custom/
 
@@ -19,4 +22,4 @@ RUN chown -R www-data:www-data /var/www/html/custom /var/www/html/client/custom 
     && find /var/www/html/client/custom -type d -exec chmod 755 {} + \
     && find /var/www/html/client/custom -type f -exec chmod 644 {} +
 
-# Keep the official EspoCRM entrypoint/cmd.
+# Keep the base runtime entrypoint and command.

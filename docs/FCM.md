@@ -10,7 +10,7 @@ OmniGoCRM has three layers for mobile notifications:
 
 Create a Firebase Android app whose package/application ID matches:
 
-`com.shivanshu.crm`
+`com.omnigocrm.android`
 
 Download `google-services.json` from Firebase and place it at:
 

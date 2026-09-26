@@ -57,12 +57,12 @@ class ClientManager
     private string $favicon = 'client/img/favicon.svg';
     private string $basePath = '';
     private string $apiUrl = 'api/v1';
-    private string $applicationId = 'espocrm';
+    private string $applicationId = 'omnigocrm';
 
     private string $nonce;
 
-    private const string APP_DESCRIPTION = "EspoCRM – Open Source CRM application.";
-    private const string APP_NAME = 'EspoCRM';
+    private const string APP_DESCRIPTION = 'OmniGoCRM — Omnichannel CRM.';
+    private const string APP_NAME = 'OmniGoCRM';
 
     private const int AJAX_TIMEOUT = 60000;
 

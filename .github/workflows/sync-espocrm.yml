@@ -1,10 +1,10 @@
-name: Sync EspoCRM Upstream
+name: Sync Upstream CRM Source
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "EspoCRM branch/tag to import"
+        description: "Upstream branch/tag to import"
         required: false
         default: "master"
   push:
@@ -28,7 +28,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Import EspoCRM core
+      - name: Import upstream CRM core
         env:
           ESPOCRM_REF: ${{ inputs.ref || 'master' }}
         run: |
@@ -42,5 +42,5 @@ jobs:
             echo "No upstream changes."
             exit 0
           fi
-          git commit -m "Sync EspoCRM upstream"
+          git commit -m "Sync upstream CRM source"
           git push

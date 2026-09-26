@@ -36,7 +36,7 @@ echo <<<EOL
 <body style="padding: 20px 10px 60px 10px; max-width: 900px; margin: 0 auto">
 
 <p>
-<strong>You need to configure your webserver in order to being able to run EspoCRM. After that,
+<strong>You need to configure your webserver in order to being able to run OmniGoCRM. After that,
 refresh the page.</strong>
 </p>
 
@@ -95,7 +95,7 @@ And allow override for the `public` directory:
 
 <p>
 <strong>
-See more details in the <a href="https://docs.espocrm.com/administration/apache-server-configuration/">documentation</a>.
+See more details in the <a href="https://github.com/Shivanshukesarwani/omnigocrm/tree/main/docs">documentation</a>.
 </strong>
 </p>
 
@@ -107,7 +107,7 @@ You need to configure the document root to look at the `public` directory and cr
 
 <p>
 <strong>
-See more details in the <a href="https://docs.espocrm.com/administration/nginx-server-configuration/">documentation</a>.
+See more details in the <a href="https://github.com/Shivanshukesarwani/omnigocrm/tree/main/docs">documentation</a>.
 </strong>
 </p>
 

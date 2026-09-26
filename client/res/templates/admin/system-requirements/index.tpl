@@ -104,8 +104,8 @@
             <div class="pull-right">
                 <a
                     target="_blank"
-                    href="https://docs.espocrm.com/administration/server-configuration/"
-                ><strong>{{translate 'Configuration Instructions' scope='Admin'}}</strong></a>
+                    href="https://github.com/Shivanshukesarwani/omnigocrm/tree/main/docs"
+                ><strong>OmniGoCRM documentation</strong></a>
             </div>
         </div>
     </div>
