@@ -81,3 +81,11 @@ jobs:
       - name: Build native Android app
         working-directory: android
         run: gradle assembleDebug --no-daemon
+
+      - name: Upload Android debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnigocrm-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
