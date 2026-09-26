@@ -20,7 +20,7 @@ scripts:
   - name: Run CI checks
     command: composer validate --no-check-publish && composer install --no-interaction --prefer-dist --no-progress
 
-server_ready_pattern: '(?i)(https?://\\S+|localhost:8080)'
+server_ready_pattern: '(?i)(https?://\S+|localhost:8080)'
 auto_open_in_browser: true
 
 automation:
