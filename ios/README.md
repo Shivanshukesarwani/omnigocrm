@@ -1,12 +1,12 @@
 # OmniGoCRM iOS
 
-Native SwiftUI client for the EspoCRM-based OmniGoCRM API.
+Native SwiftUI client for the OmniGoCRM API.
 
 ## Configuration
 
 Edit `ios/OmniGoCRM/AppConfig.swift` and set the public HTTPS CRM URL.
 
-The client authenticates with EspoCRM's documented `GET /api/v1/App/user` flow using the `Espo-Authorization` header, then reuses the returned token for API requests.
+The client authenticates through the server's native `GET /api/v1/App/user` flow using the required `Espo-Authorization` header, then reuses the returned token for API requests.
 
 ## Project generation
 

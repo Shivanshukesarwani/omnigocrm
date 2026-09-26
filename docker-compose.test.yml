@@ -26,7 +26,7 @@ services:
     image: omnigocrm:test
     build:
       context: .
-      dockerfile: Dockerfile.espocrm
+      dockerfile: Dockerfile.omnigocrm
     container_name: omnigocrm-test
     restart: unless-stopped
     depends_on:
@@ -57,7 +57,7 @@ services:
       retries: 10
       start_period: 60s
 
-  # EspoCRM scheduled jobs: automation processing, cleanup, etc.
+  # CRM scheduled jobs: automation processing, cleanup, etc.
   omnigocrm-test-daemon:
     image: omnigocrm:test
     container_name: omnigocrm-test-daemon

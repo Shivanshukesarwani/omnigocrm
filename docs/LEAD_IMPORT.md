@@ -1,10 +1,10 @@
 # OmniGoCRM Lead Import
 
-OmniGoCRM keeps EspoCRM's native CSV/XLSX import engine and adds CRM-specific lead fields.
+OmniGoCRM uses the native CSV/XLSX import engine and adds CRM-specific lead fields.
 
 ## Supported lead data
 
-The Lead entity supports the standard EspoCRM fields plus:
+The Lead entity supports the standard CRM fields plus:
 
 - WhatsApp Number
 - WhatsApp Opt-In

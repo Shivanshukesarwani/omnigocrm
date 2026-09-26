@@ -1,8 +1,8 @@
 {
-    "name": "espocrm/espocrm",
-    "description": "EspoCRM. Open source CRM application.",
+    "name": "shivanshukesarwani/omnigocrm",
+    "description": "OmniGoCRM — open-source omnichannel CRM.",
     "type": "project",
-    "homepage": "https://github.com/espocrm/espocrm.git",
+    "homepage": "https://github.com/Shivanshukesarwani/omnigocrm",
     "license": "AGPL-3.0-or-later",
     "require": {
         "php": ">=8.3.0 <8.6.0",

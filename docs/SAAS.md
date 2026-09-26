@@ -50,7 +50,7 @@ The current implementation adds `omniGoCRMWorkspaceId` to the core CRM records u
 
 A common save hook assigns the active workspace and refuses changes across workspaces.
 
-EspoCRM Select access-control filters limit list/search results to the active workspace. Read and delete hooks also reject records outside the active workspace.
+Select access-control filters limit list/search results to the active workspace. Read and delete hooks also reject records outside the active workspace.
 
 ## Workspace API
 
@@ -81,7 +81,7 @@ Switch:
 
 ## Platform administrators
 
-The setting `omniGoCRMSaaSAdminBypass` is intentionally explicit. When enabled, EspoCRM administrator accounts can operate across workspace filters. It should stay disabled for normal tenant-facing deployments unless a separate platform-admin operating model is intended.
+The setting `omniGoCRMSaaSAdminBypass` is intentionally explicit. When enabled, CRM administrator accounts can operate across workspace filters. It should stay disabled for normal tenant-facing deployments unless a separate platform-admin operating model is intended.
 
 ## Billing
 
@@ -89,6 +89,6 @@ Workspace records already have billing customer/subscription IDs and plan/subscr
 
 ## Important isolation boundary
 
-Do not rely on EspoCRM Teams alone as tenant isolation. OmniGoCRM's workspace enforcement is explicit in the record layer and should remain enabled in production.
+Do not rely on CRM teams alone as tenant isolation. OmniGoCRM's workspace enforcement is explicit in the record layer and should remain enabled in production.
 
 Any future tenant-aware entity must receive the same workspace field, select filter and read/save/delete enforcement before it becomes available to normal SaaS users.

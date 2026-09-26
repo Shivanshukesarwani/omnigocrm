@@ -1,6 +1,6 @@
 # OmniGoCRM Lead Capture API
 
-OmniGoCRM exposes a small server-to-server endpoint on top of EspoCRM's native Lead Capture service.
+OmniGoCRM exposes a small server-to-server endpoint on top of the native Lead Capture service.
 
 ## Endpoint
 
@@ -11,7 +11,7 @@ POST /api/v1/OmniGoCRM/LeadCapture
 Required header:
 
 ~~~text
-X-OmniGoCRM-Form-Key: <EspoCRM Lead Capture API key>
+X-OmniGoCRM-Form-Key: <CRM Lead Capture API key>
 ~~~
 
 Content type:
@@ -20,7 +20,7 @@ Content type:
 application/json
 ~~~
 
-The value is the API key of an active EspoCRM Lead Capture record. This keeps lead creation, field validation, duplicate handling, CAPTCHA support, target-list behavior, and future EspoCRM upgrades in the native service.
+The value is the API key of an active Lead Capture record. This keeps lead creation, field validation, duplicate handling, CAPTCHA support, target-list behavior, and future platform upgrades in the native service.
 
 ## Example request
 
@@ -71,7 +71,7 @@ For a new submission:
 
 ## Lead Capture configuration
 
-Create an active EspoCRM Lead Capture record and include every field that you want to persist in its Field List. Recommended OmniGoCRM fields:
+Create an active Lead Capture record and include every field that you want to persist in its Field List. Recommended OmniGoCRM fields:
 
 - firstName / lastName
 - emailAddress
@@ -92,7 +92,7 @@ For a public website form, prefer the native Lead Capture form with CAPTCHA enab
 
 ## Security
 
-The endpoint intentionally has no EspoCRM user login because it is designed for public/server integrations. The Lead Capture API key is therefore treated as a credential.
+The endpoint intentionally has no CRM user login because it is designed for public/server integrations. The Lead Capture API key is therefore treated as a credential.
 
 Do not commit API keys, WhatsApp access tokens, Meta app secrets, or other credentials to the Git repository.
 

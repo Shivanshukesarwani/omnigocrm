@@ -1,4 +1,4 @@
-package com.shivanshu.crm
+package com.omnigocrm.android
 
 object AppConfig {
     const val BASE_URL = "https://crm.example.com/"

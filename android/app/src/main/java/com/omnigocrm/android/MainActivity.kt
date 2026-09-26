@@ -1,4 +1,4 @@
-package com.shivanshu.crm
+package com.omnigocrm.android
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -32,7 +32,7 @@ class MainActivity : Activity() {
     private fun showLogin() {
         val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40, 70, 40, 40) }
         addText(box, "OmniGoCRM", 30f, true)
-        addText(box, "Native Android client for the EspoCRM-based OmniGoCRM server", 16f, false)
+        addText(box, "Your all-in-one sales CRM", 16f, false)
         val username = EditText(this).apply { hint = "Username or email" }
         val password = EditText(this).apply { hint = "Password"; inputType = 0x81 }
         val login = Button(this).apply { text = "Sign in" }

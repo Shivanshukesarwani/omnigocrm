@@ -1,6 +1,6 @@
 # OmniGoCRM Calling
 
-The calling layer is provider-neutral. OmniGoCRM stores calls in native EspoCRM `Call` records and adds provider/recording metadata.
+The calling layer is provider-neutral. OmniGoCRM stores calls in native `Call` records and adds provider/recording metadata.
 
 ## Mobile calling
 

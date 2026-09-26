@@ -10,7 +10,8 @@
 
     <application
         android:allowBackup="true"
-        android:label="Shivanshu CRM"
+        android:icon="@drawable/ic_omnigocrm"
+        android:label="OmniGoCRM"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false">

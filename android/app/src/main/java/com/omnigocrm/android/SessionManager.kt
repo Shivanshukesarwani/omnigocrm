@@ -1,4 +1,4 @@
-package com.shivanshu.crm
+package com.omnigocrm.android
 
 import android.content.Context
 

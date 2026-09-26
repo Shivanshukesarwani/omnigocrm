@@ -1,4 +1,4 @@
-name: EspoCRM Base Verification
+name: OmniGoCRM Base Verification
 
 on:
   workflow_dispatch:
@@ -6,18 +6,19 @@ on:
     paths:
       - "custom/**"
       - "client/custom/**"
-      - "docs/ESPO_*.md"
+      - "docs/ARCHITECTURE.md"
+      - "docs/PLATFORM_MIGRATION.md"
       - "docs/OMNIGOCRM_ROADMAP.md"
-      - ".github/workflows/espo-base.yml"
+      - ".github/workflows/omnigocrm-base.yml"
 
 jobs:
-  verify-espo-base:
+  verify-omnigocrm-base:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout OmniGoCRM
         uses: actions/checkout@v4
 
-      - name: Fetch EspoCRM upstream
+      - name: Fetch upstream CRM source
         run: |
           git clone --depth 1 https://github.com/espocrm/espocrm.git /tmp/espocrm
 
@@ -39,4 +40,4 @@ jobs:
 
       - name: Show migration status
         run: |
-          echo "OmniGoCRM EspoCRM migration foundation is valid."
+          echo "OmniGoCRM foundation is valid."

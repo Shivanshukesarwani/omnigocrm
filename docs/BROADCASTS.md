@@ -1,6 +1,6 @@
 # OmniGoCRM WhatsApp Broadcasts
 
-OmniGoCRM broadcasts are implemented as workspace-scoped campaign records plus recipient records, processed by an EspoCRM scheduled job.
+OmniGoCRM broadcasts are implemented as workspace-scoped campaign records plus recipient records, processed by a scheduled job.
 
 ## Flow
 

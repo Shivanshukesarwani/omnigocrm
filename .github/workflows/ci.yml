@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  espocrm:
+  omnigocrm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,10 +17,10 @@ jobs:
           extensions: curl, dom, exif, gd, intl, mbstring, mysqli, pdo_mysql, xml, zip
           coverage: none
 
-      - name: Validate EspoCRM dependencies
+      - name: Validate PHP dependencies
         run: composer validate --no-check-publish
 
-      - name: Install EspoCRM dependencies
+      - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Validate OmniGoCRM module JSON

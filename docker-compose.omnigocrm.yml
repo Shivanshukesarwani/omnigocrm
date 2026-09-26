@@ -21,7 +21,7 @@ services:
     image: omnigocrm:local
     build:
       context: .
-      dockerfile: Dockerfile.espocrm
+      dockerfile: Dockerfile.omnigocrm
     container_name: omnigocrm
     restart: unless-stopped
     depends_on:
