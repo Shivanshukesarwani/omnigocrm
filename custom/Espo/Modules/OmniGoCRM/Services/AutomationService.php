@@ -108,6 +108,7 @@ class AutomationService
     }
 
     private function executeRun($run, $rule): void
+    {
         $run->set(['status' => 'Running', 'startedAt' => gmdate('Y-m-d H:i:s')]);
         $this->entityManager->saveEntity($run);
         try {
