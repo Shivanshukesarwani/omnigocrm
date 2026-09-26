@@ -16,6 +16,7 @@ class WhatsAppWebhookService
         private Config $config,
         private EntityManager $entityManager,
         private WhatsAppConversationService $conversationService,
+        private AutomationService $automationService,
     ) {}
 
     public function verify(string $mode, string $token, string $challenge): string
@@ -174,12 +175,23 @@ class WhatsAppWebhookService
             $lead = $this->createLead($from, $contacts[$from] ?? null);
         }
 
+        $workspaceId = trim((string) (
+            $lead->get('omniGoCRMWorkspaceId')
+            ?: $this->config->get('omniGoCRMWhatsAppWorkspaceId')
+        ));
+
+        if ($workspaceId !== '') {
+            $lead->set('omniGoCRMWorkspaceId', $workspaceId);
+            $this->entityManager->saveEntity($lead);
+        }
+
         $conversation = $this->conversationService->findOrCreate(
             waId: $from,
             lead: $lead,
             displayName: $contacts[$from] ?? null,
         );
 
+        $receivedAt = $this->getMessageDateTime($message->timestamp ?? null) ?? gmdate('Y-m-d H:i:s');
         $messageEntity = $this->entityManager->getNewEntity('WhatsAppMessage');
 
         $messageEntity->set([
@@ -194,12 +206,18 @@ class WhatsAppWebhookService
             'leadId' => $lead?->getId(),
             'externalLeadId' => $lead?->get('externalLeadId'),
             'conversationId' => $conversation->getId(),
-            'receivedAt' => $this->getMessageDateTime($message->timestamp ?? null),
+            'receivedAt' => $receivedAt,
             'mediaId' => $this->extractMediaId($message, $type),
             'mediaMimeType' => $this->extractMediaMimeType($message, $type),
             'mediaCaption' => $this->extractMediaCaption($message, $type),
             'rawPayload' => json_encode($message, JSON_UNESCAPED_SLASHES),
         ]);
+
+        if ($workspaceId !== '') {
+            $messageEntity->set('omniGoCRMWorkspaceId', $workspaceId);
+            $conversation->set('omniGoCRMWorkspaceId', $workspaceId);
+            $this->entityManager->saveEntity($conversation);
+        }
 
         $this->entityManager->saveEntity($messageEntity);
 
@@ -208,6 +226,13 @@ class WhatsAppWebhookService
             $conversation,
             $preview,
             $messageEntity->get('receivedAt'),
+        );
+
+        $this->automationService->dispatch(
+            event: 'WhatsAppReceived',
+            entityType: 'WhatsAppMessage',
+            entityId: $messageEntity->getId(),
+            workspaceId: $workspaceId !== '' ? $workspaceId : null,
         );
 
         return true;
@@ -284,12 +309,18 @@ class WhatsAppWebhookService
             ->getRDBRepositoryByClass(Lead::class)
             ->getNew();
 
+        $workspaceId = trim((string) $this->config->get('omniGoCRMWhatsAppWorkspaceId'));
+
         $lead->set([
             'whatsappNumber' => $from,
             'leadStage' => 'New',
             'source' => 'Other',
             'leadSourceDetail' => 'WhatsApp inbound',
         ]);
+
+        if ($workspaceId !== '') {
+            $lead->set('omniGoCRMWorkspaceId', $workspaceId);
+        }
 
         if ($profileName !== null && $profileName !== '') {
             $parts = preg_split('/\s+/', trim($profileName)) ?: [];

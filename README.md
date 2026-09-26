@@ -13,6 +13,7 @@ Architecture and deployment guides:
 - `docs/ARCHITECTURE.md`
 - `docs/PLATFORM_MIGRATION.md`
 - `docs/OMNIGOCRM_ROADMAP.md`
+- `docs/WACRM_FEATURE_INTEGRATION.md`
 
 ## Product target
 

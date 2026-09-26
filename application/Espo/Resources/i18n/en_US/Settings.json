@@ -17,6 +17,7 @@
         "outboundSmsFromNumber": "SMS From Number",
         "emailAddress": "Email",
         "outboundEmailFromName": "From Name",
+        "omniGoCRMWhatsAppWorkspaceId": "WhatsApp Workspace ID",
         "outboundEmailFromAddress": "System Email Address",
         "outboundEmailIsShared": "Is Shared",
         "emailAddressLookupEntityTypeList": "Email address look-up scopes",

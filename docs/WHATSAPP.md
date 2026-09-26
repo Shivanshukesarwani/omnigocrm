@@ -4,7 +4,7 @@ OmniGoCRM uses the official WhatsApp Cloud API architecture for server-initiated
 
 ## Configuration
 
-Keep these values out of Git:
+Keep these credentials out of Git:
 
 - `omniGoCRMWhatsAppAccessToken`
 - `omniGoCRMWhatsAppAppSecret`
@@ -13,6 +13,7 @@ Keep these values out of Git:
 - `omniGoCRMWhatsAppGraphVersion`
 
 The Graph API version is configurable so an installation can move between supported provider versions without changing application code.
+Set the admin configuration value `omniGoCRMWhatsAppWorkspaceId` to the workspace that owns this WhatsApp Business phone number. Incoming messages, new leads, conversations, and automation runs are assigned to this workspace unless an existing matched lead already belongs to one.
 
 ## Outbound text
 
@@ -109,6 +110,81 @@ Templates are intentionally stored as provider-backed records. `Draft` and `Pend
 ## Provider boundary
 
 All server-initiated messaging uses Meta's official Cloud API. OmniGoCRM does not automate WhatsApp Web, browser sessions, QR logins, or unofficial client protocols.
+
+## Incoming-message automation
+
+Create an `AutomationRule` record in the WhatsApp workspace. Select **WhatsApp Message Received**, enable the rule, and use JSON conditions/actions. The inbound webhook queues matching rules after saving the message; executions and failures are visible as `AutomationRun` records. The scheduled automation job processes queued work each minute.
+
+Conditions are optional. Flat objects compare fields using `equals`; the `textContains` and `textEquals` shorthand perform case-insensitive message-text matching:
+
+~~~json
+{
+  "textContains": "pricing",
+  "messageType": "Text"
+}
+~~~
+
+For grouped conditions, use `all` and/or `any` with condition objects. Supported operators are `equals`, `notEquals`, `contains`, `startsWith`, `endsWith`, `greaterThan`, `lessThan`, `isEmpty`, and `isNotEmpty`:
+
+~~~json
+{
+  "all": [
+    { "field": "messageType", "operator": "equals", "value": "Text" }
+  ],
+  "any": [
+    { "field": "textBody", "operator": "contains", "value": "pricing" },
+    { "field": "textBody", "operator": "contains", "value": "cost" }
+  ]
+}
+~~~
+
+Use one or more of these actions. `if` selects a `then` or `else` action list, and `wait` suspends the run for a bounded interval before continuing:
+
+~~~json
+[
+  {
+    "type": "if",
+    "conditions": {
+      "textContains": "pricing"
+    },
+    "then": [
+      { "type": "sendWhatsAppText", "body": "Hi {{firstName}}, I can help with pricing." }
+    ],
+    "else": [
+      { "type": "wait", "duration": 2, "unit": "minutes" },
+      { "type": "createTask", "name": "Review WhatsApp inquiry" }
+    ]
+  }
+]
+~~~
+
+An action list can also directly send a reply:
+
+~~~json
+[
+  {
+    "type": "sendWhatsAppText",
+    "body": "Hi {{firstName}}, thanks for asking about our pricing."
+  }
+]
+~~~
+
+Text replies are sent only within 24 hours of the inbound message, as required by WhatsApp's customer-service window. Supported lead placeholders are `{{firstName}}`, `{{lastName}}`, `{{name}}`, and `{{whatsappNumber}}`.
+
+Approved templates can be sent outside the service window, but require the lead's WhatsApp opt-in and an active, approved `WhatsAppTemplate`:
+
+~~~json
+[
+  {
+    "type": "sendWhatsAppTemplate",
+    "templateName": "follow_up",
+    "languageCode": "en_US",
+    "components": []
+  }
+]
+~~~
+
+Automation conditions/actions must be valid JSON. Supported action types are `createTask`, `updateRecord`, `sendWhatsAppText`, `sendWhatsAppTemplate`, `if`, and `wait`; unsupported actions fail the run instead of being reported as successful. The visual automation builder and keyword/scheduled triggers are planned separately; see `docs/WACRM_FEATURE_INTEGRATION.md`.
 
 
 ## Shared inbox
