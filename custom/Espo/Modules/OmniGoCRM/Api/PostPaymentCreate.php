@@ -16,8 +16,6 @@ class PostPaymentCreate implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
-
         $payment = $this->service->recordPayment((array) $data);
 
         return ResponseComposer::json([
