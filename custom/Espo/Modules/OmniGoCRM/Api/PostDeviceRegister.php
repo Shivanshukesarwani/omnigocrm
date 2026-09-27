@@ -20,11 +20,6 @@ class PostDeviceRegister implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         $platform = $this->value($data, 'platform');
         $pushProvider = $this->value($data, 'pushProvider');
         $pushToken = $this->value($data, 'pushToken');
@@ -64,7 +59,7 @@ class PostDeviceRegister implements Action
             $device = $repo->getNew();
         }
 
-        $device->set([
+        $device->setMultiple([
             'name' => $deviceName !== '' ? $deviceName : $platform . ' device',
             'externalDeviceId' => $externalDeviceId !== '' ? $externalDeviceId : null,
             'platform' => $platform,
