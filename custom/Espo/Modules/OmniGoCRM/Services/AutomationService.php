@@ -45,7 +45,7 @@ class AutomationService
                 continue;
             }
             $run = $this->entityManager->getNewEntity('AutomationRun');
-            $run->set([
+            $run->setMultiple([
                 'name' => $rule->get('name') . ' / ' . $entityId,
                 'ruleId' => $rule->getId(),
                 'entityType' => $entityType,
@@ -98,7 +98,7 @@ class AutomationService
         ])->limit(100)->find();
 
         foreach ($runs as $run) {
-            $run->set([
+            $run->setMultiple([
                 'status' => 'Queued',
                 'scheduledAt' => gmdate('Y-m-d H:i:s'),
                 'startedAt' => null,
@@ -109,7 +109,7 @@ class AutomationService
 
     private function executeRun($run, $rule): void
     {
-        $run->set(['status' => 'Running', 'startedAt' => gmdate('Y-m-d H:i:s')]);
+        $run->setMultiple(['status' => 'Running', 'startedAt' => gmdate('Y-m-d H:i:s')]);
         $this->entityManager->saveEntity($run);
         try {
             $actions = $this->json(
@@ -149,7 +149,7 @@ class AutomationService
                         0,
                     );
                     array_splice($actions, $index, 1, $branch);
-                    $run->set([
+                    $run->setMultiple([
                         'actionsJson' => json_encode($actions, JSON_THROW_ON_ERROR),
                         'startedAt' => gmdate('Y-m-d H:i:s'),
                     ]);
@@ -159,7 +159,7 @@ class AutomationService
 
                 if ($type === 'wait') {
                     $delay = $this->getWaitSeconds($action);
-                    $run->set([
+                    $run->setMultiple([
                         'status' => 'Queued',
                         'actionIndex' => $index + 1,
                         'scheduledAt' => gmdate('Y-m-d H:i:s', time() + $delay),
@@ -176,16 +176,16 @@ class AutomationService
                     $workspaceId,
                 );
                 $index++;
-                $run->set([
+                $run->setMultiple([
                     'actionIndex' => $index,
                     'resultJson' => json_encode($result, JSON_THROW_ON_ERROR),
                     'startedAt' => gmdate('Y-m-d H:i:s'),
                 ]);
                 $this->entityManager->saveEntity($run);
             }
-            $run->set(['status' => 'Completed', 'completedAt' => gmdate('Y-m-d H:i:s')]);
+            $run->setMultiple(['status' => 'Completed', 'completedAt' => gmdate('Y-m-d H:i:s')]);
         } catch (\Throwable $e) {
-            $run->set(['status' => 'Failed', 'completedAt' => gmdate('Y-m-d H:i:s'), 'errorMessage' => $e->getMessage()]);
+            $run->setMultiple(['status' => 'Failed', 'completedAt' => gmdate('Y-m-d H:i:s'), 'errorMessage' => $e->getMessage()]);
         }
         $this->entityManager->saveEntity($run);
     }
@@ -699,7 +699,7 @@ class AutomationService
         $this->assertEntityWorkspace($conversation, $workspaceId, 'WhatsApp conversation');
 
         $outboundMessage = $this->entityManager->getNewEntity('WhatsAppMessage');
-        $outboundMessage->set([
+        $outboundMessage->setMultiple([
             'name' => $result->providerMessageId,
             'providerMessageId' => $result->providerMessageId,
             'direction' => 'Outbound',
@@ -780,7 +780,7 @@ class AutomationService
         string $error,
     ): void {
         $run = $this->entityManager->getNewEntity('AutomationRun');
-        $run->set([
+        $run->setMultiple([
             'name' => $rule->get('name') . ' / ' . $entityId,
             'ruleId' => $rule->getId(),
             'entityType' => $entityType,
