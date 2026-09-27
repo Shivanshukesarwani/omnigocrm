@@ -58,7 +58,7 @@ Caddy obtains and renews TLS certificates automatically when DNS points the doma
 Run:
 
 ```bash
-./scripts/backup-production.sh
+bash scripts/backup-production.sh
 ```
 
 Store backups outside the production server too. Regularly test restoration.
@@ -88,7 +88,6 @@ Create the real secret separately:
 kubectl create namespace omnigocrm
 kubectl -n omnigocrm create secret generic omnigocrm-secrets \
   --from-literal=db-password='REPLACE_ME' \
-  --from-literal=db-root-password='REPLACE_ME' \
   --from-literal=admin-password='REPLACE_ME'
 ```
 
