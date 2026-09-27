@@ -24,7 +24,7 @@ jobs:
           mkdir -p secrets
           printf 'ci-db-password' > secrets/db_password.txt
           printf 'ci-admin-password' > secrets/admin_password.txt
-          docker compose -f docker-compose.prod.yml config
+          docker compose -f docker-compose.yml config
 
       - name: Build production image
         run: |
