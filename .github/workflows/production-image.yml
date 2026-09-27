@@ -40,6 +40,5 @@ jobs:
             ESPOCRM_IMAGE=espocrm/espocrm:${{ steps.version.outputs.version }}
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
-            ghcr.io/${{ github.repository }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
