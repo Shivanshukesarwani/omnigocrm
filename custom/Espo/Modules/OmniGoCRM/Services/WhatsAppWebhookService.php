@@ -194,7 +194,7 @@ class WhatsAppWebhookService
         $receivedAt = $this->getMessageDateTime($message->timestamp ?? null) ?? gmdate('Y-m-d H:i:s');
         $messageEntity = $this->entityManager->getNewEntity('WhatsAppMessage');
 
-        $messageEntity->set([
+        $messageEntity->setMultiple([
             'name' => $providerMessageId,
             'providerMessageId' => $providerMessageId,
             'direction' => 'Inbound',
@@ -311,7 +311,7 @@ class WhatsAppWebhookService
 
         $workspaceId = trim((string) $this->config->get('omniGoCRMWhatsAppWorkspaceId'));
 
-        $lead->set([
+        $lead->setMultiple([
             'whatsappNumber' => $from,
             'leadStage' => 'New',
             'source' => 'Other',
