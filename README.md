@@ -6,15 +6,14 @@ The project is designed around the feature set we want from a TeleCRM-style sale
 
 ## Current architecture
 
-The project is migrating from the original Laravel prototype to an **EspoCRM-based architecture**.
-
-EspoCRM provides the mature CRM foundation: entities, relationships, ACL, metadata, REST API, layouts, scheduled jobs and extension/module support. OmniGoCRM-specific functionality is being added in custom modules instead of unnecessarily rewriting the core.
+EspoCRM is now the **only active CRM backend**. It provides the mature CRM foundation: entities, relationships, ACL, metadata, REST API, layouts, scheduled jobs and extension/module support. OmniGoCRM-specific functionality is added in custom modules instead of unnecessarily rewriting the core.
 
 See:
 
 - `docs/ESPO_BASE.md`
 - `docs/ESPO_MIGRATION.md`
 - `docs/OMNIGOCRM_ROADMAP.md`
+- `docs/WACRM_FEATURE_INTEGRATION.md`
 
 ## Product target
 
@@ -96,7 +95,7 @@ Android and iOS clients will use the same CRM backend and expose the major CRM, 
 
 ## Repository status
 
-The Laravel implementation that existed before the EspoCRM migration is retained temporarily while features are ported and tested. It will only be moved to `legacy/` after equivalent functionality is available and verified.
+The Laravel prototype has been moved to `legacy/laravel-prototype/` and is no longer an active backend. New CRM, SaaS, WhatsApp, calling, automation or mobile functionality must be implemented against the EspoCRM backend.
 
 ## Upstream
 
