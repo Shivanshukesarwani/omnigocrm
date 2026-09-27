@@ -4,8 +4,8 @@ metadata:
   name: omnigocrm
   namespace: omnigocrm
 spec:
-  replicas: 2
-  strategy: {type: RollingUpdate}
+  replicas: 1
+  strategy: {type: Recreate}
   selector:
     matchLabels: {app: omnigocrm}
   template:
