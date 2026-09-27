@@ -120,7 +120,19 @@ class DispatchBroadcastCampaigns implements JobDataLess
             $lead = $this->entityManager->getEntityById('Lead', $leadId);
         }
 
-        if (!$lead || !$lead->get('whatsappOptIn')) {
+        $leadWorkspaceId = $lead ? trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? '')) : '';
+
+        if (!$lead || ($workspaceId !== '' && $leadWorkspaceId !== '' && $leadWorkspaceId !== $workspaceId)) {
+            $recipient->setMultiple([
+                'status' => 'Skipped',
+                'errorMessage' => 'Lead does not belong to the campaign workspace.',
+            ]);
+            $this->entityManager->saveEntity($recipient);
+            $this->incrementCampaign($campaign, false, false);
+            return;
+        }
+
+        if (!$lead->get('whatsappOptIn')) {
             $recipient->setMultiple([
                 'status' => 'Skipped',
                 'errorMessage' => 'Lead is missing or WhatsApp opt-in is not enabled.',
