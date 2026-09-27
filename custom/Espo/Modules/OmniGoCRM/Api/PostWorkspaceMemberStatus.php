@@ -14,8 +14,6 @@ class PostWorkspaceMemberStatus implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
-
         $workspaceId = is_string($data->workspaceId ?? null) ? trim($data->workspaceId) : '';
         $membershipId = is_string($data->membershipId ?? null) ? trim($data->membershipId) : '';
         $status = is_string($data->status ?? null) ? trim($data->status) : '';
