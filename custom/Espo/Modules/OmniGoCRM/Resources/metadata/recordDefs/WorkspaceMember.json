@@ -1,0 +1,4 @@
+{
+    "beforeSaveHookClassNameList": ["Espo\\Modules\\OmniGoCRM\\Classes\\Record\\WorkspaceMember\\BeforeSave"],
+    "beforeReadHookClassNameList": ["Espo\\Modules\\OmniGoCRM\\Classes\\Record\\WorkspaceMember\\BeforeRead"]
+}

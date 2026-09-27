@@ -1,40 +1,18 @@
 <?php
-
 namespace Espo\Modules\OmniGoCRM\Classes\Record\Workspace;
-
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Record\Hook\ReadHook;
+use Espo\Core\Record\ReadParams;
 use Espo\Core\Utils\Config;
+use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
-use Espo\Core\Record\ReadParams;
-
-class BeforeRead implements ReadHook
-{
-    public function __construct(
-        private User $user,
-        private Config $config,
-    ) {}
-
-    public function process(Entity $entity, ReadParams $params): void
-    {
-        if (!$entity->hasAttribute('omniGoCRMWorkspaceId')) {
-            return;
-        }
-
-        if ($this->user->isSystem()) {
-            return;
-        }
-
-        if ((bool) $this->config->get('omniGoCRMSaaSAdminBypass') && $this->user->isAdmin()) {
-            return;
-        }
-
-        $current = trim((string) $this->user->get('omniGoCRMCurrentWorkspaceId'));
-        $recordWorkspace = trim((string) $entity->get('omniGoCRMWorkspaceId'));
-
-        if ($current === '' || $recordWorkspace === '' || $current !== $recordWorkspace) {
-            throw new Forbidden('This CRM record is outside the active workspace.');
-        }
-    }
+class BeforeRead implements ReadHook {
+ public function __construct(private User $user, private Config $config, private EntityManager $entityManager) {}
+ public function process(Entity $entity, ReadParams $params): void {
+  if ($this->user->isSystem()) return;
+  if ((bool)$this->config->get('omniGoCRMSaaSAdminBypass') && $this->user->isAdmin()) return;
+  $membership=$this->entityManager->getRDBRepository('WorkspaceMember')->where(['workspaceId'=>$entity->getId(),'userId'=>$this->user->getId(),'status'=>'Active','deleted'=>false])->findOne();
+  if (!$membership) throw new Forbidden('This workspace is not available to your account.');
+ }
 }
