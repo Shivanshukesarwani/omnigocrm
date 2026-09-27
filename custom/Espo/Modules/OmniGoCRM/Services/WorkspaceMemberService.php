@@ -45,7 +45,7 @@ class WorkspaceMemberService
         $membership = $repo->where(['workspaceId' => $workspaceId, 'userId' => $userId, 'deleted' => false])->findOne();
         if (!$membership) $membership = $repo->getNew();
 
-        $membership->set([
+        $membership->setMultiple([
             'name' => $workspace->get('name') . ' / ' . $user->get('name'),
             'workspaceId' => $workspaceId,
             'userId' => $userId,
