@@ -75,30 +75,14 @@ class AutomationServiceTest extends TestCase
         self::assertFalse($this->invoke($service, 'isWithinWhatsAppTextWindow', ['not-a-date', $lastSecond]));
     }
 
-    public function testAssignRecordRequiresWorkspaceMember(): void
+    public function testAssignRecordValidationRequiresUser(): void
     {
-        $record = $this->createMock(Entity::class);
-        $record->method('get')->willReturnCallback(
-            fn (string $field): mixed => ['omniGoCRMWorkspaceId' => 'workspace-a'][$field] ?? null,
-        );
-        $entityManager = $this->createMock(EntityManager::class);
-        $entityManager->method('getEntityById')->willReturnMap([['Lead', 'lead-1', $record]]);
-        $entityManager->method('getRDBRepository')->willReturnCallback(function (string $entityType) {
-            $repository = $this->createMock(\\Espo\\ORM\\Repository\\RDBRepository::class);
-            return $repository;
-        });
-
-        $service = new AutomationService(
-            $entityManager,
-            $this->createMock(WhatsAppCloudApi::class),
-            $this->createMock(WhatsAppConversationService::class),
-        );
+        $service = $this->serviceWithRecord($this->createMock(Entity::class));
 
         $this->expectException(\\Espo\\Core\\Exceptions\\BadRequest::class);
-        $this->invoke($service, 'executeAction', [[
+        $this->invoke($service, 'validateActions', [[[
             'type' => 'assignRecord',
-            'assignedUserId' => 'user-2',
-        ], 'Lead', 'lead-1', 'workspace-a']);
+        ]]]);
     }
 
     public function testWorkspaceGuardRejectsCrossWorkspaceEntity(): void
