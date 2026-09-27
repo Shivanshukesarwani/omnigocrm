@@ -14,8 +14,6 @@ class PostWorkspaceMemberAdd implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
-
         $workspaceId = is_string($data->workspaceId ?? null) ? trim($data->workspaceId) : '';
         $userId = is_string($data->userId ?? null) ? trim($data->userId) : '';
         $role = is_string($data->role ?? null) ? trim($data->role) : 'Agent';
