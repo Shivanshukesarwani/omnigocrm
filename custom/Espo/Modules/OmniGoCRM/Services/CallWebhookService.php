@@ -56,6 +56,14 @@ class CallWebhookService
         $phone = $direction === 'Inbound' ? $from : $to;
 
         $lead = $this->findLead($phone);
+        $workspaceId = trim((string) ($payload->workspaceId ?? ''));
+
+        if ($lead && $workspaceId !== '') {
+            $leadWorkspaceId = trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? ''));
+            if ($leadWorkspaceId !== '' && $leadWorkspaceId !== $workspaceId) {
+                $lead = null;
+            }
+        }
 
         if (!$lead && $direction === 'Inbound' && in_array($status, ['missed', 'no-answer', 'busy', 'failed'], true) && $phone !== '') {
             $lead = $this->createMissedCallLead($phone);
@@ -117,10 +125,12 @@ class CallWebhookService
         }
 
         if ($lead) {
-            $workspaceId = trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? $lead->get('workspaceId')));
-            if ($workspaceId !== '') {
-                $call->set('omniGoCRMWorkspaceId', $workspaceId);
+            $leadWorkspaceId = trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? $lead->get('workspaceId')));
+            if ($leadWorkspaceId !== '') {
+                $call->set('omniGoCRMWorkspaceId', $leadWorkspaceId);
             }
+        } elseif ($workspaceId !== '') {
+            $call->set('omniGoCRMWorkspaceId', $workspaceId);
         }
 
         $this->entityManager->saveEntity($call);
