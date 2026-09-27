@@ -16,8 +16,6 @@ class PostBillingSetPlan implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
-
         $workspaceId = is_string($data->workspaceId ?? null) ? trim($data->workspaceId) : '';
         $plan = is_string($data->plan ?? null) ? trim($data->plan) : '';
         $status = is_string($data->status ?? null) ? trim($data->status) : 'Active';
