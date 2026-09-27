@@ -1,17 +1,17 @@
 services:
   db:
-    image: mariadb:${MARIADB_VERSION:-11.8}
+    image: postgres:${POSTGRES_VERSION:-18.6}
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: ${MARIADB_DATABASE:-omnigocrm}
-      MARIADB_USER: ${MARIADB_USER:-omnigocrm}
-      MARIADB_PASSWORD_FILE: /run/secrets/db_password
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      POSTGRES_DB: ${POSTGRES_DATABASE:-omnigocrm}
+      POSTGRES_USER: ${POSTGRES_USER:-omnigocrm}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_INITDB_ARGS: "--auth=scram-sha-256"
     volumes:
-      - db_data:/var/lib/mysql
-    secrets: [db_password, db_root_password]
+      - db_data:/var/lib/postgresql/data
+    secrets: [db_password]
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-omnigocrm} -d ${POSTGRES_DATABASE:-omnigocrm}"]
       interval: 20s
       timeout: 10s
       retries: 5
@@ -27,11 +27,11 @@ services:
     image: ${OMNIGOCRM_IMAGE:-omnigocrm:${OMNIGOCRM_VERSION:-10.0.8}}
     restart: unless-stopped
     environment:
-      ESPOCRM_DATABASE_PLATFORM: Mysql
+      ESPOCRM_DATABASE_PLATFORM: Postgresql
       ESPOCRM_DATABASE_HOST: db
-      ESPOCRM_DATABASE_PORT: "3306"
-      ESPOCRM_DATABASE_NAME: ${MARIADB_DATABASE:-omnigocrm}
-      ESPOCRM_DATABASE_USER: ${MARIADB_USER:-omnigocrm}
+      ESPOCRM_DATABASE_PORT: "5432"
+      ESPOCRM_DATABASE_NAME: ${POSTGRES_DATABASE:-omnigocrm}
+      ESPOCRM_DATABASE_USER: ${POSTGRES_USER:-omnigocrm}
       ESPOCRM_DATABASE_PASSWORD_FILE: /run/secrets/db_password
       ESPOCRM_ADMIN_USERNAME: ${ESPOCRM_ADMIN_USERNAME:-admin}
       ESPOCRM_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
@@ -56,11 +56,11 @@ services:
     image: ${OMNIGOCRM_IMAGE:-omnigocrm:${OMNIGOCRM_VERSION:-10.0.8}}
     restart: unless-stopped
     environment:
-      ESPOCRM_DATABASE_PLATFORM: Mysql
+      ESPOCRM_DATABASE_PLATFORM: Postgresql
       ESPOCRM_DATABASE_HOST: db
-      ESPOCRM_DATABASE_PORT: "3306"
-      ESPOCRM_DATABASE_NAME: ${MARIADB_DATABASE:-omnigocrm}
-      ESPOCRM_DATABASE_USER: ${MARIADB_USER:-omnigocrm}
+      ESPOCRM_DATABASE_PORT: "5432"
+      ESPOCRM_DATABASE_NAME: ${POSTGRES_DATABASE:-omnigocrm}
+      ESPOCRM_DATABASE_USER: ${POSTGRES_USER:-omnigocrm}
       ESPOCRM_DATABASE_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - app_data:/var/www/html/data
@@ -96,8 +96,6 @@ volumes:
 secrets:
   db_password:
     file: ./secrets/db_password.txt
-  db_root_password:
-    file: ./secrets/db_root_password.txt
   admin_password:
     file: ./secrets/admin_password.txt
 
