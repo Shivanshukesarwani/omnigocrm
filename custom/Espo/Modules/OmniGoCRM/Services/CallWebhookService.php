@@ -84,14 +84,14 @@ class CallWebhookService
             ]);
 
             if ($lead) {
-                $call->set([
+                $call->setMultiple([
                     'parentId' => $lead->getId(),
                     'parentType' => Lead::ENTITY_TYPE,
                 ]);
             }
         }
 
-        $call->set([
+        $call->setMultiple([
             'status' => $this->mapStatus($status),
             'omniGoCRMProvider' => $provider,
             'omniGoCRMExternalCallId' => $externalCallId,
