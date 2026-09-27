@@ -230,7 +230,7 @@ class AutomationService
                 $taskData['parentId'] = $parentId;
             }
 
-            $task->set($taskData);
+            $task->setMultiple($taskData);
             $this->entityManager->saveEntity($task);
             return ['type' => $type, 'id' => $task->getId()];
         }
@@ -247,7 +247,7 @@ class AutomationService
                 throw new BadRequest('Automation actions cannot change record workspace ownership.');
             }
             $this->assertEntityWorkspace($record, $workspaceId, 'Automation target');
-            $record->set($fields);
+            $record->setMultiple($fields);
             $this->entityManager->saveEntity($record);
             return ['type' => $type, 'id' => $entityId];
         }
@@ -358,16 +358,24 @@ class AutomationService
             return false;
         }
 
-        return match ($operator) {
-            'equals' => mb_strtolower(trim((string) $actual)) === mb_strtolower(trim((string) $expected)),
-            'notEquals' => mb_strtolower(trim((string) $actual)) !== mb_strtolower(trim((string) $expected)),
-            'contains' => mb_stripos((string) $actual, (string) $expected) !== false,
-            'startsWith' => mb_stripos((string) $actual, (string) $expected) === 0,
-            'endsWith' => mb_stripos((string) $actual, (string) $expected) === mb_strlen((string) $actual) - mb_strlen((string) $expected),
-            'greaterThan' => is_numeric($actual) && is_numeric($expected) && (float) $actual > (float) $expected,
-            'lessThan' => is_numeric($actual) && is_numeric($expected) && (float) $actual < (float) $expected,
-            default => false,
-        };
+        switch ($operator) {
+            case 'equals':
+                return mb_strtolower(trim((string) $actual)) === mb_strtolower(trim((string) $expected));
+            case 'notEquals':
+                return mb_strtolower(trim((string) $actual)) !== mb_strtolower(trim((string) $expected));
+            case 'contains':
+                return mb_stripos((string) $actual, (string) $expected) !== false;
+            case 'startsWith':
+                return mb_stripos((string) $actual, (string) $expected) === 0;
+            case 'endsWith':
+                return mb_stripos((string) $actual, (string) $expected) === mb_strlen((string) $actual) - mb_strlen((string) $expected);
+            case 'greaterThan':
+                return is_numeric($actual) && is_numeric($expected) && (float) $actual > (float) $expected;
+            case 'lessThan':
+                return is_numeric($actual) && is_numeric($expected) && (float) $actual < (float) $expected;
+            default:
+                return false;
+        }
     }
 
     private function branchActions(array $action, string $entityType, string $entityId, int $depth): array
