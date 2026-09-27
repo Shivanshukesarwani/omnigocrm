@@ -25,7 +25,7 @@ class SalesService
 
         $quote = $this->entityManager->getNewEntity('Quote');
 
-        $quote->set([
+        $quote->setMultiple([
             'name' => $name,
             'quoteNumber' => $this->nextNumber('Quote', 'quoteNumber', 'Q-' . gmdate('Y') . '-'),
             'status' => 'Draft',
@@ -64,7 +64,7 @@ class SalesService
 
         $order = $this->entityManager->getNewEntity('Order');
 
-        $order->set([
+        $order->setMultiple([
             'name' => 'Order from ' . $quote->get('quoteNumber'),
             'orderNumber' => $this->nextNumber('Order', 'orderNumber', 'SO-' . gmdate('Y') . '-'),
             'status' => 'Draft',
@@ -95,7 +95,7 @@ class SalesService
         foreach ($items as $source) {
             $target = $this->entityManager->getNewEntity('OrderItem');
 
-            $target->set([
+            $target->setMultiple([
                 'name' => $source->get('name'),
                 'orderId' => $order->getId(),
                 'productId' => $source->get('productId'),
@@ -137,7 +137,7 @@ class SalesService
 
         $payment = $this->entityManager->getNewEntity('Payment');
 
-        $payment->set([
+        $payment->setMultiple([
             'name' => $this->text($data, 'name') ?: 'Payment ' . gmdate('Y-m-d H:i:s'),
             'paymentNumber' => $this->nextNumber('Payment', 'paymentNumber', 'PAY-' . gmdate('Y') . '-'),
             'status' => $this->text($data, 'status') ?: 'Paid',
@@ -195,7 +195,7 @@ class SalesService
 
         $header = $this->getInWorkspace($headerEntity, $parentId);
 
-        $header->set([
+        $header->setMultiple([
             'subtotal' => $subtotal,
             'discountAmount' => $discount,
             'taxAmount' => $tax,
@@ -220,7 +220,7 @@ class SalesService
 
         $item = $this->entityManager->getNewEntity($entityType);
 
-        $item->set([
+        $item->setMultiple([
             'name' => $this->text($data, 'name') ?: ($this->text($data, 'description') ?: 'Item'),
             $parentField => $parentId,
             'productId' => $this->nullableId($data, 'productId'),
