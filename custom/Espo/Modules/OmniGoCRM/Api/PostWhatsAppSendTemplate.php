@@ -23,11 +23,6 @@ class PostWhatsAppSendTemplate implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         $leadId = isset($data->leadId) && is_string($data->leadId) ? trim($data->leadId) : '';
         $templateName = isset($data->templateName) && is_string($data->templateName) ? trim($data->templateName) : '';
         $languageCode = isset($data->languageCode) && is_string($data->languageCode) ? trim($data->languageCode) : '';
@@ -86,7 +81,7 @@ class PostWhatsAppSendTemplate implements Action
 
         $message = $this->entityManager->getNewEntity('WhatsAppMessage');
 
-        $message->set([
+        $message->setMultiple([
             'name' => $result->providerMessageId,
             'providerMessageId' => $result->providerMessageId,
             'direction' => 'Outbound',
