@@ -1,6 +1,6 @@
 # OmniGoCRM — EspoCRM Base
 
-OmniGoCRM is being migrated from the original Laravel prototype to an EspoCRM-based application.
+OmniGoCRM is built on the EspoCRM application and keeps OmniGoCRM-specific functionality in custom modules.
 
 ## Upstream
 
@@ -8,9 +8,9 @@ OmniGoCRM is being migrated from the original Laravel prototype to an EspoCRM-ba
 - Upstream license: GNU AGPLv3
 - Development model: maintain an upstream-compatible fork and keep OmniGoCRM functionality in custom modules where practical.
 
-EspoCRM's documentation explicitly supports maintaining a customized fork and recommends merging upstream changes and producing production builds from artifacts.
+EspoCRM supports maintaining customized modules and merging upstream changes while producing production builds from controlled artifacts.
 
-## Migration rule
+## Backend rule
 
 Do not rewrite EspoCRM core unnecessarily.
 
@@ -19,9 +19,9 @@ OmniGoCRM functionality should live primarily in:
 - `custom/Espo/Modules/OmniGoCRM/` for backend/module metadata
 - `client/custom/modules/omni-go-crm/` for frontend code
 - `docs/` for architecture and deployment
-- `mobile/` for the Android/iOS clients
+- `android/` and `ios/` for native clients
 
-The existing Laravel prototype remains in the repository until the EspoCRM migration reaches feature parity. It must not be deleted during the migration.
+There is no separate Laravel backend in the repository. EspoCRM is the sole active CRM/data backend.
 
 ## Target product
 
