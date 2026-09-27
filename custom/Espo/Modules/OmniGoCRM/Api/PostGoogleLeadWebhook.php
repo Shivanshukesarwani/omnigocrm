@@ -15,7 +15,6 @@ class PostGoogleLeadWebhook implements Action {
         $provided = trim((string) ($request->getHeader('X-OmniGoCRM-Google-Key') ?? ''));
         if ($expected === '' || $provided === '' || !hash_equals($expected, $provided)) throw new Forbidden('Invalid Google lead webhook key.');
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
         return ResponseComposer::json(['accepted'=>true,'results'=>$this->service->captureGoogle($data)]);
     }
 }
