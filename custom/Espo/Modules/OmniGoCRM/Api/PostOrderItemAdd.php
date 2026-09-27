@@ -18,7 +18,7 @@ class PostOrderItemAdd implements Action
     {
         $data = $request->getParsedBody();
 
-        if ($data === null || empty($data->orderId) || !is_string($data->orderId)) {
+        if (empty($data->orderId)) {
             throw new BadRequest('orderId is required.');
         }
 
@@ -40,7 +40,7 @@ class PostOrderItemAdd implements Action
 
         $discount = max(0, (float) ($data->discountAmount ?? 0));
         $tax = max(0, (float) ($data->taxAmount ?? 0));
-        $item->set([
+        $item->setMultiple([
             'name' => isset($data->name) && is_string($data->name) ? trim($data->name) : 'Item',
             'orderId' => $orderId,
             'productId' => isset($data->productId) && is_string($data->productId) ? trim($data->productId) : null,
@@ -73,7 +73,7 @@ class PostOrderItemAdd implements Action
             $subtotal += $qty * $price;
         }
 
-        $order->set([
+        $order->setMultiple([
             'subtotal' => $subtotal,
             'discountAmount' => $discountTotal,
             'taxAmount' => $taxTotal,
