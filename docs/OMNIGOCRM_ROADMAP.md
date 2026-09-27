@@ -7,26 +7,27 @@
 - [x] OmniGoCRM custom module namespace created
 - [x] Vendor EspoCRM source into the development branch
 - [x] Build EspoCRM dependencies and validate custom module code in CI
-- [x] Docker development environment (EspoCRM + MariaDB baseline)
+- [x] Docker development environment
 - [x] CI build/test pipeline
+- [x] Remove obsolete secondary CRM backend
 
 ## Phase 1 — Core CRM
-- [x] Leads (native EspoCRM Lead + OmniGoCRM fields)
-- [x] Contacts (native EspoCRM)
-- [x] Accounts/companies (native EspoCRM)
-- [x] Opportunities/deals (native EspoCRM)
+- [x] Leads
+- [x] Contacts
+- [x] Accounts/companies
+- [x] Opportunities/deals
 - [x] Pipeline
-- [x] Tasks (native EspoCRM)
+- [x] Tasks
 - [ ] Follow-ups
-- [x] Notes (native EspoCRM)
-- [x] Tags (native EspoCRM)
+- [x] Notes
+- [x] Tags
 - [x] Custom fields
 - [x] externalLeadId idempotency
-- [x] CSV/Excel import (native EspoCRM + documented OmniGoCRM field mapping)
+- [x] CSV/Excel import
 - [x] Lead assignment metadata foundation
 - [x] Lead source tracking
 
-## Phase 2 — OmniGoCRM Sales Layer
+## Phase 2 — Sales
 - [x] Products/services
 - [x] Quotations
 - [x] Orders
@@ -35,10 +36,10 @@
 - [x] Customer timeline
 
 ## Phase 3 — WhatsApp
-- [x] WhatsApp provider abstraction (Cloud API service boundary)
+- [x] WhatsApp provider abstraction
 - [x] Meta WhatsApp Cloud API outbound text + signed webhook foundation
-- [x] Shared inbox conversation model + unread/read/close actions
-- [x] Conversation assignment metadata
+- [x] Shared inbox conversation model
+- [x] Conversation assignment
 - [x] Templates + approval-gated sending
 - [x] Media metadata/webhook ingestion
 - [x] Delivery/read states
@@ -60,9 +61,9 @@
 - [ ] IVR integration
 
 ## Phase 5 — Lead Acquisition
-- [x] Public lead forms (Espo native Lead Capture + OmniGoCRM gateway)
-- [x] Website/server lead-capture endpoint
-- [x] Meta lead webhook + Graph lead retrieval adapter
+- [x] Public lead forms
+- [x] Website/server lead capture
+- [x] Meta lead webhook + Graph adapter
 - [x] Google lead webhook adapter
 - [x] API lead ingestion with externalLeadId idempotency
 - [x] Lead assignment metadata foundation
@@ -70,15 +71,17 @@
 ## Phase 6 — Automation
 - [x] Trigger engine
 - [x] Conditions
-- [x] Actions (task creation + record updates)
+- [x] Actions
 - [x] Delays
 - [x] Scheduled jobs
 - [ ] Webhooks
 - [ ] Assignment rules
-- [x] Automation runs can create follow-up tasks
+- [x] Resumable automation runs
+- [x] Conditional branches
+- [x] Guarded automated WhatsApp actions
 
 ## Phase 7 — SaaS
-- [ ] Tenant/workspace isolation
+- [ ] Tenant/workspace isolation hardening
 - [ ] Organizations
 - [ ] Users
 - [ ] Roles
@@ -102,29 +105,23 @@
 - [ ] WhatsApp
 - [x] Calling
 - [x] Device registration foundation
-- [x] Dashboard summary API + native mobile dashboard
-
-## Backend migration
-
-The Laravel prototype has been moved to `legacy/laravel-prototype/` and is no longer an active backend. No new product functionality should be added there.
-
+- [x] Dashboard summary API + native dashboard
+- [ ] Sales documents
+- [ ] Broadcasts
+- [ ] Offline sync/conflict handling
+- [ ] Push delivery
 
 ## Remaining before production SaaS launch
 
-The repository is substantially implemented, but these items still require final integration/testing before calling the product production-complete:
-
-- External billing processor webhooks and live checkout (Stripe/Razorpay/etc.).
-- Invitation email delivery and polished workspace/member administration UI.
-- Meta/Google lead-source adapters beyond the generic lead-capture API.
-- Public form security hardening (rate limiting, origin controls and deployment-key strategy).
-- iOS APNs device registration/push delivery.
-- Native mobile sales document and broadcast management screens.
+- External billing processor webhooks and live checkout.
+- Invitation email delivery and workspace/member administration UI.
+- Production Meta/Google lead-source adapters.
+- Public form security hardening.
+- iOS APNs push delivery.
+- Native mobile sales document and broadcast screens.
 - Offline sync, background refresh and conflict handling.
-- PDF quote/invoice generation and production document templates.
-- Production Docker secrets, HTTPS/reverse-proxy, backup/restore and migration runbooks.
-- Full integration/E2E tests against a real EspoCRM + MariaDB instance and real WhatsApp provider sandbox.
+- PDF quote/invoice generation.
+- Production Docker secrets, HTTPS/reverse proxy, backup/restore and migration runbooks.
+- Full integration/E2E tests against real EspoCRM + MariaDB and a WhatsApp provider sandbox.
 
-
-## Implementation status — 2026-09-25
-
-The active EspoCRM branch now includes the shared WhatsApp conversation/inbox layer, media metadata capture, approved template sending, sales dashboard metrics, customer timeline API, Meta/Google lead ingestion adapters, workspace-aware automation, resumable automation runs, conditional branches, and guarded automated WhatsApp actions. CI is used after implementation batches; production billing checkout, push delivery, offline sync, complete tenant integration testing, and deployment hardening remain unfinished.
+The active architecture is EspoCRM + OmniGoCRM custom modules + native clients.
