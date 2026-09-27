@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omnigocrm-daemon
+  namespace: omnigocrm
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: omnigocrm-daemon}
+  template:
+    metadata:
+      labels: {app: omnigocrm-daemon}
+    spec:
+      containers:
+        - name: daemon
+          image: ghcr.io/shivanshukesarwani/omnigocrm:10.0.8
+          env:
+            - {name: ESPOCRM_DATABASE_PLATFORM, value: Mysql}
+            - {name: ESPOCRM_DATABASE_HOST, value: omnigocrm-db}
+            - {name: ESPOCRM_DATABASE_PORT, value: "3306"}
+            - {name: ESPOCRM_DATABASE_NAME, valueFrom: {configMapKeyRef: {name: omnigocrm-config, key: ESPOCRM_DATABASE_NAME}}}
+            - {name: ESPOCRM_DATABASE_USER, valueFrom: {configMapKeyRef: {name: omnigocrm-config, key: ESPOCRM_DATABASE_USER}}}
+            - {name: ESPOCRM_DATABASE_PASSWORD, valueFrom: {secretKeyRef: {name: omnigocrm-secrets, key: db-password}}}
+          command: ["docker-daemon.sh"]
+          volumeMounts: [{name: data, mountPath: /var/www/html/data}]
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: omnigocrm-data}
