@@ -1,12 +1,12 @@
 # Production Deployment
 
-OmniGoCRM uses EspoCRM as its only CRM/data backend. This repository now includes a production Docker Compose baseline, HTTPS reverse proxy, Docker secrets, scheduled processing, backups, Kubernetes manifests, and a release image workflow.
+OmniGoCRM uses EspoCRM as its only CRM/data backend. The production stack uses PostgreSQL for the database, with Docker Compose, HTTPS reverse proxy, secrets, scheduled processing, backups, Kubernetes manifests, and a release image workflow.
 
-EspoCRM recommends Docker Compose for production Docker deployments, supports Docker secrets through *_FILE variables, and recommends version-pinning when customizations are involved. citeturn0search0
+EspoCRM supports PostgreSQL 15 and above and its Docker configuration exposes `Postgresql` as a supported database platform. citeturn0search0turn0search4
 
 ## Production baseline
 
-The recommended baseline is Docker Compose on a Linux VPS or dedicated server. EspoCRM currently supports PHP 8.3–8.5 with MySQL 8+ or MariaDB 10.3+. citeturn0search1
+The recommended baseline is Docker Compose on a Linux VPS or dedicated server. PostgreSQL 18.6 is used here because PostgreSQL 18 is the current supported major release and 18.6 is the current minor release listed by PostgreSQL. PostgreSQL majors receive five years of support, and PostgreSQL recommends using the current minor release for a supported major version. citeturn0search1turn0search7
 
 ### Files
 
@@ -25,14 +25,13 @@ Create the environment file:
 cp .env.example .env
 ```
 
-Set the real domain, TLS email and site URL. Keep the validated EspoCRM and MariaDB versions pinned.
+Set the real domain, TLS email and site URL. Keep the validated EspoCRM and PostgreSQL versions pinned.
 
 Create secrets:
 
 ```bash
 mkdir -p secrets
 openssl rand -base64 36 > secrets/db_password.txt
-openssl rand -base64 36 > secrets/db_root_password.txt
 openssl rand -base64 36 > secrets/admin_password.txt
 chmod 600 secrets/*.txt
 ```
@@ -50,7 +49,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml ps
 ```
 
-Only ports 80/443 are published. MariaDB is isolated on an internal Docker network.
+Only ports 80/443 are published. PostgreSQL is isolated on an internal Docker network.
 
 Caddy obtains and renews TLS certificates automatically when DNS points the domain at the server. EspoCRM documents Caddy as a supported Docker reverse-proxy approach. citeturn0search3
 
@@ -66,7 +65,7 @@ Store backups outside the production server too. Regularly test restoration.
 
 ## Updates
 
-Do not deploy a floating `latest` image. Validate a specific EspoCRM release, build the OmniGoCRM image, run tests and migrations, then deploy the immutable version. EspoCRM documents version pinning as the way to handle incompatible customizations during upgrades. citeturn0search0
+Do not deploy a floating `latest` image. Validate a specific EspoCRM release, build the OmniGoCRM image, run tests and migrations, then deploy the immutable version. EspoCRM documents version pinning as the way to handle incompatible customizations during upgrades. citeturn0search4
 
 ## Kubernetes
 
@@ -75,7 +74,7 @@ The Kubernetes baseline includes:
 - Namespace
 - ConfigMap
 - Persistent storage
-- MariaDB StatefulSet
+- PostgreSQL StatefulSet
 - OmniGoCRM Deployment
 - scheduled daemon
 - Service
@@ -100,7 +99,7 @@ kubectl apply -k deploy/kubernetes
 kubectl -n omnigocrm rollout status deployment/omnigocrm
 ```
 
-The included MariaDB StatefulSet is a single-instance baseline. For high-availability production, use a managed database or database operator with tested backups and failover.
+The included PostgreSQL StatefulSet is a single-instance baseline. For high-availability production, use a managed PostgreSQL service or PostgreSQL operator with tested backups and failover.
 
 ## Security
 
