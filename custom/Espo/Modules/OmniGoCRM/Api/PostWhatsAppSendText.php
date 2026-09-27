@@ -23,11 +23,6 @@ class PostWhatsAppSendText implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         $leadId = isset($data->leadId) && is_string($data->leadId)
             ? trim($data->leadId)
             : '';
@@ -77,7 +72,7 @@ class PostWhatsAppSendText implements Action
 
         $message = $this->entityManager->getNewEntity('WhatsAppMessage');
 
-        $message->set([
+        $message->setMultiple([
             'name' => $result->providerMessageId,
             'providerMessageId' => $result->providerMessageId,
             'direction' => 'Outbound',
