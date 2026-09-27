@@ -19,7 +19,7 @@
                 "DealStageChanged",
                 "CallMissed"
             ],
-            "default": "LeadCreated"
+            "default": "WhatsAppReceived"
         },
         "conditionsJson": {
             "type": "text"
