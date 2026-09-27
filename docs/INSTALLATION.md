@@ -164,7 +164,7 @@ docker compose -f docker-compose.test.yml up -d --build
 
 The repository currently provides this Compose file for **integration testing/local development**, not as the final production Compose configuration.
 
-For production Docker deployment, use `docker-compose.prod.yml` with:
+For production Docker deployment, use `docker-compose.yml` with:
 
 - pinned OmniGoCRM/EspoCRM image version or digest;
 - PostgreSQL 18.x storage;
