@@ -23,13 +23,12 @@ jobs:
         run: |
           mkdir -p secrets
           printf 'ci-db-password' > secrets/db_password.txt
-          printf 'ci-db-root-password' > secrets/db_root_password.txt
           printf 'ci-admin-password' > secrets/admin_password.txt
           docker compose -f docker-compose.prod.yml config
 
       - name: Build production image
         run: |
-          docker build             -f Dockerfile.espocrm             --build-arg ESPOCRM_IMAGE=espocrm/espocrm:10.0.8             -t omnigocrm:ci .
+          docker build -f Dockerfile.espocrm --build-arg ESPOCRM_IMAGE=espocrm/espocrm:10.0.8 -t omnigocrm:ci .
 
       - name: Validate Kubernetes manifests
         run: kubectl kustomize deploy/kubernetes > /tmp/omnigocrm-k8s.yaml
