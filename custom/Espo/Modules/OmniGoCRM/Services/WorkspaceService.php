@@ -56,8 +56,8 @@ class WorkspaceService
 
         $membership = $this->entityManager->getNewEntity('WorkspaceMember');
 
-        $membership->set([
-            'name' => $name . ' / ' . $this->user->get('name'),
+        $membership->setMultiple([
+                'name' => $name . ' / ' . $this->user->get('name'),
             'workspaceId' => $workspace->getId(),
             'userId' => $this->user->getId(),
             'role' => 'Owner',
