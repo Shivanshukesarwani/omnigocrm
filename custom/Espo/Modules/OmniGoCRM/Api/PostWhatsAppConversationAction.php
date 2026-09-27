@@ -20,11 +20,6 @@ class PostWhatsAppConversationAction implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         $conversationId = isset($data->conversationId) && is_string($data->conversationId)
             ? trim($data->conversationId)
             : '';
