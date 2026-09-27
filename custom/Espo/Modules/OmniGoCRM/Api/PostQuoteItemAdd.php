@@ -16,7 +16,7 @@ class PostQuoteItemAdd implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-        if ($data === null || empty($data->quoteId) || !is_string($data->quoteId)) {
+        if (empty($data->quoteId)) {
             throw new BadRequest('quoteId is required.');
         }
 
