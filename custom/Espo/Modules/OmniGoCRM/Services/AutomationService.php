@@ -234,6 +234,30 @@ class AutomationService
             $this->entityManager->saveEntity($task);
             return ['type' => $type, 'id' => $task->getId()];
         }
+        if ($type === 'assignRecord') {
+            $record = $this->entityManager->getEntityById($entityType, $entityId);
+            if (!$record) {
+                throw new BadRequest('Automation target record not found.');
+            }
+            $this->assertEntityWorkspace($record, $workspaceId, 'Automation target');
+            $assignedUserId = trim((string) ($action['assignedUserId'] ?? ''));
+            if ($assignedUserId === '') {
+                throw new BadRequest('assignRecord requires an assignedUserId.');
+            }
+            $member = $this->entityManager->getRDBRepository('WorkspaceMember')->where([
+                'workspaceId' => $workspaceId,
+                'userId' => $assignedUserId,
+                'status' => 'Active',
+                'deleted' => false,
+            ])->findOne();
+            if (!$member) {
+                throw new BadRequest('Automation cannot assign a record to a user outside the active workspace.');
+            }
+            $record->set('assignedUserId', $assignedUserId);
+            $this->entityManager->saveEntity($record);
+            return ['type' => $type, 'id' => $entityId, 'assignedUserId' => $assignedUserId];
+        }
+
         if ($type === 'updateRecord') {
             $record = $this->entityManager->getEntityById($entityType, $entityId);
             if (!$record) {
@@ -434,8 +458,12 @@ class AutomationService
                 continue;
             }
 
-            if (!in_array($action['type'], ['createTask', 'updateRecord', 'sendWhatsAppText', 'sendWhatsAppTemplate'], true)) {
+            if (!in_array($action['type'], ['createTask', 'updateRecord', 'assignRecord', 'sendWhatsAppText', 'sendWhatsAppTemplate'], true)) {
                 throw new BadRequest('Unsupported automation action type: ' . $action['type']);
+            }
+
+            if ($action['type'] === 'assignRecord' && (!is_string($action['assignedUserId'] ?? null) || trim($action['assignedUserId']) === '')) {
+                throw new BadRequest('assignRecord requires an assignedUserId.');
             }
 
             if ($action['type'] === 'updateRecord' && (!is_array($action['fields'] ?? null) || $action['fields'] === [])) {
