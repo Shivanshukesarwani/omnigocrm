@@ -33,7 +33,7 @@
 
 ## Single backend rule
 
-EspoCRM is the only active CRM and data backend. The archived Laravel prototype under legacy/laravel-prototype is historical reference only. New product functionality must not be added there.
+EspoCRM is the only CRM and data backend. All CRM, SaaS, WhatsApp, calling and automation functionality must use the active EspoCRM/OmniGoCRM architecture.
 
 ## Core lifecycle
 
@@ -43,7 +43,7 @@ Lead sources → Lead → Assignment → WhatsApp / Calling / Tasks / Follow-up 
 
 ## Tenant boundary
 
-Workspace-aware records carry omniGoCRMWorkspaceId. OmniGoCRM hooks and access-control metadata enforce workspace boundaries during list/search, read, create/update, and delete operations.
+Workspace-aware records carry `omniGoCRMWorkspaceId`. OmniGoCRM hooks and access-control metadata enforce workspace boundaries during list/search, read, create/update, and delete operations.
 
 Every new tenant-aware entity must receive a workspace identifier, workspace-aware filtering, save/update enforcement, read enforcement, delete enforcement, and cross-workspace tests.
 
