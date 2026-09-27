@@ -7,7 +7,7 @@ mkdir -p "$BACKUP_DIR"
 chmod 700 "$BACKUP_DIR"
 
 docker compose -f docker-compose.prod.yml exec -T db sh -c \
-  'mariadb-dump -u root -p"$(cat /run/secrets/db_root_password)" --all-databases --single-transaction --routines --events' \
+  'pg_dumpall -U "$POSTGRES_USER"' \
   | gzip > "$BACKUP_DIR/omnigocrm-db-$STAMP.sql.gz"
 
 docker compose -f docker-compose.prod.yml exec -T omnigocrm sh -c \
