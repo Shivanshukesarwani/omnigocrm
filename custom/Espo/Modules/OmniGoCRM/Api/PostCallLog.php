@@ -20,11 +20,6 @@ class PostCallLog implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         $leadId = $this->stringValue($data, 'leadId');
         $contactId = $this->stringValue($data, 'contactId');
         $phone = preg_replace('/\D+/', '', $this->stringValue($data, 'phoneNumber')) ?? '';
@@ -44,7 +39,7 @@ class PostCallLog implements Action
 
         $call = $this->entityManager->getNewEntity('Call');
 
-        $call->set([
+        $call->setMultiple([
             'name' => ($direction === 'Inbound' ? 'Inbound' : 'Outbound') . ' mobile call ' . $phone,
             'status' => $this->mapStatus($this->stringValue($data, 'status')),
             'dateStart' => $startedAt,
@@ -64,7 +59,7 @@ class PostCallLog implements Action
                 throw new BadRequest('Lead not found.');
             }
 
-            $call->set([
+            $call->setMultiple([
                 'parentId' => $leadId,
                 'parentType' => 'Lead',
             ]);
@@ -75,7 +70,7 @@ class PostCallLog implements Action
                 throw new BadRequest('Contact not found.');
             }
 
-            $call->set([
+            $call->setMultiple([
                 'parentId' => $contactId,
                 'parentType' => 'Contact',
             ]);
