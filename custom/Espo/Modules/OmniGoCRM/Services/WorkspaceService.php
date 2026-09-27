@@ -42,7 +42,7 @@ class WorkspaceService
 
         $workspace = $this->entityManager->getNewEntity('Workspace');
 
-        $workspace->set([
+        $workspace->setMultiple([
             'name' => $name,
             'slug' => $slug,
             'status' => 'Active',
