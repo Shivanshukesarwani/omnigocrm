@@ -1,41 +1,44 @@
 # EspoCRM Migration Plan
 
-## Why migrate
+## Goal
 
-The original OmniGoCRM prototype implemented CRM, SaaS and mobile concepts independently. EspoCRM provides a mature CRM platform with entities, relationships, ACL, metadata, REST API, layouts, scheduled jobs and extension/module mechanisms.
+OmniGoCRM has completed the architectural migration to EspoCRM as its sole CRM/data backend.
 
-The migration therefore uses EspoCRM as the CRM engine rather than continuing to duplicate those foundations.
+EspoCRM provides the mature CRM foundation: entities, relationships, ACL, metadata, REST API, layouts, scheduled jobs and extension/module mechanisms.
 
-## Repository layout during migration
+## Repository layout
 
 ```
 omnigocrm/
-├── application/              # EspoCRM upstream (target)
-├── client/                   # EspoCRM frontend (target)
+├── application/              # EspoCRM application
+├── client/                   # EspoCRM frontend
 ├── custom/                   # OmniGoCRM custom backend modules
 ├── client/custom/            # OmniGoCRM custom frontend
-├── mobile/                   # OmniGoCRM mobile clients
+├── android/                  # Android client
+├── ios/                      # iOS client
 ├── docs/                     # architecture/deployment docs
-└── legacy/                   # old Laravel prototype after migration
+└── tests/                    # project-specific tests
 ```
 
-## Migration stages
+## Completed migration stages
 
 1. Bring EspoCRM source into the development branch.
-2. Build and run the unmodified upstream application.
+2. Build and validate the upstream application.
 3. Add OmniGoCRM module scaffolding.
-4. Recreate the CRM requirements using EspoCRM entities/metadata.
+4. Recreate CRM requirements using EspoCRM entities/metadata.
 5. Add WhatsApp and telephony provider abstractions.
 6. Add SaaS tenant/workspace functionality.
-7. Connect the mobile clients to the EspoCRM REST API.
-8. Port useful prototype functionality.
+7. Connect native clients to the EspoCRM REST API.
+8. Port useful product functionality into the active architecture.
 9. Add automated tests.
-10. Archive the Laravel prototype under `legacy/laravel-prototype/` and remove it after migration/reference requirements are satisfied.
+10. Remove the obsolete secondary backend from the repository.
 
-## Do not do
+## Rules
 
-- Do not replace EspoCRM core with Laravel controllers.
-- Do not add new production routes or CRM functionality to `legacy/laravel-prototype/`.
+- Do not introduce a second CRM backend.
+- Do not duplicate EspoCRM entities, authentication, tenancy or CRM routes in another application.
+- Keep OmniGoCRM-specific backend code under `custom/Espo/Modules/OmniGoCRM/`.
+- Keep frontend customizations under `client/custom/modules/omni-go-crm/`.
 - Do not put credentials in Git.
 - Do not use unofficial WhatsApp browser automation as the core integration.
 - Do not promise universal Android call recording.
