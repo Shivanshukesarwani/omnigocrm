@@ -19,7 +19,7 @@ class PostBroadcastSchedule implements Action
     {
         $data = $request->getParsedBody();
 
-        if ($data === null || !isset($data->campaignId) || !is_string($data->campaignId)) {
+        if (!isset($data->campaignId) || !is_string($data->campaignId)) {
             throw new BadRequest('campaignId is required.');
         }
 
@@ -60,7 +60,7 @@ class PostBroadcastSchedule implements Action
             throw new BadRequest('A valid scheduledAt is required.');
         }
 
-        $campaign->set([
+        $campaign->setMultiple([
             'scheduledAt' => gmdate('Y-m-d H:i:s', strtotime($scheduledAt)),
             'status' => 'Scheduled',
             'languageCode' => $campaign->get('languageCode') ?: $template->get('languageCode'),
