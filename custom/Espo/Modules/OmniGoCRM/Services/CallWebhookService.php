@@ -76,7 +76,7 @@ class CallWebhookService
         if (!$call) {
             $call = $this->entityManager->getNewEntity('Call');
 
-            $call->set([
+            $call->setMultiple([
                 'name' => ($direction === 'Inbound' ? 'Inbound' : 'Outbound') . ' call ' . $phone,
                 'dateStart' => $start,
                 'dateEnd' => $end,
@@ -96,6 +96,7 @@ class CallWebhookService
             'omniGoCRMProvider' => $provider,
             'omniGoCRMExternalCallId' => $externalCallId,
             'omniGoCRMPhoneNumber' => $phone,
+            'omniGoCRMDisposition' => $this->nullableString($payload, 'disposition'),
             'omniGoCRMRecordingStatus' => $this->mapRecordingStatus($payload),
             'omniGoCRMRecordingExternalUrl' => $this->nullableString($payload, 'recordingUrl'),
             'omniGoCRMTranscript' => $this->nullableString($payload, 'transcript'),
@@ -113,6 +114,13 @@ class CallWebhookService
 
         if ($assignedUserId !== '' && !$call->get('assignedUserId')) {
             $call->set('assignedUserId', $assignedUserId);
+        }
+
+        if ($lead) {
+            $workspaceId = trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? $lead->get('workspaceId')));
+            if ($workspaceId !== '') {
+                $call->set('omniGoCRMWorkspaceId', $workspaceId);
+            }
         }
 
         $this->entityManager->saveEntity($call);
@@ -152,7 +160,7 @@ class CallWebhookService
             ->getRDBRepositoryByClass(Lead::class)
             ->getNew();
 
-        $lead->set([
+        $lead->setMultiple([
             'phoneNumber' => $phone,
             'leadStage' => 'New',
             'source' => 'Call',
