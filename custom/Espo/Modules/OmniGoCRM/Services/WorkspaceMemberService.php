@@ -16,15 +16,12 @@ class WorkspaceMemberService
 
     public function activeMembership(string $workspaceId): Entity
     {
-        $membership = $this->entityManager
-            ->getRDBRepository('WorkspaceMember')
-            ->where([
-                'workspaceId' => $workspaceId,
-                'userId' => $this->user->getId(),
-                'status' => 'Active',
-                'deleted' => false,
-            ])
-            ->findOne();
+        $membership = $this->entityManager->getRDBRepository('WorkspaceMember')->where([
+            'workspaceId' => $workspaceId,
+            'userId' => $this->user->getId(),
+            'status' => 'Active',
+            'deleted' => false,
+        ])->findOne();
 
         if (!$membership) {
             throw new Forbidden('You are not an active member of this workspace.');
@@ -44,14 +41,14 @@ class WorkspaceMemberService
         $this->assertManager($workspaceId);
 
         if (!in_array($role, ['Admin', 'Manager', 'Agent', 'Viewer'], true)) {
-            throw new \InvalidArgumentException('Invalid workspace role.');
+            throw new InvalidArgumentException('Invalid workspace role.');
         }
 
         $workspace = $this->entityManager->getEntityById('Workspace', $workspaceId);
         $user = $this->entityManager->getEntityById('User', $userId);
 
-        if (!$workspace || !$user) {
-            throw new \InvalidArgumentException('Workspace or user not found.');
+        if (!$workspace || !$user || $workspace->get('status') !== 'Active') {
+            throw new InvalidArgumentException('Workspace or user not found.');
         }
 
         $repo = $this->entityManager->getRDBRepository('WorkspaceMember');
@@ -81,9 +78,9 @@ class WorkspaceMemberService
 
     public function changeRole(string $workspaceId, string $membershipId, string $role): Entity
     {
-        $this->assertManager($workspaceId);
+        $actor = $this->activeMembership($workspaceId);
 
-        if (!in_array($role, ['Owner', 'Admin', 'Manager', 'Agent', 'Viewer'], true)) {
+        if (!in_array($role, ['Admin', 'Manager', 'Agent', 'Viewer'], true)) {
             throw new \InvalidArgumentException('Invalid workspace role.');
         }
 
@@ -91,6 +88,18 @@ class WorkspaceMemberService
 
         if (!$membership || (string) $membership->get('workspaceId') !== $workspaceId) {
             throw new \InvalidArgumentException('Workspace membership not found.');
+        }
+
+        if (!in_array($actor->get('role'), ['Owner', 'Admin'], true)) {
+            throw new Forbidden('Workspace admin access is required.');
+        }
+
+        if ((string) $membership->get('userId') === $this->user->getId()) {
+            throw new Forbidden('You cannot change your own workspace role.');
+        }
+
+        if ((string) $membership->get('role') === 'Owner') {
+            throw new Forbidden('Only an explicit ownership-transfer workflow may change an owner.');
         }
 
         $membership->set('role', $role);
@@ -101,7 +110,7 @@ class WorkspaceMemberService
 
     public function setStatus(string $workspaceId, string $membershipId, string $status): Entity
     {
-        $this->assertManager($workspaceId);
+        $actor = $this->activeMembership($workspaceId);
 
         if (!in_array($status, ['Active', 'Suspended', 'Removed'], true)) {
             throw new \InvalidArgumentException('Invalid member status.');
@@ -113,8 +122,16 @@ class WorkspaceMemberService
             throw new \InvalidArgumentException('Workspace membership not found.');
         }
 
-        if ((string) $membership->get('userId') === $this->user->getId() && $status !== 'Active') {
+        if (!in_array($actor->get('role'), ['Owner', 'Admin'], true)) {
+            throw new Forbidden('Workspace admin access is required.');
+        }
+
+        if ((string) $membership->get('userId') === $this->user->getId()) {
             throw new Forbidden('You cannot suspend or remove your own active membership.');
+        }
+
+        if ((string) $membership->get('role') === 'Owner') {
+            throw new Forbidden('The workspace owner cannot be suspended or removed.');
         }
 
         $membership->set('status', $status);
