@@ -33,7 +33,7 @@ The authenticated user's active workspace is stored as `omniGoCRMCurrentWorkspac
 
 ## Tenant-aware records
 
-The current implementation adds `omniGoCRMWorkspaceId` to the core CRM records used by OmniGoCRM:
+The implementation adds `omniGoCRMWorkspaceId` to the core CRM records used by OmniGoCRM, including automation and billing records:
 
 - Leads
 - Contacts
