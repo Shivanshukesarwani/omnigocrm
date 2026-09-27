@@ -14,7 +14,7 @@ class GetWorkspaceMembers implements Action
     public function process(Request $request): Response
     {
         $workspaceId = $request->getQueryParam('workspaceId') ?? '';
-        if (!is_string($workspaceId) || trim($workspaceId) === '') {
+        if (trim($workspaceId) === '') {
             throw new BadRequest('workspaceId is required.');
         }
 
