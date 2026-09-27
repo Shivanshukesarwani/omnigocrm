@@ -35,7 +35,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ->find();
 
         foreach ($campaigns as $campaign) {
-            $campaign->set([
+            $campaign->setMultiple([
                 'status' => 'Running',
                 'startedAt' => $campaign->get('startedAt') ?: $now,
             ]);
@@ -60,7 +60,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ->find();
 
         if (count($recipients) === 0) {
-            $campaign->set([
+            $campaign->setMultiple([
                 'status' => 'Completed',
                 'completedAt' => gmdate('Y-m-d H:i:s'),
             ]);
@@ -97,7 +97,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ->count();
 
         if ($remaining === 0) {
-            $campaign->set([
+            $campaign->setMultiple([
                 'status' => 'Completed',
                 'completedAt' => gmdate('Y-m-d H:i:s'),
             ]);
@@ -121,7 +121,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
         }
 
         if (!$lead || !$lead->get('whatsappOptIn')) {
-            $recipient->set([
+            $recipient->setMultiple([
                 'status' => 'Skipped',
                 'errorMessage' => 'Lead is missing or WhatsApp opt-in is not enabled.',
             ]);
@@ -137,7 +137,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
         }
 
         if ($phone === '') {
-            $recipient->set([
+            $recipient->setMultiple([
                 'status' => 'Skipped',
                 'errorMessage' => 'No WhatsApp number is available.',
             ]);
@@ -158,7 +158,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
 
             $message = $this->entityManager->getNewEntity('WhatsAppMessage');
 
-            $message->set([
+            $message->setMultiple([
                 'name' => $result->providerMessageId,
                 'providerMessageId' => $result->providerMessageId,
                 'direction' => 'Outbound',
@@ -188,7 +188,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
                 $sentAt,
             );
 
-            $recipient->set([
+            $recipient->setMultiple([
                 'status' => 'Sent',
                 'providerMessageId' => $result->providerMessageId,
                 'sentAt' => $sentAt,
@@ -198,7 +198,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
 
             $this->incrementCampaign($campaign, true, false);
         } catch (Throwable $e) {
-            $recipient->set([
+            $recipient->setMultiple([
                 'status' => 'Failed',
                 'errorMessage' => mb_substr($e->getMessage(), 0, 2000),
             ]);
