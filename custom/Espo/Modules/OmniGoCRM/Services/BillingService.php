@@ -92,7 +92,7 @@ class BillingService
             throw new \InvalidArgumentException('Workspace not found.');
         }
 
-        $workspace->set([
+        $workspace->setMultiple([
             'plan' => $plan,
             'subscriptionStatus' => $status,
         ]);
@@ -111,7 +111,7 @@ class BillingService
             $subscription = $this->entityManager->getNewEntity('BillingSubscription');
         }
 
-        $subscription->set([
+        $subscription->setMultiple([
             'name' => $workspace->get('name') . ' Subscription',
             'workspaceId' => $workspaceId,
             'provider' => 'Manual',
