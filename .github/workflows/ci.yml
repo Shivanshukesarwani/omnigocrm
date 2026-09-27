@@ -55,12 +55,6 @@ jobs:
         run: |
           find custom/Espo/Modules/OmniGoCRM -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l
 
-  legacy-prototype:
-    runs-on: ubuntu-latest
-    if: false
-    steps:
-      - run: echo "Laravel prototype retained for migration reference."
-
   mobile:
     runs-on: ubuntu-latest
     steps:

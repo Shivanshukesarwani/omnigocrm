@@ -6,30 +6,25 @@ The canonical Android project is `android/`.
 
 Open the `android/` directory in Android Studio.
 
-The app uses the same Laravel REST API as the web CRM. Set the backend address in:
+The app uses the EspoCRM/OmniGoCRM REST API. Set the backend address in:
 
-```text
-android/app/src/main/java/com/shivanshu/crm/AppConfig.kt
-```
+`android/app/src/main/java/com/shivanshu/crm/AppConfig.kt`
 
 Use HTTPS for production.
 
-## Included screens
+## Included workflows
+
+The mobile client is being brought to feature parity with the web platform. Current native workflows include:
 
 - Dashboard
 - Leads
 - Contacts
-- Customers
-- Follow-ups
-- Companies
+- Pipeline
 - Tasks
-- Products / Services
-- Quotations
-- Orders / Sales
-- Payments
-- Notifications
+- Calling
+- Device registration
 
-Record-level actions include calling, WhatsApp click-to-chat, lead conversion and customer conversion.
+Additional follow-up, WhatsApp, sales-document, broadcast, notification and offline-sync workflows remain on the implementation roadmap.
 
 ## Calling
 

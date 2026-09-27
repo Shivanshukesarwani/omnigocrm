@@ -1,25 +1,18 @@
 # Hosting without SSH / terminal
 
-If your Premium Hosting control panel has no SSH/terminal, use this process.
+If the hosting control panel has no SSH/terminal, use the host's supported PHP/Composer deployment workflow or upload a pre-built, verified EspoCRM release artifact.
 
 ## On your Windows PC
 
-1. Install PHP 8.3+ and Composer.
-2. Open a Command Prompt in `backend/`.
-3. Run:
+1. Install the PHP and Composer versions supported by the pinned EspoCRM release.
+2. Prepare the EspoCRM application and OmniGoCRM custom module locally.
+3. Install the production Composer dependencies.
+4. Build/prepare the EspoCRM frontend assets.
+5. Upload the complete verified application artifact and required writable data directories.
+6. Configure the production database and environment settings in the hosting panel.
+7. Set the domain/subdomain document root to the EspoCRM public application directory.
+8. Configure scheduled jobs according to the EspoCRM release instructions.
+9. Enable HTTPS.
+10. Verify workspace isolation, authentication, scheduled automation, WhatsApp webhooks and backups.
 
-```bat
-composer install --no-dev --optimize-autoloader
-php artisan key:generate
-php artisan migrate --seed
-php artisan storage:link
-php artisan optimize
-```
-
-4. Upload the complete `backend/` folder **including `vendor/`** to the hosting account.
-5. Set the domain/subdomain document root to the `backend/public` directory.
-6. Copy `backend/.env.example` to `.env` and change it to your production MySQL credentials and HTTPS URL.
-7. If your control panel has a PHP selector, choose PHP 8.3–8.5.
-8. Make `storage/` and `bootstrap/cache/` writable by the web server.
-
-Do not put `.env`, `vendor`, `app`, `config`, or `database` directly inside a public `public_html` folder where they can be downloaded. The web-visible root must be the Laravel `public` folder.
+Do not place environment secrets, private attachments or internal application files in a publicly downloadable directory.

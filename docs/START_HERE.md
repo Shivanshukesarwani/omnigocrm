@@ -1,115 +1,59 @@
 # Start Here
 
-OmniGoCRM is a multi-tenant PHP/Laravel CRM with a native Android client.
+OmniGoCRM is an EspoCRM-based omnichannel CRM SaaS with native Android and iOS clients.
 
-## 1. Backend installation
+## 1. Backend
 
-Create a MySQL/MariaDB database. For local development, SQLite is also supported.
+The only active backend is EspoCRM plus the OmniGoCRM custom module.
 
-Inside the `backend/` directory:
+For local development, use the repository's Docker/Compose setup or the documented EspoCRM installation procedure.
 
-```text
-composer install
-copy .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan optimize
-php artisan serve
-```
+Key locations:
 
-Open the local CRM at `http://127.0.0.1:8000`.
+`custom/Espo/Modules/OmniGoCRM/` — backend/module code
 
-Before seeding a fresh installation, set the admin/sales credentials in `.env`:
+`client/custom/modules/omni-go-crm/` — frontend customizations
 
-```env
-CRM_ADMIN_EMAIL=admin@example.com
-CRM_ADMIN_PASSWORD=change-this-password
-CRM_SALES_EMAIL=sales@example.com
-CRM_SALES_PASSWORD=change-this-password-too
-```
+`android/` — Android client
 
-## 2. Shared PHP hosting
+`ios/` — iOS client
 
-Production runs on PHP 8.3+ with MySQL/MariaDB. GitHub is source control; GitHub Pages is not the CRM runtime.
+## 2. Production
 
-Point the CRM subdomain document root to:
+Use the EspoCRM deployment procedure documented in `docs/DEPLOYMENT.md`.
 
-```text
-backend/public
-```
-
-Keep the Laravel application code, `.env`, Composer dependencies and private call recordings outside the public document root where your host permits.
-
-Use:
-
-```env
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://crm.example.com
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=your_database
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-CRM_COMPANY_NAME="Your Business"
-CRM_TIMEZONE="Asia/Kolkata"
-```
-
-Production install:
-
-```text
-composer install --no-dev --optimize-autoloader
-php artisan key:generate
-php artisan migrate --seed
-php artisan optimize
-```
+Production should use HTTPS, a supported PHP version, MariaDB/MySQL, scheduled jobs, protected application storage and regular backups.
 
 ## 3. Android app
 
 The canonical Android project is the `android/` directory.
 
-Open `android/` in Android Studio and let Gradle sync. Set the production API address in:
+Open it in Android Studio and configure the production API address in:
 
-```text
-android/app/src/main/java/com/shivanshu/crm/AppConfig.kt
-```
+`android/app/src/main/java/com/shivanshu/crm/AppConfig.kt`
 
-The mobile app shares the same Laravel API and includes the CRM dashboard, leads, contacts, customers, follow-ups, companies, tasks, products, quotations, orders, payments, notifications, WhatsApp and calling.
-
-See `docs/ANDROID.md` and `docs/CALL_RECORDING.md`.
+The mobile client uses the same EspoCRM/OmniGoCRM API as the web platform.
 
 ## 4. WhatsApp
 
-The first release uses click-to-chat with editable, situation-based templates. The CRM generates a prefilled WhatsApp URL; the user reviews and sends the message inside WhatsApp.
+OmniGoCRM uses the official WhatsApp Cloud API integration for server-side messaging. Provider credentials and webhook signing secrets belong in the deployment environment, never in Git.
 
-No Chrome extension is required.
+## 5. Calling
 
-## 5. Call recording
-
-Call recording is best-effort on Android because cellular recording depends on the exact device, OEM, carrier and OS. Calls are still logged when recording is unavailable.
-
-Recordings uploaded to Laravel are private. Only Super Admin/Admin can access the web playback route, and recording access is audited.
+Calling uses the native device dialer/call-tracking foundation. Cellular recording is device and carrier dependent and must be tested on the exact devices used by the team.
 
 ## 6. SaaS lifecycle
 
-A new business can use `/signup` to create its workspace and owner account. New workspaces start with a 14-day trial.
-
-The CRM keeps data separated by workspace and supports Super Admin, Admin, Manager and Sales roles.
+Workspaces, memberships, workspace switching and tenant-aware records are implemented through the OmniGoCRM module on EspoCRM.
 
 ## 7. Excel / CSV imports
 
-Use the Lead Import screen for CSV and Excel files. Required fields are:
-
-- `first_name`
-- `mobile`
-
-Optional fields include last name, company, email, WhatsApp, source, status, pipeline stage, requirement and notes.
+Lead import is handled through EspoCRM's import capabilities plus OmniGoCRM field mapping. Verify required fields and workspace assignment before importing production data.
 
 ## 8. First production test
 
 Verify the full workflow with a real test account:
 
-Lead → Contact → Customer → Quotation → Order → Payment.
+Lead → Contact → Opportunity → Quote → Order → Payment.
 
-Also test WhatsApp, native calling, call activity logging, recording permissions, notification delivery, workspace separation, backups and user-role restrictions.
+Also test WhatsApp, native calling, call activity logging, notification delivery, workspace separation, backups and user-role restrictions.

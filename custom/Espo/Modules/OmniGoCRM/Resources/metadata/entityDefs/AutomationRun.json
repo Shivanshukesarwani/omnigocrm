@@ -44,6 +44,14 @@
         "resultJson": {
             "type": "text"
         },
+        "actionsJson": {
+            "type": "text"
+        },
+        "actionIndex": {
+            "type": "int",
+            "default": 0,
+            "min": 0
+        },
         "workspaceId": {
             "type": "varchar",
             "maxLength": 24,

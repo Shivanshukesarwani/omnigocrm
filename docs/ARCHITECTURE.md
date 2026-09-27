@@ -1,51 +1,56 @@
-# Architecture
+# OmniGoCRM Architecture
 
-```text
-                    Laravel 13 + MySQL
-                           │
-                 ┌─────────┴─────────┐
-                 │                   │
-              Web CRM            REST API
-                 │                   │
-          Browser interface     Android App
-                                     │
-                         ┌───────────┼───────────┐
-                         │           │           │
-                       Calls     WhatsApp     Notifications
-                         │
-                    Call activity
-                         │
-                   Private upload
-                         │
-                     Admin only
-```
+~~~text
+                         OmniGoCRM
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+        EspoCRM backend                Native clients
+              │                       Android / iOS
+              │
+      OmniGoCRM custom module
+              │
+   ┌──────────┼───────────┬───────────────┐
+   │          │           │               │
+  CRM      WhatsApp     Calling       Automation
+   │          │           │               │
+   ├── Leads
+   ├── Contacts
+   ├── Accounts
+   ├── Opportunities
+   ├── Tasks
+   ├── Meetings
+   ├── Products
+   ├── Quotes
+   ├── Orders
+   └── Payments
+              │
+              ▼
+       SaaS / Workspace layer
+              │
+       Users / Roles / Billing
+~~~
 
-## Lifecycle
+## Single backend rule
 
-```text
-LEAD ──convert──> CONTACT ──convert──> CUSTOMER
-```
+EspoCRM is the only CRM and data backend. All CRM, SaaS, WhatsApp, calling and automation functionality must use the active EspoCRM/OmniGoCRM architecture.
 
-The underlying person/company details are carried forward rather than creating a second unrelated record.
+## Core lifecycle
 
-## WhatsApp
+~~~text
+Lead sources → Lead → Assignment → WhatsApp / Calling / Tasks / Follow-up → Deal → Quote → Order → Payment → Customer timeline
+~~~
 
-Templates contain placeholders such as:
+## Tenant boundary
 
-- `{first_name}`
-- `{last_name}`
-- `{company}`
-- `{requirement}`
-- `{salesperson}`
-- `{company_name}`
+Workspace-aware records carry `omniGoCRMWorkspaceId`. OmniGoCRM hooks and access-control metadata enforce workspace boundaries during list/search, read, create/update, and delete operations.
 
-The API returns a `wa.me` click-to-chat URL.
+Every new tenant-aware entity must receive a workspace identifier, workspace-aware filtering, save/update enforcement, read enforcement, delete enforcement, and cross-workspace tests.
 
-## Permissions
+## Provider boundary
 
-- `super_admin` — all areas
-- `admin` — all CRM areas including call recordings
-- `manager` — operational CRM, no recording by default
-- `sales` — assigned CRM work, no recording access
+External integrations are isolated behind provider services/adapters for WhatsApp Cloud API, Meta/Google lead ingestion, telephony, billing, and push notifications. Credentials must never be committed to Git.
 
-The recording route checks both authentication and role before streaming/downloading a file.
+## Automation boundary
+
+Inbound events should be acknowledged quickly. Automation execution runs through scheduled jobs where possible, with persistent run state for delayed and resumable actions.

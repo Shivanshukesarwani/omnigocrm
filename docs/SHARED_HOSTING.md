@@ -1,16 +1,17 @@
 # Shared Hosting
 
-Required: PHP 8.3 or newer, MySQL or MariaDB, and a way to install Composer dependencies.
+OmniGoCRM should be deployed using a hosting environment that meets the PHP, database and scheduled-job requirements of the pinned EspoCRM release.
 
-Recommended layout:
+Required:
 
-/home/account/omnigocrm/backend
-/home/account/your-domain/public_html
+- Supported PHP version for the pinned EspoCRM release
+- MySQL/MariaDB
+- Composer
+- HTTPS
+- Scheduled jobs/cron
+- Persistent writable application data
+- Regular database and file backups
 
-The domain should serve backend/public. Keep the Laravel application code outside public_html when the hosting panel allows it.
+The web server should serve the EspoCRM public application directory. Keep environment configuration, private attachments and application data outside directly downloadable public paths.
 
-Set APP_URL, the MySQL connection variables, SESSION_DRIVER=database, CACHE_STORE=database, and FILESYSTEM_DISK=local.
-
-Private call recordings must be writable by PHP but must not be directly downloadable from a public URL.
-
-Run database migrations during deployment before enabling a new application release.
+For shared hosting, follow the EspoCRM installation and deployment procedure for the exact version being deployed. Do not assume generic PHP application paths or commands from an unrelated framework.
