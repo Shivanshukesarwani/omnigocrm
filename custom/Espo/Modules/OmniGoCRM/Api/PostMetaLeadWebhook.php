@@ -12,7 +12,6 @@ class PostMetaLeadWebhook implements Action {
         $raw = (string) $request->getBodyContents();
         $this->service->verifyMetaSignature($raw, $request->getHeader('X-Hub-Signature-256'));
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
         return ResponseComposer::json(['accepted'=>true,'results'=>$this->service->captureMeta($data)]);
     }
 }
