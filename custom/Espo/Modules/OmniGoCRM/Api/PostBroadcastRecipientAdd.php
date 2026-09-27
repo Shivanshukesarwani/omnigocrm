@@ -19,7 +19,7 @@ class PostBroadcastRecipientAdd implements Action
     {
         $data = $request->getParsedBody();
 
-        if ($data === null || !isset($data->campaignId) || !is_string($data->campaignId)) {
+        if (!isset($data->campaignId) || !is_string($data->campaignId)) {
             throw new BadRequest('campaignId is required.');
         }
 
@@ -57,7 +57,7 @@ class PostBroadcastRecipientAdd implements Action
 
         $phone = trim((string) $lead->get('whatsappNumber'));
 
-        $recipient->set([
+        $recipient->setMultiple([
             'name' => trim((string) $lead->get('name')),
             'campaignId' => $campaignId,
             'leadId' => $leadId,
