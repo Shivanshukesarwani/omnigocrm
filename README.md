@@ -1,17 +1,17 @@
 # OmniGoCRM
 
-**OmniGoCRM** is an open-source, self-hostable CRM/SaaS platform being built on top of the EspoCRM foundation.
+**OmniGoCRM** is an open-source, self-hostable omnichannel CRM/SaaS platform built on the EspoCRM foundation.
 
-The project is designed around the feature set we want from a TeleCRM-style sales CRM: lead management, follow-ups, WhatsApp, calling, automation, team management, reporting, integrations, SaaS workspaces and mobile apps.
+The product targets lead management, follow-ups, WhatsApp, calling, automation, team management, reporting, integrations, SaaS workspaces and native mobile apps.
 
 ## Current architecture
 
-EspoCRM is now the **only active CRM backend**. It provides the mature CRM foundation: entities, relationships, ACL, metadata, REST API, layouts, scheduled jobs and extension/module support. OmniGoCRM-specific functionality is added in custom modules instead of unnecessarily rewriting the core.
+EspoCRM is the **only CRM/data backend**. OmniGoCRM-specific functionality is implemented in custom modules instead of maintaining a second application backend.
 
 See:
 
 - `docs/ESPO_BASE.md`
-- `docs/ESPO_MIGRATION.md`
+- `docs/DEPLOYMENT.md`
 - `docs/OMNIGOCRM_ROADMAP.md`
 - `docs/WACRM_FEATURE_INTEGRATION.md`
 
@@ -91,11 +91,11 @@ See:
 - Audit/security controls
 
 ### Mobile
-Android and iOS clients will use the same CRM backend and expose the major CRM, follow-up, WhatsApp, calling, notification and dashboard workflows supported by the platform.
+Android and iOS clients use the same EspoCRM/OmniGoCRM backend and are being brought toward feature parity with the web workflows.
 
-## Repository status
+## Repository rule
 
-The Laravel prototype has been moved to `legacy/laravel-prototype/` and is no longer an active backend. New CRM, SaaS, WhatsApp, calling, automation or mobile functionality must be implemented against the EspoCRM backend.
+There is **one backend only: EspoCRM + OmniGoCRM custom modules**. Do not introduce a second CRM backend or duplicate CRM models, routes, authentication, tenancy or business logic outside the active EspoCRM architecture.
 
 ## Upstream
 
@@ -103,8 +103,4 @@ OmniGoCRM is based on the open-source **EspoCRM** project:
 
 https://github.com/espocrm/espocrm
 
-EspoCRM is licensed under **GNU AGPLv3**. Required upstream license and attribution notices will be preserved. OmniGoCRM additions are maintained separately under the same project compliance requirements.
-
-## Development direction
-
-The target is not merely an EspoCRM rebrand. The goal is a complete **Omnichannel CRM SaaS** with EspoCRM as the reliable CRM engine and OmniGoCRM modules for the additional product requirements.
+EspoCRM is licensed under **GNU AGPLv3**. Required upstream license and attribution notices will be preserved.
