@@ -30,11 +30,12 @@ omnigocrm/
 7. Connect the mobile clients to the EspoCRM REST API.
 8. Port useful prototype functionality.
 9. Add automated tests.
-10. Move the Laravel prototype to `legacy/` only after parity is verified.
+10. Archive the Laravel prototype under `legacy/laravel-prototype/` and remove it after migration/reference requirements are satisfied.
 
 ## Do not do
 
 - Do not replace EspoCRM core with Laravel controllers.
+- Do not add new production routes or CRM functionality to `legacy/laravel-prototype/`.
 - Do not put credentials in Git.
 - Do not use unofficial WhatsApp browser automation as the core integration.
 - Do not promise universal Android call recording.
