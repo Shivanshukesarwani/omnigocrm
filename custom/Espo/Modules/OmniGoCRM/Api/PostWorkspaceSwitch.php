@@ -19,11 +19,11 @@ class PostWorkspaceSwitch implements Action
     {
         $data = $request->getParsedBody();
 
-        if ($data === null || !isset($data->workspaceId) || !is_string($data->workspaceId)) {
+        if (!isset($data->workspaceId)) {
             throw new BadRequest('workspaceId is required.');
         }
 
-        $workspace = $this->service->switch(trim($data->workspaceId));
+        $workspace = $this->service->switch(trim((string) $data->workspaceId));
 
         return ResponseComposer::json([
             'accepted' => true,
