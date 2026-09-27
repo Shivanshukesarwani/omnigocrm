@@ -9,7 +9,10 @@ The product targets lead management, follow-ups, WhatsApp, calling, automation, 
 Installation guides are available for Linux, Windows, macOS, Docker, Kubernetes and production/VPS servers:
 
 - **[Installation Guide](docs/INSTALLATION.md)**
-- [Deployment & production guidance](docs/DEPLOYMENT.md)
+- **[Production Deployment](docs/DEPLOYMENT.md)**
+- **[Production deployment files](deploy/README.md)**
+
+The repository includes a production Docker Compose stack, Caddy HTTPS reverse proxy, Docker secret templates, backup script, Kubernetes baseline and GHCR image publishing workflow.
 
 ## Current architecture
 
