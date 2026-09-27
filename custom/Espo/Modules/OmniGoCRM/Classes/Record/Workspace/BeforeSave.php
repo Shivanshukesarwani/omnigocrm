@@ -5,6 +5,7 @@ namespace Espo\Modules\OmniGoCRM\Classes\Record\Workspace;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Record\Hook\SaveHook;
 use Espo\Core\Utils\Config;
+use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 
@@ -13,6 +14,7 @@ class BeforeSave implements SaveHook
     public function __construct(
         private User $user,
         private Config $config,
+        private EntityManager $entityManager,
     ) {}
 
     public function process(Entity $entity): void
@@ -33,9 +35,13 @@ class BeforeSave implements SaveHook
             return;
         }
 
-        $ownerId = trim((string) $entity->get('ownerUserId'));
-        if ($ownerId !== $this->user->getId()) {
+        $stored = $this->entityManager->getEntityById('Workspace', $entity->getId());
+        if (!$stored || (string) $stored->get('ownerUserId') !== $this->user->getId()) {
             throw new Forbidden('Only the workspace owner can modify workspace settings.');
+        }
+
+        if ((string) $entity->get('ownerUserId') !== (string) $stored->get('ownerUserId')) {
+            throw new Forbidden('Workspace ownership cannot be changed through record editing.');
         }
     }
 }
