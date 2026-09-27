@@ -18,11 +18,6 @@ class PostWorkspaceCreate implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         $name = isset($data->name) && is_string($data->name) ? $data->name : '';
         $slug = isset($data->slug) && is_string($data->slug) ? $data->slug : null;
 
