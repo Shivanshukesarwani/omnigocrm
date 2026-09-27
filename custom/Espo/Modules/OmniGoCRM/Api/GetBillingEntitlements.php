@@ -16,9 +16,7 @@ class GetBillingEntitlements implements Action
     public function process(Request $request): Response
     {
         $workspaceId = $request->getQueryParam('workspaceId');
-        if ($workspaceId !== null && !is_string($workspaceId)) {
-            throw new BadRequest('Invalid workspaceId.');
-        }
+        
 
         return ResponseComposer::json(
             $this->service->entitlements($workspaceId ?: null)
