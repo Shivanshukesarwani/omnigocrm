@@ -2,9 +2,9 @@
 
 ## Call recordings
 
-Call recordings are stored on the Laravel private disk, not in the public web directory.
+Call recordings must use protected/private storage and authenticated, authorized API access.
 
-The web recording route requires an authenticated CRM user and the `admin` or `super_admin` role.
+Recording access must be enforced by the active EspoCRM/OmniGoCRM authorization layer.
 
 Sales users can create/upload recordings associated with their own calls, but they do not get a playback endpoint through the web CRM.
 
