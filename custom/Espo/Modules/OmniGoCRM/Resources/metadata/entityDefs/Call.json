@@ -8,6 +8,22 @@
             "type": "varchar",
             "maxLength": 255
         },
+        "omniGoCRMDisposition": {
+            "type": "enum",
+            "options": [
+                "No Answer",
+                "Connected",
+                "Interested",
+                "Follow Up",
+                "Callback Requested",
+                "Not Interested",
+                "Wrong Number",
+                "Do Not Call",
+                "Qualified",
+                "Converted"
+            ],
+            "displayAsLabel": true
+        },
         "omniGoCRMRecordingStatus": {
             "type": "enum",
             "options": [
