@@ -48,11 +48,11 @@ Build the image:
 docker build -f Dockerfile.espocrm -t omnigocrm:local .
 ```
 
-For the repository's local integration/test environment:
+For the repository's production Compose environment:
 
 ```bash
-docker compose -f docker-compose.test.yml up -d --build
-docker compose -f docker-compose.test.yml ps
+docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml ps
 ```
 
 Open:
@@ -61,18 +61,18 @@ Open:
 http://localhost:8081
 ```
 
-The test Compose file contains deliberately local test credentials. **Do not use them in production.**
+The Compose file contains deliberately local production secrets. **Do not commit production secrets.**
 
 Stop the stack:
 
 ```bash
-docker compose -f docker-compose.test.yml down
+docker compose -f docker-compose.yml down
 ```
 
 Remove test volumes:
 
 ```bash
-docker compose -f docker-compose.test.yml down -v
+docker compose -f docker-compose.yml down -v
 ```
 
 ### Native Linux
@@ -104,8 +104,8 @@ From WSL:
 git clone https://github.com/Shivanshukesarwani/omnigocrm.git
 cd omnigocrm
 docker build -f Dockerfile.espocrm -t omnigocrm:local .
-docker compose -f docker-compose.test.yml up -d --build
-docker compose -f docker-compose.test.yml ps
+docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml ps
 ```
 
 Open:
@@ -132,8 +132,8 @@ Then:
 git clone https://github.com/Shivanshukesarwani/omnigocrm.git
 cd omnigocrm
 docker build -f Dockerfile.espocrm -t omnigocrm:local .
-docker compose -f docker-compose.test.yml up -d --build
-docker compose -f docker-compose.test.yml ps
+docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml ps
 ```
 
 Open:
@@ -156,10 +156,10 @@ Build:
 docker build -f Dockerfile.espocrm -t omnigocrm:local .
 ```
 
-Run the local integration stack:
+Run the production Compose stack:
 
 ```bash
-docker compose -f docker-compose.test.yml up -d --build
+docker compose -f docker-compose.yml up -d --build
 ```
 
 The repository currently provides this Compose file for **integration testing/local development**, not as the final production Compose configuration.
@@ -230,7 +230,7 @@ Persistent Application Storage
 
 Kubernetes secrets should not be committed as plaintext manifests. Restrict database network access to the application. Configure health probes according to the deployed EspoCRM release.
 
-A Kubernetes production manifest/chart should be versioned against the exact EspoCRM release and image digest being deployed. The test Compose file is not a Kubernetes production configuration.
+A Kubernetes production manifest/chart should be versioned against the exact EspoCRM release and image digest being deployed. The Compose file is not a Kubernetes production configuration.
 
 ---
 
@@ -314,19 +314,19 @@ Never blindly replace a production application without checking database migrati
 Check containers:
 
 ```bash
-docker compose -f docker-compose.test.yml ps
+docker compose -f docker-compose.yml ps
 ```
 
 View application logs:
 
 ```bash
-docker compose -f docker-compose.test.yml logs --tail=200 omnigocrm-test
+docker compose -f docker-compose.yml logs --tail=200 omnigocrm
 ```
 
 View database logs:
 
 ```bash
-docker compose -f docker-compose.test.yml logs --tail=200 db-test
+docker compose -f docker-compose.yml logs --tail=200 db
 ```
 
 If port 8081 is already used, change the host-side port in a local Compose override, for example:
@@ -354,7 +354,7 @@ For production problems check, in order:
 
 ## 10. Security
 
-Never use the test credentials from `docker-compose.test.yml` in production.
+Never use the production secrets from `docker-compose.yml` in production.
 
 Never commit:
 
@@ -376,5 +376,5 @@ Production installations must use HTTPS and keep private application data outsid
 - `docs/ESPO_BASE.md` — EspoCRM foundation
 - `docs/OMNIGOCRM_ROADMAP.md` — product roadmap
 - `docs/WACRM_FEATURE_INTEGRATION.md` — WhatsApp/automation integration
-- `docker-compose.test.yml` — local integration-test stack
+- `docker-compose.yml` — local integration-test stack
 - `Dockerfile.espocrm` — OmniGoCRM container build
