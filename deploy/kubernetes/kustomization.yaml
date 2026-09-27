@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: omnigocrm
 resources:
   - namespace.yaml
-  - secret.example.yaml
   - configmap.yaml
   - pvc.yaml
   - db.yaml
