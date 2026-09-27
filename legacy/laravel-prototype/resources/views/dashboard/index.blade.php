@@ -1,7 +1,0 @@
-@extends('layouts.app')
-@section('title','· Dashboard')
-@section('content')
-<div class="page-head"><div><h1>Dashboard</h1><p class="muted">Your workspace sales pulse.</p></div></div>
-<div class="cards"><div class="card"><span>Leads</span><strong>{{ $leadCount }}</strong></div><div class="card"><span>Contacts</span><strong>{{ $contactCount }}</strong></div><div class="card"><span>Customers</span><strong>{{ $customerCount }}</strong></div><div class="card"><span>Pending follow-ups</span><strong>{{ $pendingFollowUps }}</strong></div></div>
-<div class="two-col"><section class="panel"><div class="panel-head"><h2>Recent leads</h2><a href="{{ route('leads.index') }}">View all</a></div><table><thead><tr><th>Name</th><th>Company</th><th>Stage</th></tr></thead><tbody>@foreach($recentLeads as $lead)<tr><td><a href="{{ route('leads.show',$lead) }}">{{ $lead->first_name }} {{ $lead->last_name }}</a></td><td>{{ $lead->company ?: '—' }}</td><td>{{ $lead->pipeline_stage }}</td></tr>@endforeach</tbody></table></section><section class="panel"><div class="panel-head"><h2>Recent calls</h2></div><table><thead><tr><th>Phone</th><th>Direction</th><th>Duration</th></tr></thead><tbody>@foreach($recentCalls as $call)<tr><td>{{ $call->phone }}</td><td>{{ $call->direction }}</td><td>{{ $call->durationLabel() }}</td></tr>@endforeach</tbody></table></section></div>
-@endsection
