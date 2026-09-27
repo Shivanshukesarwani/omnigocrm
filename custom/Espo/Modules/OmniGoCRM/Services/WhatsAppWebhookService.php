@@ -7,7 +7,6 @@ use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\ORM\EntityManager;
 use Espo\Core\Utils\Config;
 use Espo\Modules\Crm\Entities\Lead;
-use Espo\Modules\Crm\Entities\Contact;
 use stdClass;
 
 class WhatsAppWebhookService
@@ -203,8 +202,8 @@ class WhatsAppWebhookService
             'fromNumber' => $from,
             'toNumber' => $this->getBusinessNumber($value),
             'textBody' => $textBody,
-            'leadId' => $lead?->getId(),
-            'externalLeadId' => $lead?->get('externalLeadId'),
+            'leadId' => $lead->getId(),
+            'externalLeadId' => $lead->get('externalLeadId'),
             'conversationId' => $conversation->getId(),
             'receivedAt' => $receivedAt,
             'mediaId' => $this->extractMediaId($message, $type),
@@ -278,29 +277,6 @@ class WhatsAppWebhookService
             ->findOne();
 
         return $lead;
-    }
-
-    private function findContact(string $from): ?\Espo\Modules\Crm\Entities\Contact
-    {
-        $digits = preg_replace('/\D+/', '', $from) ?? '';
-
-        if ($digits === '') {
-            return null;
-        }
-
-        /** @var ?\Espo\Modules\Crm\Entities\Contact $contact */
-        $contact = $this->entityManager
-            ->getRDBRepositoryByClass(\Espo\Modules\Crm\Entities\Contact::class)
-            ->where([
-                'OR' => [
-                    ['phoneNumber' => $from],
-                    ['phoneNumber*' => '%' . $digits . '%'],
-                ],
-                'deleted' => false,
-            ])
-            ->findOne();
-
-        return $contact;
     }
 
     private function createLead(string $from, ?string $profileName): Lead
