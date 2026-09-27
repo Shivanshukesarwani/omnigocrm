@@ -2,7 +2,7 @@
 
 ## Docker Compose
 
-Set `OMNIGOCRM_DOMAIN`, `OMNIGOCRM_TLS_EMAIL`, `OMNIGOCRM_SITE_URL`, and validated `ESPOCRM_VERSION`/ `MARIADB_VERSION` values in `.env`. Create the three secret files in `secrets/README.md`.
+Set `OMNIGOCRM_DOMAIN`, `OMNIGOCRM_TLS_EMAIL`, `OMNIGOCRM_SITE_URL`, and validated `ESPOCRM_VERSION`/`POSTGRES_VERSION` values in `.env`. Create the two application secrets in `secrets/README.md`.
 
 Validate and start:
 
@@ -12,7 +12,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml ps
 ```
 
-Only ports 80/443 should be public. MariaDB is on an internal Docker network.
+Only ports 80/443 should be public. PostgreSQL is on an internal Docker network.
 
 Run `scripts/backup-production.sh` regularly and copy backups to storage outside the server.
 
@@ -24,4 +24,4 @@ Build and publish an immutable image with the production-image GitHub Actions wo
 kubectl apply -k deploy/kubernetes
 ```
 
-The included MariaDB StatefulSet is a single-node baseline. For high availability, use a managed database or database operator with tested backups/failover.
+The included PostgreSQL StatefulSet is a single-node baseline. For high availability, use a managed PostgreSQL service or PostgreSQL operator with tested backups/failover.
