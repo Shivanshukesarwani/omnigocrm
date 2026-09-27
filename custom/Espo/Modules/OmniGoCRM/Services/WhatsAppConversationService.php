@@ -21,7 +21,7 @@ class WhatsAppConversationService
 
         if (!$conversation) {
             $conversation = $this->entityManager->getNewEntity('WhatsAppConversation');
-            $conversation->set([
+            $conversation->setMultiple([
                 'name' => $displayName ?: $waId,
                 'waId' => $waId,
                 'phoneNumber' => $waId,
@@ -50,7 +50,7 @@ class WhatsAppConversationService
     public function incoming(Entity $conversation, string $preview, ?string $when = null): void
     {
         $when ??= gmdate('Y-m-d H:i:s');
-        $conversation->set([
+        $conversation->setMultiple([
             'status' => 'Open',
             'unreadCount' => ((int) ($conversation->get('unreadCount') ?? 0)) + 1,
             'lastMessagePreview' => mb_substr($preview, 0, 1000),
@@ -63,7 +63,7 @@ class WhatsAppConversationService
     public function outgoing(Entity $conversation, string $preview, ?string $when = null): void
     {
         $when ??= gmdate('Y-m-d H:i:s');
-        $conversation->set([
+        $conversation->setMultiple([
             'lastMessagePreview' => mb_substr($preview, 0, 1000),
             'lastMessageAt' => $when,
             'lastOutboundAt' => $when,
@@ -79,7 +79,7 @@ class WhatsAppConversationService
 
     public function close(Entity $conversation): void
     {
-        $conversation->set(['status' => 'Closed', 'unreadCount' => 0]);
+        $conversation->setMultiple(['status' => 'Closed', 'unreadCount' => 0]);
         $this->entityManager->saveEntity($conversation);
     }
 }
