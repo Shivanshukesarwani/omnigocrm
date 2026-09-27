@@ -44,7 +44,7 @@ class BillingWebhookService
         ])->findOne();
         if (!$subscription) $subscription = $this->entityManager->getNewEntity('BillingSubscription');
 
-        $subscription->set([
+        $subscription->setMultiple([
             'name' => 'Billing Subscription',
             'workspaceId' => $workspaceId,
             'provider' => $provider,
@@ -61,7 +61,7 @@ class BillingWebhookService
 
         $workspace = $this->entityManager->getEntityById('Workspace', $workspaceId);
         if ($workspace) {
-            $workspace->set(['plan' => $plan, 'subscriptionStatus' => $status]);
+            $workspace->setMultiple(['plan' => $plan, 'subscriptionStatus' => $status]);
             $this->entityManager->saveEntity($workspace);
         }
 
