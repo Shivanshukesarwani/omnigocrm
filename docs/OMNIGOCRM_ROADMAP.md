@@ -42,9 +42,9 @@
 - [x] Templates + approval-gated sending
 - [x] Media metadata/webhook ingestion
 - [x] Delivery/read states
-- [ ] Broadcasts
+- [ ] Broadcast production controls
 - [x] WhatsApp Flows
-- [ ] Automated replies
+- [x] Workspace-scoped automated replies foundation
 - [ ] Drip campaigns
 
 ## Phase 4 — Calling
@@ -104,9 +104,9 @@
 - [x] Device registration foundation
 - [x] Dashboard summary API + native mobile dashboard
 
-## Migration principle
+## Backend migration
 
-The Laravel prototype is not deleted until the corresponding OmniGoCRM/EspoCRM functionality is implemented and tested.
+The Laravel prototype has been moved to `legacy/laravel-prototype/` and is no longer an active backend. No new product functionality should be added there.
 
 
 ## Remaining before production SaaS launch
@@ -127,4 +127,4 @@ The repository is substantially implemented, but these items still require final
 
 ## Implementation status — 2026-09-25
 
-The active EspoCRM branch now includes the shared WhatsApp conversation/inbox layer, media metadata capture, approved template sending, sales dashboard metrics, customer timeline API, Meta Lead Ads webhook/Graph retrieval adapter, Google lead ingestion adapter, and a scheduled automation engine with conditions, delayed runs, task creation and record updates. CI is being used after each implementation batch; production billing checkout, push delivery, offline sync, and deployment hardening remain integration work rather than placeholder claims.
+The active EspoCRM branch now includes the shared WhatsApp conversation/inbox layer, media metadata capture, approved template sending, sales dashboard metrics, customer timeline API, Meta/Google lead ingestion adapters, workspace-aware automation, resumable automation runs, conditional branches, and guarded automated WhatsApp actions. CI is used after implementation batches; production billing checkout, push delivery, offline sync, complete tenant integration testing, and deployment hardening remain unfinished.
