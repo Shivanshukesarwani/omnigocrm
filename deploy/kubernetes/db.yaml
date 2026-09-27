@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: omnigocrm-db
+  namespace: omnigocrm
+spec:
+  serviceName: omnigocrm-db
+  replicas: 1
+  selector:
+    matchLabels: {app: omnigocrm-db}
+  template:
+    metadata:
+      labels: {app: omnigocrm-db}
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:11.8
+          env:
+            - {name: MARIADB_DATABASE, valueFrom: {configMapKeyRef: {name: omnigocrm-config, key: ESPOCRM_DATABASE_NAME}}}
+            - {name: MARIADB_USER, valueFrom: {configMapKeyRef: {name: omnigocrm-config, key: ESPOCRM_DATABASE_USER}}}
+            - {name: MARIADB_PASSWORD, valueFrom: {secretKeyRef: {name: omnigocrm-secrets, key: db-password}}}
+            - {name: MARIADB_ROOT_PASSWORD, valueFrom: {secretKeyRef: {name: omnigocrm-secrets, key: db-root-password}}}
+          ports: [{containerPort: 3306}]
+          volumeMounts: [{name: db, mountPath: /var/lib/mysql}]
+          readinessProbe:
+            exec: {command: ["healthcheck.sh", "--connect", "--innodb_initialized"]}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          livenessProbe:
+            exec: {command: ["healthcheck.sh", "--connect", "--innodb_initialized"]}
+            initialDelaySeconds: 60
+            periodSeconds: 30
+      volumes:
+        - name: db
+          persistentVolumeClaim: {claimName: omnigocrm-db}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omnigocrm-db
+  namespace: omnigocrm
+spec:
+  clusterIP: None
+  selector: {app: omnigocrm-db}
+  ports: [{port: 3306, targetPort: 3306}]
