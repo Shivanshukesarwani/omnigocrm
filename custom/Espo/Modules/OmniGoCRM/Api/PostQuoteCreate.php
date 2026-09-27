@@ -16,8 +16,6 @@ class PostQuoteCreate implements Action
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
-        if ($data === null) throw new BadRequest('A JSON payload is required.');
-
         $quote = $this->service->createQuote((array) $data);
 
         return ResponseComposer::json([
