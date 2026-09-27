@@ -7,9 +7,9 @@ Set `OMNIGOCRM_DOMAIN`, `OMNIGOCRM_TLS_EMAIL`, `OMNIGOCRM_SITE_URL`, and validat
 Validate and start:
 
 ```bash
-docker compose -f docker-compose.prod.yml config
-docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.yml config
+docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml ps
 ```
 
 Only ports 80/443 should be public. PostgreSQL is on an internal Docker network.
