@@ -17,7 +17,7 @@ For the simplest installation, use Docker.
 
 ## 1. Prerequisites
 
-You need Git and, depending on the installation method, Docker, Docker Compose, or the PHP/MariaDB stack required by the selected EspoCRM release.
+You need Git and, depending on the installation method, Docker, Docker Compose, or the PHP/PostgreSQL stack required by the selected EspoCRM release.
 
 Clone the repository:
 
@@ -77,9 +77,9 @@ docker compose -f docker-compose.test.yml down -v
 
 ### Native Linux
 
-A native deployment can use Apache/Nginx, PHP, Composer and MariaDB/MySQL.
+A native deployment can use Apache/Nginx, PHP, Composer and PostgreSQL.
 
-Install the PHP version and extensions supported by the exact EspoCRM release, Composer, MariaDB/MySQL, Git, a web server, and cron/systemd for scheduled jobs.
+Install the PHP version and extensions supported by the exact EspoCRM release, Composer, PostgreSQL, Git, a web server, and cron/systemd for scheduled jobs.
 
 Then clone the repository, configure the database and EspoCRM installation according to that EspoCRM release, expose the EspoCRM public application directory through the web server, run the required migration/upgrade procedure, configure scheduled jobs, enable HTTPS, and configure backups.
 
@@ -164,10 +164,10 @@ docker compose -f docker-compose.test.yml up -d --build
 
 The repository currently provides this Compose file for **integration testing/local development**, not as the final production Compose configuration.
 
-For production Docker deployment, use a separate production Compose/environment configuration with:
+For production Docker deployment, use `docker-compose.prod.yml` with:
 
 - pinned OmniGoCRM/EspoCRM image version or digest;
-- persistent MariaDB/MySQL storage;
+- PostgreSQL 18.x storage;
 - persistent EspoCRM application data;
 - strong credentials supplied through secrets/environment management;
 - HTTPS through a reverse proxy;
@@ -199,7 +199,7 @@ A production cluster should provide:
 1. Namespace
 2. Secret(s) for database/application credentials
 3. ConfigMap for non-secret configuration
-4. MariaDB/MySQL StatefulSet or externally managed database
+4. PostgreSQL StatefulSet or externally managed database
 5. PersistentVolumeClaim for database storage
 6. OmniGoCRM Deployment
 7. PersistentVolumeClaim for EspoCRM writable data
@@ -219,7 +219,7 @@ OmniGoCRM Service
    |
 OmniGoCRM Deployment
    |
-MariaDB/MySQL Service
+PostgreSQL Service
    |
 Persistent Storage
 
@@ -249,7 +249,7 @@ HTTPS reverse proxy
    |
 OmniGoCRM / EspoCRM
    |
-MariaDB/MySQL
+PostgreSQL
    |
 Persistent storage
 ```
@@ -258,7 +258,7 @@ Typical components:
 
 - Ubuntu/Debian/RHEL-compatible Linux
 - Docker + Docker Compose, or Nginx/Apache + PHP + Composer
-- MariaDB/MySQL
+- PostgreSQL
 - HTTPS
 - Firewall
 - Backups
