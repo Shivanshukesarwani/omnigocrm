@@ -1,0 +1,105 @@
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION:-18.6}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE:-omnigocrm}
+      POSTGRES_USER: ${POSTGRES_USER:-omnigocrm}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_INITDB_ARGS: "--auth=scram-sha-256"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    secrets: [db_password]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-omnigocrm} -d ${POSTGRES_DATABASE:-omnigocrm}"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [backend]
+
+  omnigocrm:
+    build:
+      context: .
+      dockerfile: Dockerfile.espocrm
+      args:
+        ESPOCRM_IMAGE: espocrm/espocrm:${ESPOCRM_VERSION:-10.0.8}
+    image: ${OMNIGOCRM_IMAGE:-omnigocrm:${OMNIGOCRM_VERSION:-10.0.8}}
+    restart: unless-stopped
+    environment:
+      ESPOCRM_DATABASE_PLATFORM: Postgresql
+      ESPOCRM_DATABASE_HOST: db
+      ESPOCRM_DATABASE_PORT: "5432"
+      ESPOCRM_DATABASE_NAME: ${POSTGRES_DATABASE:-omnigocrm}
+      ESPOCRM_DATABASE_USER: ${POSTGRES_USER:-omnigocrm}
+      ESPOCRM_DATABASE_PASSWORD_FILE: /run/secrets/db_password
+      ESPOCRM_ADMIN_USERNAME: ${ESPOCRM_ADMIN_USERNAME:-admin}
+      ESPOCRM_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+      ESPOCRM_SITE_URL: ${OMNIGOCRM_SITE_URL}
+      ESPOCRM_CONFIG_ADMIN_UPGRADE: "false"
+      ESPOCRM_CONFIG_ADMIN_EXTENSION_UPLOAD: "false"
+    volumes:
+      - app_data:/var/www/html/data
+    secrets: [db_password, admin_password]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bin/command", "app-check"]
+      interval: 60s
+      timeout: 20s
+      retries: 5
+      start_period: 90s
+    networks: [backend, frontend]
+
+  daemon:
+    image: ${OMNIGOCRM_IMAGE:-omnigocrm:${OMNIGOCRM_VERSION:-10.0.8}}
+    restart: unless-stopped
+    environment:
+      ESPOCRM_DATABASE_PLATFORM: Postgresql
+      ESPOCRM_DATABASE_HOST: db
+      ESPOCRM_DATABASE_PORT: "5432"
+      ESPOCRM_DATABASE_NAME: ${POSTGRES_DATABASE:-omnigocrm}
+      ESPOCRM_DATABASE_USER: ${POSTGRES_USER:-omnigocrm}
+      ESPOCRM_DATABASE_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - app_data:/var/www/html/data
+    secrets: [db_password]
+    depends_on:
+      omnigocrm:
+        condition: service_healthy
+    entrypoint: docker-daemon.sh
+    networks: [backend]
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      OMNIGOCRM_DOMAIN: ${OMNIGOCRM_DOMAIN}
+      OMNIGOCRM_TLS_EMAIL: ${OMNIGOCRM_TLS_EMAIL}
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      omnigocrm:
+        condition: service_healthy
+    networks: [frontend]
+
+volumes:
+  db_data:
+  app_data:
+  caddy_data:
+  caddy_config:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  admin_password:
+    file: ./secrets/admin_password.txt
+
+networks:
+  backend:
+    internal: true
+  frontend:
