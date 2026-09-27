@@ -2,9 +2,9 @@
 
 OmniGoCRM has three layers for mobile notifications:
 
-1. Database notifications are always supported.
+1. Database notifications are always supported by the EspoCRM backend.
 2. The Android client contains an optional Firebase Messaging service.
-3. The Laravel API stores per-user Android device tokens and includes an optional FCM HTTP v1 sender.
+3. Push delivery is connected to the EspoCRM/OmniGoCRM device-registration and notification APIs.
 
 ## Enable push delivery
 
@@ -16,25 +16,14 @@ Download `google-services.json` from Firebase and place it at:
 
 `android/app/google-services.json`
 
-Do not commit project-specific Firebase files or server credentials to a public repository unless your security policy explicitly allows it.
-
-On the Laravel server configure:
-
-```env
-FCM_PROJECT_ID=your-firebase-project-id
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/server-side-service-account.json
-```
-
-The Android build is designed so Firebase configuration is optional. Without `google-services.json`, the CRM still builds and its in-app notification system remains available.
+Do not commit project-specific Firebase files or server credentials to a public repository.
 
 ## Server credentials
 
-The service-account JSON must stay on the server, outside the public web root. Rotate the service account according to your organization's security policy.
-
-The repository does not contain Firebase service-account credentials.
+If server-side Firebase credentials are required by the selected push provider, keep them outside the public web root and outside Git. Rotate service credentials according to your organization's security policy.
 
 ## Current notification behavior
 
-Follow-up notifications are stored in Laravel's database notification table. The Android client can display them from the CRM API.
+OmniGoCRM notifications are stored and delivered through the EspoCRM/OmniGoCRM backend. The Android client can display in-app notifications and register its device for push delivery.
 
-Push delivery requires the Firebase project and server-side credential setup above; that environment-specific wiring cannot be verified from GitHub alone.
+Environment-specific Firebase wiring must be configured in the deployment environment and is not stored in this repository.
