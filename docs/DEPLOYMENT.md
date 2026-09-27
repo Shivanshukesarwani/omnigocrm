@@ -10,7 +10,7 @@ The recommended baseline is Docker Compose on a Linux VPS or dedicated server. P
 
 ### Files
 
-- `docker-compose.prod.yml` — production stack.
+- `docker-compose.yml` — production stack.
 - `deploy/caddy/Caddyfile` — automatic HTTPS.
 - `secrets/README.md` — secret creation.
 - `scripts/backup-production.sh` — database and application-data backups.
@@ -39,14 +39,14 @@ chmod 600 secrets/*.txt
 Validate:
 
 ```bash
-docker compose -f docker-compose.prod.yml config
+docker compose -f docker-compose.yml config
 ```
 
 Start:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml ps
 ```
 
 Only ports 80/443 are published. PostgreSQL is isolated on an internal Docker network.
