@@ -24,11 +24,6 @@ class PostLeadCapture implements Action
         }
 
         $data = $request->getParsedBody();
-
-        if ($data === null) {
-            throw new BadRequest('A JSON payload is required.');
-        }
-
         return ResponseComposer::json(
             $this->gateway->capture($apiKey, $data)
         );
