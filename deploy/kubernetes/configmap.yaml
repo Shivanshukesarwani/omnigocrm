@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omnigocrm-config
+  namespace: omnigocrm
+data:
+  ESPOCRM_DATABASE_NAME: omnigocrm
+  ESPOCRM_DATABASE_USER: omnigocrm
+  ESPOCRM_SITE_URL: "https://crm.example.com"
