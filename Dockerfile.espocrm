@@ -1,18 +1,13 @@
-# OmniGoCRM image
-# Use the official EspoCRM runtime so installation and entrypoint behavior
-# stay aligned with upstream EspoCRM.
-ARG ESPOCRM_IMAGE=espocrm/espocrm:latest
+# OmniGoCRM production image
+ARG ESPOCRM_IMAGE=espocrm/espocrm:10.0.8
 FROM ${ESPOCRM_IMAGE}
 
 USER root
 WORKDIR /var/www/html
 
-# Add OmniGoCRM extensions on top of the upstream EspoCRM image.
 COPY custom/ /var/www/html/custom/
 COPY client/custom/ /var/www/html/client/custom/
 
-# Use + rather than shell-semicolon escaping so this remains portable
-# across Docker's /bin/sh implementations.
 RUN chown -R www-data:www-data /var/www/html/custom /var/www/html/client/custom \
     && find /var/www/html/custom -type d -exec chmod 755 {} + \
     && find /var/www/html/custom -type f -exec chmod 644 {} + \
