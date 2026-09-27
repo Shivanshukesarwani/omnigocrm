@@ -19,13 +19,8 @@ class BeforeSave implements SaveHook
 
     public function process(Entity $entity): void
     {
-        if ($this->user->isSystem()) {
-            return;
-        }
-
-        if ((bool) $this->config->get('omniGoCRMSaaSAdminBypass') && $this->user->isAdmin()) {
-            return;
-        }
+        if ($this->user->isSystem()) return;
+        if ((bool) $this->config->get('omniGoCRMSaaSAdminBypass') && $this->user->isAdmin()) return;
 
         if ($entity->isNew()) {
             $entity->set('ownerUserId', $this->user->getId());
@@ -35,7 +30,10 @@ class BeforeSave implements SaveHook
             return;
         }
 
-        $stored = $this->entityManager->getEntityById('Workspace', $entity->getId());
+        $workspaceId = (string) $entity->getId();
+        if ($workspaceId === '') throw new Forbidden('Workspace ID is required.');
+
+        $stored = $this->entityManager->getEntityById('Workspace', $workspaceId);
         if (!$stored || (string) $stored->get('ownerUserId') !== $this->user->getId()) {
             throw new Forbidden('Only the workspace owner can modify workspace settings.');
         }
