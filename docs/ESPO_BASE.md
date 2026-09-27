@@ -21,7 +21,7 @@ OmniGoCRM functionality should live primarily in:
 - `docs/` for architecture and deployment
 - `android/` and `ios/` for native clients
 
-There is no separate Laravel backend in the repository. EspoCRM is the sole active CRM/data backend.
+EspoCRM is the sole active CRM/data backend.
 
 ## Target product
 
