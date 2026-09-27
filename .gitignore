@@ -34,3 +34,6 @@ client/modules/crm/lib/*
 .env
 .env.*
 !.env.example
+/secrets/*
+!/secrets/README.md
+/backups/
