@@ -4,6 +4,13 @@
 
 The product targets lead management, follow-ups, WhatsApp, calling, automation, team management, reporting, integrations, SaaS workspaces and native mobile apps.
 
+## Installation
+
+Installation guides are available for Linux, Windows, macOS, Docker, Kubernetes and production/VPS servers:
+
+- **[Installation Guide](docs/INSTALLATION.md)**
+- [Deployment & production guidance](docs/DEPLOYMENT.md)
+
 ## Current architecture
 
 EspoCRM is the **only CRM/data backend**. OmniGoCRM-specific functionality is implemented in custom modules instead of maintaining a second application backend.
