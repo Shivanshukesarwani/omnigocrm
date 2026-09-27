@@ -17,9 +17,9 @@ spec:
           image: ghcr.io/shivanshukesarwani/omnigocrm:10.0.8
           imagePullPolicy: IfNotPresent
           env:
-            - {name: ESPOCRM_DATABASE_PLATFORM, value: Mysql}
+            - {name: ESPOCRM_DATABASE_PLATFORM, value: Postgresql}
             - {name: ESPOCRM_DATABASE_HOST, value: omnigocrm-db}
-            - {name: ESPOCRM_DATABASE_PORT, value: "3306"}
+            - {name: ESPOCRM_DATABASE_PORT, value: "5432"}
             - {name: ESPOCRM_DATABASE_NAME, valueFrom: {configMapKeyRef: {name: omnigocrm-config, key: ESPOCRM_DATABASE_NAME}}}
             - {name: ESPOCRM_DATABASE_USER, valueFrom: {configMapKeyRef: {name: omnigocrm-config, key: ESPOCRM_DATABASE_USER}}}
             - {name: ESPOCRM_DATABASE_PASSWORD, valueFrom: {secretKeyRef: {name: omnigocrm-secrets, key: db-password}}}
