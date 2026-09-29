@@ -64,6 +64,19 @@
         "lastOutboundAt": {
             "type": "datetime"
         },
+        "lastTrackedInboundAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "lastResponseAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "lastResponseSeconds": {
+            "type": "int",
+            "min": 0,
+            "readOnly": true
+        },
         "lead": {
             "type": "link",
             "readOnly": true
@@ -131,6 +144,13 @@
             "columns": [
                 "lastMessageAt",
                 "deleted"
+            ]
+        },
+        "lastResponseAt": {
+            "columns": [
+                "omniGoCRMWorkspaceId",
+                "deleted",
+                "lastResponseAt"
             ]
         },
         "omniGoCRMWorkspaceId": {

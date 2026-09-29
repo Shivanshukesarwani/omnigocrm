@@ -6,6 +6,7 @@ use Espo\Core\Job\JobDataLess;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppCloudApi;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppConversationService;
+use Espo\Modules\OmniGoCRM\Services\BillingService;
 use Throwable;
 
 class DispatchBroadcastCampaigns implements JobDataLess
@@ -17,6 +18,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
         private EntityManager $entityManager,
         private WhatsAppCloudApi $whatsApp,
         private WhatsAppConversationService $conversationService,
+        private BillingService $billingService,
     ) {}
 
     public function run(): void
@@ -34,25 +36,56 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ->limit(self::CAMPAIGN_LIMIT)
             ->find();
 
+        $remainingQuotaByWorkspace = [];
+
         foreach ($campaigns as $campaign) {
+            $workspaceId = trim((string) $campaign->get('omniGoCRMWorkspaceId'));
+
+            if ($workspaceId === '') {
+                $campaign->set('status', 'Canceled');
+                $this->entityManager->saveEntity($campaign);
+                continue;
+            }
+
+            if (!array_key_exists($workspaceId, $remainingQuotaByWorkspace)) {
+                $remainingQuotaByWorkspace[$workspaceId] = $this->billingService
+                    ->broadcastRecipientsRemaining($workspaceId);
+            }
+
             $campaign->setMultiple([
                 'status' => 'Running',
                 'startedAt' => $campaign->get('startedAt') ?: $now,
             ]);
             $this->entityManager->saveEntity($campaign);
 
-            $this->dispatchCampaign($campaign);
+            $this->dispatchCampaign($campaign, $remainingQuotaByWorkspace[$workspaceId]);
         }
     }
 
-    private function dispatchCampaign($campaign): void
+    private function dispatchCampaign($campaign, ?int &$remainingQuota): void
     {
         $workspaceId = (string) $campaign->get('omniGoCRMWorkspaceId');
+
+        $template = $this->entityManager->getRDBRepository('WhatsAppTemplate')->where([
+            'name' => trim((string) $campaign->get('templateName')),
+            'omniGoCRMWorkspaceId' => $workspaceId,
+            'status' => 'Approved',
+            'active' => true,
+            'deleted' => false,
+        ])->findOne();
+
+        if (!$template) {
+            $campaign->set('status', 'Canceled');
+            $this->entityManager->saveEntity($campaign);
+            $this->skipQueuedRecipients($campaign, $workspaceId, 'The campaign template is no longer active and approved.');
+            return;
+        }
 
         $recipients = $this->entityManager
             ->getRDBRepository('BroadcastRecipient')
             ->where([
                 'campaignId' => $campaign->getId(),
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'status' => 'Queued',
                 'deleted' => false,
             ])
@@ -77,7 +110,16 @@ class DispatchBroadcastCampaigns implements JobDataLess
         }
 
         foreach ($recipients as $recipient) {
-            $this->dispatchRecipient(
+            if ($remainingQuota === 0) {
+                $recipient->setMultiple([
+                    'status' => 'Skipped',
+                    'errorMessage' => 'The active plan monthly WhatsApp recipient limit has been reached.',
+                ]);
+                $this->entityManager->saveEntity($recipient);
+                continue;
+            }
+
+            $sent = $this->dispatchRecipient(
                 $campaign,
                 $recipient,
                 $templateName,
@@ -85,12 +127,15 @@ class DispatchBroadcastCampaigns implements JobDataLess
                 $components,
                 $workspaceId,
             );
+
+            if ($sent && $remainingQuota !== null) $remainingQuota--;
         }
 
         $remaining = $this->entityManager
             ->getRDBRepository('BroadcastRecipient')
             ->where([
                 'campaignId' => $campaign->getId(),
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'status' => 'Queued',
                 'deleted' => false,
             ])
@@ -112,7 +157,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
         string $languageCode,
         array $components,
         string $workspaceId,
-    ): void {
+    ): bool {
         $lead = null;
         $leadId = trim((string) $recipient->get('leadId'));
 
@@ -122,14 +167,14 @@ class DispatchBroadcastCampaigns implements JobDataLess
 
         $leadWorkspaceId = $lead ? trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? '')) : '';
 
-        if (!$lead || ($workspaceId !== '' && $leadWorkspaceId !== '' && $leadWorkspaceId !== $workspaceId)) {
+        if (!$lead || $workspaceId === '' || $leadWorkspaceId !== $workspaceId) {
             $recipient->setMultiple([
                 'status' => 'Skipped',
                 'errorMessage' => 'Lead does not belong to the campaign workspace.',
             ]);
             $this->entityManager->saveEntity($recipient);
             $this->incrementCampaign($campaign, false, false);
-            return;
+            return false;
         }
 
         if (!$lead->get('whatsappOptIn')) {
@@ -139,7 +184,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ]);
             $this->entityManager->saveEntity($recipient);
             $this->incrementCampaign($campaign, false, false);
-            return;
+            return false;
         }
 
         $phone = trim((string) $lead->get('whatsappNumber'));
@@ -155,10 +200,13 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ]);
             $this->entityManager->saveEntity($recipient);
             $this->incrementCampaign($campaign, false, false);
-            return;
+            return false;
         }
 
         try {
+            $variables = json_decode((string) $recipient->get('variablesJson'), true);
+            if (!is_array($variables)) $variables = [];
+            $components = $this->personalizeValue($components, $lead, $variables);
             $result = $this->whatsApp->sendTemplate(
                 recipient: $phone,
                 templateName: $templateName,
@@ -190,6 +238,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
             $conversation = $this->conversationService->findOrCreate(
                 waId: preg_replace('/\D+/', '', $phone) ?? $phone,
                 lead: $lead,
+                workspaceId: $workspaceId,
             );
 
             $message->set('conversationId', $conversation->getId());
@@ -198,6 +247,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
                 $conversation,
                 '[Template] ' . $templateName,
                 $sentAt,
+                countsAsReply: false,
             );
 
             $recipient->setMultiple([
@@ -209,6 +259,7 @@ class DispatchBroadcastCampaigns implements JobDataLess
             $this->entityManager->saveEntity($recipient);
 
             $this->incrementCampaign($campaign, true, false);
+            return true;
         } catch (Throwable $e) {
             $recipient->setMultiple([
                 'status' => 'Failed',
@@ -216,7 +267,51 @@ class DispatchBroadcastCampaigns implements JobDataLess
             ]);
             $this->entityManager->saveEntity($recipient);
             $this->incrementCampaign($campaign, false, true);
+            return false;
         }
+    }
+
+    private function skipQueuedRecipients($campaign, string $workspaceId, string $reason): void
+    {
+        $recipients = $this->entityManager->getRDBRepository('BroadcastRecipient')->where([
+            'campaignId' => $campaign->getId(),
+            'omniGoCRMWorkspaceId' => $workspaceId,
+            'status' => 'Queued',
+            'deleted' => false,
+        ])->find();
+
+        foreach ($recipients as $recipient) {
+            $recipient->setMultiple(['status' => 'Skipped', 'errorMessage' => $reason]);
+            $this->entityManager->saveEntity($recipient);
+        }
+    }
+
+    private function personalizeValue(mixed $value, $lead, array $variables = []): mixed
+    {
+        if (is_string($value)) {
+            $values = [
+                '{{firstName}}' => (string) $lead->get('firstName'),
+                '{{lastName}}' => (string) $lead->get('lastName'),
+                '{{whatsappNumber}}' => (string) $lead->get('whatsappNumber'),
+                '{{name}}' => trim((string) $lead->get('firstName') . ' ' . (string) $lead->get('lastName')),
+            ];
+
+            foreach ($variables as $key => $variable) {
+                if (is_string($key) && (is_string($variable) || is_numeric($variable))) {
+                    $values['{{' . $key . '}}'] = (string) $variable;
+                }
+            }
+
+            return strtr($value, $values);
+        }
+
+        if (!is_array($value)) return $value;
+
+        foreach ($value as $key => $item) {
+            $value[$key] = $this->personalizeValue($item, $lead, $variables);
+        }
+
+        return $value;
     }
 
     private function incrementCampaign($campaign, bool $sent, bool $failed): void

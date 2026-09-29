@@ -3,6 +3,7 @@
 namespace Espo\Modules\OmniGoCRM\Services;
 
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\NotFound;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\Crm\Entities\Lead;
 use Espo\Tools\LeadCapture\CaptureService;
@@ -57,14 +58,15 @@ class LeadCaptureGateway
      */
     public function capture(string $apiKey, stdClass $input): array
     {
+        $this->assertActiveApiKey($apiKey);
         $data = $this->normalize($input);
 
-        if (property_exists($data, 'website') && is_string($data->website) && trim($data->website) !== '') {
-            throw new BadRequest('Spam check failed.');
-        }
-
-        if (property_exists($data, 'honeypot') && is_string($data->honeypot) && trim($data->honeypot) !== '') {
-            throw new BadRequest('Spam check failed.');
+        foreach (['website', 'honeypot'] as $field) {
+            if (!property_exists($data, $field)) continue;
+            $value = $data->{$field};
+            if ($value !== null && $value !== '' && $value !== false && $value !== []) {
+                throw new BadRequest('Spam check failed.');
+            }
         }
 
         $externalLeadId = $data->externalLeadId ?? null;
@@ -75,8 +77,8 @@ class LeadCaptureGateway
             if ($existing) {
                 return [
                     'accepted' => true,
-                    'status' => 'duplicate',
-                    'leadId' => $existing->getId(),
+                    'status' => 'accepted',
+                    'leadId' => null,
                     'externalLeadId' => $externalLeadId,
                 ];
             }
@@ -84,18 +86,25 @@ class LeadCaptureGateway
 
         $this->captureService->capture($apiKey, $data);
 
-        $lead = null;
-
-        if ($externalLeadId !== null) {
-            $lead = $this->findByExternalLeadId($externalLeadId);
-        }
-
         return [
             'accepted' => true,
-            'status' => 'created',
-            'leadId' => $lead?->getId(),
+            'status' => 'accepted',
+            'leadId' => null,
             'externalLeadId' => $externalLeadId,
         ];
+    }
+
+    private function assertActiveApiKey(string $apiKey): void
+    {
+        $form = $this->entityManager->getRDBRepository('LeadCapture')->where([
+            'apiKey' => $apiKey,
+            'isActive' => true,
+            'deleted' => false,
+        ])->findOne();
+
+        if (!$form) {
+            throw new NotFound('Form ID is not valid.');
+        }
     }
 
     private function normalize(stdClass $input): stdClass

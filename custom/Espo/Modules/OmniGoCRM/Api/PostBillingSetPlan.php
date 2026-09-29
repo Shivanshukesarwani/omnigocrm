@@ -26,7 +26,7 @@ class PostBillingSetPlan implements Action
 
         try {
             $result = $this->service->setPlan($workspaceId, $plan, $status);
-        } catch (\InvalidArgumentException|\RuntimeException $e) {
+        } catch (\InvalidArgumentException $e) {
             throw new BadRequest($e->getMessage());
         }
 

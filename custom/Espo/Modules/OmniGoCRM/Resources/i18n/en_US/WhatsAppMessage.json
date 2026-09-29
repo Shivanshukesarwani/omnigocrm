@@ -20,7 +20,8 @@
     "options": {
         "direction": {
             "Inbound": "Inbound",
-            "Outbound": "Outbound"
+            "Outbound": "Outbound",
+            "Internal": "Internal note"
         },
         "status": {
             "Queued": "Queued",
@@ -28,7 +29,8 @@
             "Delivered": "Delivered",
             "Read": "Read",
             "Failed": "Failed",
-            "Received": "Received"
+            "Received": "Received",
+            "Internal": "Internal"
         },
         "messageType": {
             "Text": "Text",
@@ -38,6 +40,7 @@
             "Audio": "Audio",
             "Video": "Video",
             "Interactive": "Interactive",
+            "InternalNote": "Internal note",
             "Unknown": "Unknown"
         }
     },

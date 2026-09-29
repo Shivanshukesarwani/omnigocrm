@@ -9,12 +9,16 @@ use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceMemberService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 
 class PostDeviceRegister implements Action
 {
     public function __construct(
         private EntityManager $entityManager,
         private User $user,
+        private WorkspaceService $workspaceService,
+        private WorkspaceMemberService $memberService,
     ) {}
 
     public function process(Request $request): Response
@@ -43,6 +47,10 @@ class PostDeviceRegister implements Action
             throw new BadRequest('pushToken is too long.');
         }
 
+        $workspaceId = $this->workspaceService->currentId();
+        if (!$workspaceId) throw new BadRequest('Select an active workspace before registering a device.');
+        $this->memberService->activeMembership($workspaceId);
+
         $repo = $this->entityManager->getRDBRepository('OmniGoCRMDevice');
 
         $device = null;
@@ -69,6 +77,7 @@ class PostDeviceRegister implements Action
             'active' => true,
             'lastSeenAt' => gmdate('Y-m-d H:i:s'),
             'userId' => $this->user->getId(),
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
 
         $this->entityManager->saveEntity($device);

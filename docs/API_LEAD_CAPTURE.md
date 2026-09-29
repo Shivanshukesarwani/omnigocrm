@@ -47,24 +47,24 @@ Common aliases are accepted, including `first_name`, `last_name`, `email`, `mobi
 
 Use `externalLeadId` for every lead coming from a website form, Meta, Google, or another integration.
 
-When the same `externalLeadId` already exists, OmniGoCRM returns:
+The endpoint validates that the form key belongs to an active Lead Capture record before checking idempotency. Repeated submissions with the same `externalLeadId` are accepted without creating another record. Responses intentionally omit CRM record IDs so a public integration cannot use this endpoint to enumerate records:
 
 ~~~json
 {
   "accepted": true,
-  "status": "duplicate",
-  "leadId": "existing-lead-id",
+  "status": "accepted",
+  "leadId": null,
   "externalLeadId": "website-2026-000123"
 }
 ~~~
 
-For a new submission:
+New submissions use the same response shape:
 
 ~~~json
 {
   "accepted": true,
-  "status": "created",
-  "leadId": "new-lead-id",
+  "status": "accepted",
+  "leadId": null,
   "externalLeadId": "website-2026-000123"
 }
 ~~~
@@ -97,3 +97,7 @@ The endpoint intentionally has no EspoCRM user login because it is designed for 
 Do not commit API keys, WhatsApp access tokens, Meta app secrets, or other credentials to the Git repository.
 
 For browser-direct forms with cross-origin requests, OmniGoCRM will use a separate public-form layer with origin controls and rate limiting rather than exposing a long-lived Lead Capture API key to browsers.
+
+Requests with an `Origin` header are accepted only when that exact origin is in the newline- or comma-separated `omniGoCRMLeadCaptureAllowedOrigins` system configuration value (for example, `https://www.example.com`). Scheme and non-default port are part of the match. Requests without an `Origin` header remain available for server-to-server integrations. This origin check is defense in depth, not authentication: never expose the form key in browser code.
+
+Requests are limited to 32 KiB in both the API and the maintained Caddy deployment. Configure a rate limit at the public edge or WAF for `/api/v1/OmniGoCRM/LeadCapture` before exposing it to untrusted traffic; the bundled Caddy image does not include a rate-limiting module.

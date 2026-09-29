@@ -23,6 +23,16 @@ class SalesService
             $name = 'Quote ' . gmdate('Y-m-d H:i:s');
         }
 
+        foreach ([
+            'leadId' => 'Lead',
+            'contactId' => 'Contact',
+            'accountId' => 'Account',
+            'opportunityId' => 'Opportunity',
+        ] as $field => $entityType) {
+            $id = $this->nullableId($data, $field);
+            if ($id) $this->getInWorkspace($entityType, $id);
+        }
+
         $quote = $this->entityManager->getNewEntity('Quote');
 
         $quote->setMultiple([
@@ -134,6 +144,14 @@ class SalesService
 
         if ($orderId) { $this->getInWorkspace('Order', $orderId); }
         if ($quoteId) { $this->getInWorkspace('Quote', $quoteId); }
+        foreach ([
+            'leadId' => 'Lead',
+            'contactId' => 'Contact',
+            'accountId' => 'Account',
+        ] as $field => $entityType) {
+            $id = $this->nullableId($data, $field);
+            if ($id) $this->getInWorkspace($entityType, $id);
+        }
 
         $payment = $this->entityManager->getNewEntity('Payment');
 
@@ -218,12 +236,15 @@ class SalesService
             throw new BadRequest('Unit price cannot be negative.');
         }
 
+        $productId = $this->nullableId($data, 'productId');
+        if ($productId) $this->getInWorkspace('Product', $productId);
+
         $item = $this->entityManager->getNewEntity($entityType);
 
         $item->setMultiple([
             'name' => $this->text($data, 'name') ?: ($this->text($data, 'description') ?: 'Item'),
             $parentField => $parentId,
-            'productId' => $this->nullableId($data, 'productId'),
+            'productId' => $productId,
             'description' => $this->text($data, 'description'),
             'quantity' => $quantity,
             'unitPrice' => $unitPrice,

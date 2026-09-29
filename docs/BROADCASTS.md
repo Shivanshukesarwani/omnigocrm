@@ -19,6 +19,7 @@ OmniGoCRM broadcasts are implemented as workspace-scoped campaign records plus r
 ~~~text
 POST /api/v1/OmniGoCRM/Broadcast/recipient
 POST /api/v1/OmniGoCRM/Broadcast/schedule
+GET  /api/v1/OmniGoCRM/Broadcast/campaign?campaignId=<id>
 ~~~
 
 Recipient example:
@@ -41,6 +42,8 @@ Schedule example:
 
 The scheduler intentionally caps processing per run so a large audience is spread across multiple runs. It does not bypass the CRM opt-in field.
 
+The Android and iOS clients provide native campaign creation, recipient selection, recipient status review, and schedule-now actions. Campaign detail reads verify the active workspace and return only that campaign's recipients. Scheduling still passes through the server's approved-template, opt-in, workspace, and monthly-quota gates.
+
 ## Drip campaigns
 
-The broadcast model is the base layer for future drip sequences. A future automation entity can chain multiple BroadcastCampaigns by relative delays while reusing the same recipient and opt-in safeguards.
+Use workspace automation rules for delayed/drip-style sequences. See `AUTOMATIONS.md` for the supported wait and template actions.

@@ -1,5 +1,15 @@
 [
     {
+        "route": "/follow-ups",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetFollowUps"
+    },
+    {
+        "route": "/follow-ups",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostFollowUp"
+    },
+    {
         "route": "/OmniGoCRM/LeadCapture",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostLeadCapture",
@@ -89,6 +99,11 @@
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostOrderItemAdd"
     },
     {
+        "route": "/OmniGoCRM/Broadcast/campaign",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetBroadcastCampaign"
+    },
+    {
         "route": "/OmniGoCRM/Broadcast/recipient",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBroadcastRecipientAdd"
@@ -97,6 +112,11 @@
         "route": "/OmniGoCRM/Broadcast/schedule",
         "method": "post",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBroadcastSchedule"
+    },
+    {
+        "route": "/OmniGoCRM/Broadcast/retryRecipient",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\PostBroadcastRecipientRetry"
     },
     {
         "route": "/OmniGoCRM/Dashboard/summary",
@@ -155,6 +175,16 @@
         "route": "/OmniGoCRM/WhatsApp/inbox",
         "method": "get",
         "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetWhatsAppInbox"
+    },
+    {
+        "route": "/OmniGoCRM/WhatsApp/conversationMessages",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetWhatsAppConversationMessages"
+    },
+    {
+        "route": "/OmniGoCRM/WhatsApp/media",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\OmniGoCRM\\Api\\GetWhatsAppMedia"
     },
     {
         "route": "/OmniGoCRM/Timeline",

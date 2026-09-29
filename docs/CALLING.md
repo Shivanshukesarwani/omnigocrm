@@ -54,4 +54,4 @@ The system intentionally does not promise universal Android call recording. Reco
 
 ## Required server setting
 
-Set `omniGoCRMCallingWebhookSecret` and, for providers that create Call records without an authenticated CRM user, set `omniGoCRMCallingDefaultAssignedUserId`.
+Set `omniGoCRMCallingWebhookSecret` and `omniGoCRMCallingWorkspaceId`. Webhook events are matched and recorded only inside that configured workspace; `workspaceId` in event payloads is ignored. If using `omniGoCRMCallingDefaultAssignedUserId`, the user must be an active member of that workspace.

@@ -23,7 +23,7 @@
         },
         "subscriptionStatus": {
             "type": "enum",
-            "options": ["Trialing", "Active", "Past Due", "Canceled", "None"],
+            "options": ["Trialing", "Active", "Past Due", "Canceled", "Incomplete", "None"],
             "default": "Trialing"
         },
         "billingCustomerId": {

@@ -86,7 +86,10 @@ class WhatsAppWebhookService
                         continue;
                     }
 
-                    $this->updateMessageStatus($status);
+                    $this->updateMessageStatus(
+                        $status,
+                        trim((string) $this->config->get('omniGoCRMWhatsAppWorkspaceId')),
+                    );
                 }
             }
         }
@@ -168,16 +171,12 @@ class WhatsAppWebhookService
                 : null;
         }
 
-        $lead = $this->findLead($from);
+        $workspaceId = trim((string) $this->config->get('omniGoCRMWhatsAppWorkspaceId'));
+        $lead = $this->findLead($from, $workspaceId);
 
         if (!$lead) {
             $lead = $this->createLead($from, $contacts[$from] ?? null);
         }
-
-        $workspaceId = trim((string) (
-            $lead->get('omniGoCRMWorkspaceId')
-            ?: $this->config->get('omniGoCRMWhatsAppWorkspaceId')
-        ));
 
         if ($workspaceId !== '') {
             $lead->set('omniGoCRMWorkspaceId', $workspaceId);
@@ -188,6 +187,7 @@ class WhatsAppWebhookService
             waId: $from,
             lead: $lead,
             displayName: $contacts[$from] ?? null,
+            workspaceId: $workspaceId,
         );
 
         $receivedAt = $this->getMessageDateTime($message->timestamp ?? null) ?? gmdate('Y-m-d H:i:s');
@@ -255,7 +255,7 @@ class WhatsAppWebhookService
         return is_object($media) && isset($media->caption) && is_string($media->caption) ? mb_substr($media->caption, 0, 1000) : null;
     }
 
-    private function findLead(string $from): ?Lead
+    private function findLead(string $from, string $workspaceId): ?Lead
     {
         $digits = preg_replace('/\D+/', '', $from) ?? '';
 
@@ -272,6 +272,7 @@ class WhatsAppWebhookService
                     ['whatsappNumber*' => '%' . $digits . '%'],
                     ['phoneNumber*' => '%' . $digits . '%'],
                 ],
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'deleted' => false,
             ])
             ->findOne();
@@ -317,7 +318,7 @@ class WhatsAppWebhookService
         return $lead;
     }
 
-    private function updateMessageStatus(stdClass $status): void
+    private function updateMessageStatus(stdClass $status, string $workspaceId): void
     {
         $providerMessageId = isset($status->id) && is_string($status->id)
             ? trim($status->id)
@@ -335,6 +336,7 @@ class WhatsAppWebhookService
             ->getRDBRepository('WhatsAppMessage')
             ->where([
                 'providerMessageId' => $providerMessageId,
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'deleted' => false,
             ])
             ->findOne();

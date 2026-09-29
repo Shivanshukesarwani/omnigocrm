@@ -7,10 +7,13 @@ use Espo\Core\Api\Request;
 use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\Crm\Entities\Lead;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppCloudApi;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppConversationService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceMemberService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 
 class PostWhatsAppSendTemplate implements Action
 {
@@ -18,6 +21,8 @@ class PostWhatsAppSendTemplate implements Action
         private WhatsAppCloudApi $client,
         private EntityManager $entityManager,
         private WhatsAppConversationService $conversationService,
+        private WorkspaceService $workspaceService,
+        private WorkspaceMemberService $memberService,
     ) {}
 
     public function process(Request $request): Response
@@ -37,6 +42,18 @@ class PostWhatsAppSendTemplate implements Action
 
         if (!$lead) {
             throw new BadRequest('Lead not found.');
+        }
+
+        $workspaceId = $this->workspaceService->currentId();
+
+        if (!$workspaceId) {
+            throw new Forbidden('Select an active workspace before sending WhatsApp templates.');
+        }
+
+        $this->memberService->assertCanWrite($workspaceId);
+
+        if ((string) $lead->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+            throw new Forbidden('The lead is not available in the active workspace.');
         }
 
         if (!$lead->get('whatsappOptIn')) {
@@ -63,6 +80,10 @@ class PostWhatsAppSendTemplate implements Action
             throw new BadRequest('Only an active Approved WhatsAppTemplate can be sent.');
         }
 
+        if ((string) $template->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+            throw new Forbidden('The WhatsApp template is not available in the active workspace.');
+        }
+
         if ($languageCode === '') {
             $languageCode = (string) $template->get('languageCode') ?: 'en_US';
         }
@@ -77,6 +98,7 @@ class PostWhatsAppSendTemplate implements Action
         $conversation = $this->conversationService->findOrCreate(
             waId: $recipient,
             lead: $lead,
+            workspaceId: $workspaceId,
         );
 
         $message = $this->entityManager->getNewEntity('WhatsAppMessage');
@@ -94,6 +116,7 @@ class PostWhatsAppSendTemplate implements Action
             'conversationId' => $conversation->getId(),
             'sentAt' => gmdate('Y-m-d H:i:s'),
             'rawPayload' => json_encode($result->response, JSON_UNESCAPED_SLASHES),
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
 
         $this->entityManager->saveEntity($message);

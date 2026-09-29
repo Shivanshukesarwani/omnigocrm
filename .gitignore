@@ -34,6 +34,8 @@ client/modules/crm/lib/*
 .env
 .env.*
 !.env.example
+/android/app/google-services.json
+/ios/OmniGoCRM/GoogleService-Info.plist
 /secrets/*
 !/secrets/README.md
 /backups/

@@ -37,7 +37,7 @@ Open the `android/` folder in Android Studio. Let Gradle sync. Use JDK 17.
 - Call activity logging
 - Best-effort device-dependent call recording flow
 - Private recording upload to Laravel
-- Follow-up list
+- Workspace-scoped follow-up list and scheduling from a lead record
 
 ## Recording limitation
 

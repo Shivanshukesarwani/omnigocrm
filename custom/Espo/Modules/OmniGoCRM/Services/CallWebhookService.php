@@ -54,25 +54,24 @@ class CallWebhookService
         $from = $this->normalizePhone($this->stringValue($payload, 'from'));
         $to = $this->normalizePhone($this->stringValue($payload, 'to'));
         $phone = $direction === 'Inbound' ? $from : $to;
+        $workspaceId = trim((string) $this->config->get('omniGoCRMCallingWorkspaceId'));
 
-        $lead = $this->findLead($phone);
-        $workspaceId = trim((string) ($payload->workspaceId ?? ''));
-
-        if ($lead && $workspaceId !== '') {
-            $leadWorkspaceId = trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? ''));
-            if ($leadWorkspaceId !== '' && $leadWorkspaceId !== $workspaceId) {
-                $lead = null;
-            }
+        if ($workspaceId === '') {
+            throw new BadRequest('Calling workspace is not configured.');
         }
 
+        $lead = $this->findLead($phone, $workspaceId);
+
         if (!$lead && $direction === 'Inbound' && in_array($status, ['missed', 'no-answer', 'busy', 'failed'], true) && $phone !== '') {
-            $lead = $this->createMissedCallLead($phone);
+            $lead = $this->createMissedCallLead($phone, $workspaceId);
         }
 
         $call = $this->entityManager
             ->getRDBRepository('Call')
             ->where([
                 'omniGoCRMExternalCallId' => $externalCallId,
+                'omniGoCRMProvider' => $provider,
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'deleted' => false,
             ])
             ->findOne();
@@ -99,16 +98,43 @@ class CallWebhookService
             }
         }
 
+        $disposition = $this->nullableString($payload, 'disposition');
+        $allowedDispositions = [
+            'No Answer', 'Connected', 'Interested', 'Follow Up', 'Callback Requested',
+            'Not Interested', 'Wrong Number', 'Do Not Call', 'Qualified', 'Converted',
+        ];
+
+        if ($disposition !== null && !in_array($disposition, $allowedDispositions, true)) {
+            throw new BadRequest('Unsupported call disposition.');
+        }
+
         $call->setMultiple([
             'status' => $this->mapStatus($status),
             'omniGoCRMProvider' => $provider,
             'omniGoCRMExternalCallId' => $externalCallId,
             'omniGoCRMPhoneNumber' => $phone,
-            'omniGoCRMDisposition' => $this->nullableString($payload, 'disposition'),
-            'omniGoCRMRecordingStatus' => $this->mapRecordingStatus($payload),
-            'omniGoCRMRecordingExternalUrl' => $this->nullableString($payload, 'recordingUrl'),
-            'omniGoCRMTranscript' => $this->nullableString($payload, 'transcript'),
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
+
+        if ($disposition !== null) $call->set('omniGoCRMDisposition', $disposition);
+
+        $recordingUrl = $this->nullableString($payload, 'recordingUrl');
+
+        if ($recordingUrl !== null) {
+            $scheme = strtolower((string) parse_url($recordingUrl, PHP_URL_SCHEME));
+
+            if (!filter_var($recordingUrl, FILTER_VALIDATE_URL) || $scheme !== 'https') {
+                throw new BadRequest('recordingUrl must be an HTTPS URL.');
+            }
+            $call->set('omniGoCRMRecordingExternalUrl', $recordingUrl);
+        }
+
+        if (isset($payload->recordingStatus) || $recordingUrl !== null) {
+            $call->set('omniGoCRMRecordingStatus', $this->mapRecordingStatus($payload));
+        }
+
+        $transcript = $this->nullableString($payload, 'transcript');
+        if ($transcript !== null) $call->set('omniGoCRMTranscript', $transcript);
 
         if (isset($payload->recordingDuration)) {
             $call->set('omniGoCRMRecordingDuration', max(0, (int) $payload->recordingDuration));
@@ -121,16 +147,18 @@ class CallWebhookService
         $assignedUserId = trim((string) $this->config->get('omniGoCRMCallingDefaultAssignedUserId'));
 
         if ($assignedUserId !== '' && !$call->get('assignedUserId')) {
-            $call->set('assignedUserId', $assignedUserId);
-        }
+            $membership = $this->entityManager->getRDBRepository('WorkspaceMember')->where([
+                'workspaceId' => $workspaceId,
+                'userId' => $assignedUserId,
+                'status' => 'Active',
+                'deleted' => false,
+            ])->findOne();
 
-        if ($lead) {
-            $leadWorkspaceId = trim((string) ($lead->get('omniGoCRMWorkspaceId') ?? $lead->get('workspaceId')));
-            if ($leadWorkspaceId !== '') {
-                $call->set('omniGoCRMWorkspaceId', $leadWorkspaceId);
+            if (!$membership) {
+                throw new BadRequest('Default call assignee must be an active member of the calling workspace.');
             }
-        } elseif ($workspaceId !== '') {
-            $call->set('omniGoCRMWorkspaceId', $workspaceId);
+
+            $call->set('assignedUserId', $assignedUserId);
         }
 
         $this->entityManager->saveEntity($call);
@@ -143,7 +171,7 @@ class CallWebhookService
         ];
     }
 
-    private function findLead(string $phone): ?Lead
+    private function findLead(string $phone, string $workspaceId): ?Lead
     {
         if ($phone === '') {
             return null;
@@ -157,6 +185,7 @@ class CallWebhookService
                     ['phoneNumber*' => '%' . $phone . '%'],
                     ['whatsappNumber*' => '%' . $phone . '%'],
                 ],
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'deleted' => false,
             ])
             ->findOne();
@@ -164,7 +193,7 @@ class CallWebhookService
         return $lead;
     }
 
-    private function createMissedCallLead(string $phone): Lead
+    private function createMissedCallLead(string $phone, string $workspaceId): Lead
     {
         $lead = $this->entityManager
             ->getRDBRepositoryByClass(Lead::class)
@@ -175,6 +204,7 @@ class CallWebhookService
             'leadStage' => 'New',
             'source' => 'Call',
             'leadSourceDetail' => 'Missed call',
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
 
         $this->entityManager->saveEntity($lead);

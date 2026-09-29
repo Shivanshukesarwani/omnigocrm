@@ -1,5 +1,15 @@
 {
     "fields": {
+        "omniGoCRMIsFollowUp": {
+            "type": "bool",
+            "default": false,
+            "index": true
+        },
+        "omniGoCRMDueAutomationDispatchedAt": {
+            "type": "datetime",
+            "readOnly": true,
+            "utility": true
+        },
         "omniGoCRMWorkspaceId": {
             "type": "varchar",
             "maxLength": 24,
@@ -11,6 +21,9 @@
     "indexes": {
         "omniGoCRMWorkspaceId": {
             "columns": ["omniGoCRMWorkspaceId", "deleted"]
+        },
+        "omniGoCRMIsFollowUp": {
+            "columns": ["omniGoCRMIsFollowUp", "omniGoCRMWorkspaceId", "deleted"]
         }
     }
 }

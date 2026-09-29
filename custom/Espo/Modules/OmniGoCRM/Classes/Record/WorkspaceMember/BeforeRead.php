@@ -16,5 +16,7 @@ class BeforeRead implements ReadHook {
   if ($workspaceId==='' || $workspaceId!==$current) throw new Forbidden('This workspace membership is outside the active workspace.');
   $membership=$this->entityManager->getRDBRepository('WorkspaceMember')->where(['workspaceId'=>$workspaceId,'userId'=>$this->user->getId(),'status'=>'Active','deleted'=>false])->findOne();
   if (!$membership) throw new Forbidden('You are not an active member of this workspace.');
+  $workspace=$this->entityManager->getEntityById('Workspace',$workspaceId);
+  if (!$workspace || $workspace->get('status')!=='Active') throw new Forbidden('This workspace is not active.');
  }
 }

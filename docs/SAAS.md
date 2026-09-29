@@ -27,6 +27,8 @@ Workspace members have:
 - Agent
 - Viewer
 
+Workspace roles are enforced server-side: Viewers cannot write CRM records; Agents cannot delete records, reassign conversations, or schedule broadcasts; Managers, Admins, and Owners can perform those operations. Only Admins and Owners can manage workspace membership.
+
 Only active memberships can switch a user into a workspace.
 
 The authenticated user's active workspace is stored as `omniGoCRMCurrentWorkspaceId`.
@@ -85,7 +87,9 @@ The setting `omniGoCRMSaaSAdminBypass` is intentionally explicit. When enabled, 
 
 ## Billing
 
-Workspace records already have billing customer/subscription IDs and plan/subscription status, but Stripe/another payment processor is **not** connected yet. Billing webhooks, invoices, plan entitlements, usage metering and payment failure handling remain separate implementation work.
+Workspace records have plan/subscription status and plan entitlements with lead and broadcast quotas. Signed Stripe and Razorpay subscription webhook handlers now ignore unrelated event types and deduplicate processed deliveries. Hosted checkout, invoice generation, provider price-to-plan configuration, and a complete payment-failure lifecycle remain unfinished. Manual plan changes are restricted to global EspoCRM administrators; workspace owners cannot grant themselves paid tiers through the API.
+
+The webhook accepts Stripe `customer.subscription.created`, `updated`, `deleted`, `paused`, and `resumed`, plus Razorpay `subscription.activated`, `pending`, `halted`, `cancelled`, `paused`, `resumed`, `completed`, and `charged`. New subscription events need `workspaceId` and a valid plan (`Free`, `Starter`, `Business`, or `Enterprise`) in Stripe metadata or Razorpay notes. The provider subscription ID cannot be reassigned to another workspace. Configure only the required event types in each provider dashboard.
 
 ## Important isolation boundary
 

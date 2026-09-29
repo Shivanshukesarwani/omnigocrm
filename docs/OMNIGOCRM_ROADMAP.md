@@ -18,7 +18,7 @@
 - [x] Opportunities/deals
 - [x] Pipeline
 - [x] Tasks
-- [ ] Follow-ups
+- [x] Follow-ups (workspace-scoped task API and native mobile list/create)
 - [x] Notes
 - [x] Tags
 - [x] Custom fields
@@ -43,19 +43,19 @@
 - [x] Templates + approval-gated sending
 - [x] Media metadata/webhook ingestion
 - [x] Delivery/read states
-- [ ] Broadcast production controls
+- [x] Approved-template preflight, workspace-safe recipients, and monthly plan quotas
 - [x] WhatsApp Flows
 - [x] Workspace-scoped automated replies foundation
-- [ ] Drip campaigns
+- [x] Drip-style WhatsApp sequences through workspace automation wait/template actions
 
 ## Phase 4 — Calling
-- [ ] Telephony provider abstraction
+- [x] Provider-neutral signed call-event webhook contract
 - [x] Click-to-call
-- [ ] Incoming call events
-- [ ] Outgoing call events
+- [x] Incoming call events
+- [x] Outgoing call events
 - [x] Call logs
-- [ ] Call disposition
-- [ ] Recording metadata
+- [x] Call disposition
+- [x] Recording metadata
 - [ ] Provider-hosted recordings
 - [x] Missed-call lead creation
 - [ ] IVR integration
@@ -74,8 +74,8 @@
 - [x] Actions
 - [x] Delays
 - [x] Scheduled jobs
-- [ ] Webhooks
-- [ ] Assignment rules
+- [x] Signed outbound webhooks with administrator host allowlist
+- [x] Workspace-scoped automation assignment rules
 - [x] Resumable automation runs
 - [x] Conditional branches
 - [x] Guarded automated WhatsApp actions
@@ -85,10 +85,10 @@
 - [ ] Organizations
 - [ ] Users
 - [ ] Roles
-- [ ] Permissions
+- [ ] Permissions (workspace role write/delete, membership deletion, conversation assignment and broadcast scheduling checks exist; full entity/field ACL policy remains)
 - [ ] Subscription plans
 - [ ] Usage limits
-- [ ] Billing integration
+- [ ] Billing integration (signed subscription webhooks and event deduplication exist; live checkout, price mapping and invoice lifecycle remain)
 - [ ] Super-admin console
 - [ ] Tenant provisioning
 - [ ] Audit/security controls
@@ -101,24 +101,23 @@
 - [x] Contacts
 - [x] Pipeline
 - [x] Tasks
-- [ ] Follow-ups
-- [ ] WhatsApp
+- [x] Follow-ups
+- [x] WhatsApp conversation inbox, thread history, and consent-gated replies
 - [x] Calling
 - [x] Device registration foundation
 - [x] Dashboard summary API + native dashboard
-- [ ] Sales documents
-- [ ] Broadcasts
+- [x] Native quote, order, and payment workflows on Android and iOS
+- [x] Native WhatsApp broadcast campaign, recipient, and scheduling workflows on Android and iOS
 - [ ] Offline sync/conflict handling
-- [ ] Push delivery
+- [x] Push delivery (Android and iOS FCM, with APNs routed through Firebase)
 
 ## Remaining before production SaaS launch
 
 - External billing processor webhooks and live checkout.
 - Invitation email delivery and workspace/member administration UI.
 - Production Meta/Google lead-source adapters.
-- Public form security hardening.
-- iOS APNs push delivery.
-- Native mobile sales document and broadcast screens.
+- Public form request-size and origin enforcement (edge rate limiting remains a production requirement).
+- Native mobile sales document workflows.
 - Offline sync, background refresh and conflict handling.
 - PDF quote/invoice generation.
 - Production Docker secrets, HTTPS/reverse proxy, backup/restore and migration runbooks.

@@ -12,6 +12,9 @@
         "providerPhoneNumberId": "Provider Phone Number ID",
         "lastInboundAt": "Last Inbound At",
         "lastOutboundAt": "Last Outbound At",
+        "lastTrackedInboundAt": "Last Tracked Inbound At",
+        "lastResponseAt": "Last Agent Reply At",
+        "lastResponseSeconds": "Latest Reply Time (Seconds)",
         "lead": "Lead",
         "contact": "Contact"
     },
