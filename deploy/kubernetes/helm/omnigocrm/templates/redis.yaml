@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "omnigocrm.fullname" . }}-redis
+spec:
+  serviceName: {{ include "omnigocrm.fullname" . }}-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "omnigocrm.fullname" . }}-redis
+  template:
+    metadata:
+      labels:
+        app: {{ include "omnigocrm.fullname" . }}-redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          args: ["redis-server","--appendonly","yes"]
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.redis.storage }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "omnigocrm.fullname" . }}-redis
+spec:
+  selector:
+    app: {{ include "omnigocrm.fullname" . }}-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
