@@ -38,6 +38,10 @@ The first registered account creates a workspace and becomes its owner.
 
 See docs/ARCHITECTURE.md, docs/API.md, docs/SECURITY.md and docs/DEPLOYMENT.md.
 
+## Deployment options
+
+OmniGoCRM supports direct Linux installation, Docker, Kubernetes, cloud/VPS deployment and managed/custom infrastructure. The interactive installer lets the operator choose the target. See docs/DEPLOYMENT.md for the full deployment matrix.
+
 ## Automatic Git deployment
 
 You do not need to manually install Node.js, pnpm, PostgreSQL or Redis for the production Docker deployment.
