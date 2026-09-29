@@ -21,7 +21,7 @@ spec:
             - {name: POSTGRES_PASSWORD, valueFrom: {secretKeyRef: {name: omnigocrm-secrets, key: db-password}}}
             - {name: POSTGRES_INITDB_ARGS, value: "--auth=scram-sha-256"}
           ports: [{containerPort: 5432}]
-          volumeMounts: [{name: db, mountPath: /var/lib/postgresql/data}]
+          volumeMounts: [{name: db, mountPath: /var/lib/postgresql}]
           readinessProbe:
             exec: {command: ["pg_isready", "-U", "omnigocrm", "-d", "omnigocrm"]}
             initialDelaySeconds: 10
