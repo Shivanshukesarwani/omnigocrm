@@ -6,7 +6,7 @@ OmniGoCRM owns its domain model, PostgreSQL schema, API, authentication, authori
 - **Node.js** is the server runtime.
 - **Fastify** provides the HTTP API.
 - **PostgreSQL** is the system of record.
-- **React + TypeScript** powers the web client.
+- **React + JavaScript (JSX)** powers the web client.
 - **Node.js worker** processes asynchronous automation jobs.
 
 Core domains:
