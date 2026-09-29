@@ -1,0 +1,43 @@
+replicaCount:
+  api: 1
+  worker: 1
+  web: 1
+
+images:
+  api:
+    repository: ghcr.io/shivanshukesarwani/omnigocrm-api
+    tag: main
+    pullPolicy: Always
+  worker:
+    repository: ghcr.io/shivanshukesarwani/omnigocrm-worker
+    tag: main
+    pullPolicy: Always
+  web:
+    repository: ghcr.io/shivanshukesarwani/omnigocrm-web
+    tag: main
+    pullPolicy: Always
+
+service:
+  webPort: 80
+  apiPort: 3000
+
+ingress:
+  enabled: false
+  className: nginx
+  host: omnigocrm.local
+  tls: false
+
+postgres:
+  image: postgres:18
+  storage: 10Gi
+  database: omnigocrm
+  user: omnigocrm
+  password: ""
+  existingSecret: ""
+
+redis:
+  image: redis:8-alpine
+  storage: 2Gi
+
+jwtSecret: ""
+existingSecret: ""
