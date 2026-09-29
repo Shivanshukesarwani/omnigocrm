@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Secret
+metadata: {name: omnigocrm-secrets,namespace: omnigocrm}
+type: Opaque
+stringData: {postgres-password: change-me,jwt-secret: change-me}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: postgres,namespace: omnigocrm}
+spec: {selector: {app: postgres},ports: [{port: 5432}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: postgres,namespace: omnigocrm}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: postgres}}
+  template:
+    metadata: {labels: {app: postgres}}
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:18
+        env:
+        - {name: POSTGRES_DB,value: omnigocrm}
+        - {name: POSTGRES_USER,value: omnigocrm}
+        - {name: POSTGRES_PASSWORD,valueFrom:{secretKeyRef:{name:omnigocrm-secrets,key:postgres-password}}}
+        ports: [{containerPort:5432}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: api,namespace: omnigocrm}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: api}}
+  template:
+    metadata: {labels: {app: api}}
+    spec:
+      containers:
+      - name: api
+        image: ghcr.io/shivanshukesarwani/omnigocrm-api:latest
+        env:
+        - {name: PORT,value:"3000"}
+        - {name: DATABASE_URL,value:postgresql://omnigocrm:change-me@postgres:5432/omnigocrm}
+        - {name: JWT_SECRET,valueFrom:{secretKeyRef:{name:omnigocrm-secrets,key:jwt-secret}}}
+        ports: [{containerPort:3000}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: api,namespace: omnigocrm}
+spec: {selector:{app:api},ports:[{port:3000}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: web,namespace:omnigocrm}
+spec:
+  replicas: 2
+  selector: {matchLabels:{app:web}}
+  template:
+    metadata: {labels:{app:web}}
+    spec:
+      containers:
+      - name: web
+        image: ghcr.io/shivanshukesarwani/omnigocrm-web:latest
+        ports: [{containerPort:80}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name:web,namespace:omnigocrm}
+spec: {selector:{app:web},ports:[{port:80,targetPort:80}]}

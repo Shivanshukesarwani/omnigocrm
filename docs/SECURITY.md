@@ -1,0 +1,3 @@
+# Security
+
+Use HTTPS in production and a high-entropy JWT secret. Never commit .env or provider credentials. Restrict CORS to the actual web origin. Validate input at the API boundary. Keep workspace filtering server-side. Destructive operations require RBAC. Keep audit logs for data changes. Protect public lead capture with rate limiting/CAPTCHA at the edge before exposing it publicly. Encrypt backups and test restoration regularly.

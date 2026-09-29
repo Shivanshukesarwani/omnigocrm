@@ -1,13 +1,14 @@
 # OmniGoCRM Architecture
 
-OmniGoCRM owns its domain model, database schema, API, authentication, authorization, business logic and interfaces.
+OmniGoCRM owns its domain model, PostgreSQL schema, API, authentication, authorization, business logic and interfaces. There is no EspoCRM or Laravel runtime dependency.
 
-There is no EspoCRM or Laravel runtime dependency.
+Core domains:
+- Identity: users, workspaces, members, RBAC, audit logs
+- CRM: leads, contacts, accounts, opportunities, pipelines, tasks, notes, tags
+- Omnichannel: conversations, messages, calls, campaigns
+- Automation: workflows and queued jobs
+- Platform: notifications and future integrations/billing
 
-## Monorepo
-`apps/api` backend · `apps/web` web · `apps/worker` jobs · `packages/*` shared code · `database` PostgreSQL · `mobile` Android/iOS · `infra` deployment.
+Every business record is workspace-scoped. The active workspace is derived from the signed JWT and verified against workspace membership.
 
-## Core domain
-Workspace, User, Role, Lead, Contact, Account, Opportunity, Pipeline, Activity, Conversation, Message, Call, Campaign, Automation, Task, Quote, Order, Payment, Notification, Integration and AuditLog.
-
-Every completed feature should include its data model, migration, API, authorization, UI, tests and documentation.
+The web app and future native Android/iOS clients use the same versioned API. Provider integrations plug into OmniGoCRM rather than defining its core data model.

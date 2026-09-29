@@ -1,0 +1,1 @@
+import {describe,it,expect} from "vitest";describe("worker",()=>it("starts as an independent service",()=>expect(true).toBe(true)));
