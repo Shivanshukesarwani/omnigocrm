@@ -1,9 +1,0 @@
-{
-  "OmniGoCRM": {
-    "params": {
-      "controller": "module:omni-go-crm/controllers/home",
-      "action": "index"
-    },
-    "order": 1
-  }
-}

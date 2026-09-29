@@ -1,6 +1,0 @@
-{
-    "beforeReadHookClassNameList":["Espo\\Modules\\OmniGoCRM\\Classes\\Record\\WorkspaceRecord\\BeforeRead"],
-    "beforeDeleteHookClassNameList":["Espo\\Modules\\OmniGoCRM\\Classes\\Record\\WorkspaceRecord\\BeforeDelete"],
-    "selectApplierClassNameList": ["Espo\\Modules\\OmniGoCRM\\Classes\\Select\\WorkspaceFilter"],
-    "mandatoryAttributeList": ["omniGoCRMWorkspaceId"]
-}

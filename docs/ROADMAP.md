@@ -1,33 +1,13 @@
-# Product roadmap
+# OmniGoCRM Roadmap
 
-## Included foundation
+1. Foundation — authentication, sessions, RBAC, workspace isolation, migrations, API versioning, web shell, worker, Docker and CI.
+2. CRM core — leads, contacts, accounts, opportunities, pipelines, tasks, notes, tags, custom fields, import/export and routing.
+3. Communications — unified inbox, WhatsApp, calling, SMS, email, templates and notifications.
+4. Lead acquisition — website forms, public API, webhooks, Meta, Google and campaign attribution.
+5. Automation — triggers, conditions, actions, delays, branches, sequences and workflow builder.
+6. Sales — products, quotes, orders, payments and invoices.
+7. Analytics — sales, agent, conversion, calling, messaging and custom reports.
+8. SaaS — workspaces, plans, quotas, billing, provisioning and super-admin.
+9. Mobile — Android/iOS parity, push, sync, offline mode and conflict resolution.
 
-- Authentication
-- Dashboard
-- Lead CRUD
-- Lead conversion
-- Contact CRUD
-- Customer CRUD
-- WhatsApp templates
-- WhatsApp deep links
-- Follow-ups
-- Call logging
-- Private recordings
-- API authentication
-- Android login/dashboard/leads/contacts/customers/templates/calls
-- Native one-click calling
-
-## Next recommended modules
-
-1. Full quotation editor + PDF generation
-2. Invoice + payment ledger
-3. Product/service catalogue
-4. Bulk CSV/XLSX import with field mapping
-5. Website lead capture forms/webhooks
-6. Push notifications and background sync
-7. Advanced automation rules
-8. Team analytics and sales funnel reports
-9. Audit log UI
-10. Encrypted-at-rest recording storage and retention policies
-11. Backup/restore
-12. Official WhatsApp Business Platform integration if true outbound automation is required
+TeleCRM references supplied by the owner are product requirements references only; implementation belongs to OmniGoCRM.

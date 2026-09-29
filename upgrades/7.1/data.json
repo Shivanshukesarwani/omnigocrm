@@ -1,8 +1,0 @@
-{
-    "manifest": {
-        "delete": [
-            "client/espo.min.js",
-            "client/espo.min.js.map"
-        ]
-    }
-}

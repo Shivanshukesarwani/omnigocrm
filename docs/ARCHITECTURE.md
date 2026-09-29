@@ -1,56 +1,13 @@
 # OmniGoCRM Architecture
 
-~~~text
-                         OmniGoCRM
-                             │
-              ┌──────────────┴──────────────┐
-              │                             │
-        EspoCRM backend                Native clients
-              │                       Android / iOS
-              │
-      OmniGoCRM custom module
-              │
-   ┌──────────┼───────────┬───────────────┐
-   │          │           │               │
-  CRM      WhatsApp     Calling       Automation
-   │          │           │               │
-   ├── Leads
-   ├── Contacts
-   ├── Accounts
-   ├── Opportunities
-   ├── Tasks
-   ├── Meetings
-   ├── Products
-   ├── Quotes
-   ├── Orders
-   └── Payments
-              │
-              ▼
-       SaaS / Workspace layer
-              │
-       Users / Roles / Billing
-~~~
+OmniGoCRM owns its domain model, database schema, API, authentication, authorization, business logic and interfaces.
 
-## Single backend rule
+There is no EspoCRM or Laravel runtime dependency.
 
-EspoCRM is the only CRM and data backend. All CRM, SaaS, WhatsApp, calling and automation functionality must use the active EspoCRM/OmniGoCRM architecture.
+## Monorepo
+`apps/api` backend · `apps/web` web · `apps/worker` jobs · `packages/*` shared code · `database` PostgreSQL · `mobile` Android/iOS · `infra` deployment.
 
-## Core lifecycle
+## Core domain
+Workspace, User, Role, Lead, Contact, Account, Opportunity, Pipeline, Activity, Conversation, Message, Call, Campaign, Automation, Task, Quote, Order, Payment, Notification, Integration and AuditLog.
 
-~~~text
-Lead sources → Lead → Assignment → WhatsApp / Calling / Tasks / Follow-up → Deal → Quote → Order → Payment → Customer timeline
-~~~
-
-## Tenant boundary
-
-Workspace-aware records carry `omniGoCRMWorkspaceId`. OmniGoCRM hooks and access-control metadata enforce workspace boundaries during list/search, read, create/update, and delete operations.
-
-Every new tenant-aware entity must receive a workspace identifier, workspace-aware filtering, save/update enforcement, read enforcement, delete enforcement, and cross-workspace tests.
-
-## Provider boundary
-
-External integrations are isolated behind provider services/adapters for WhatsApp Cloud API, Meta/Google lead ingestion, telephony, billing, and push notifications. Credentials must never be committed to Git.
-
-## Automation boundary
-
-Inbound events should be acknowledged quickly. Automation execution runs through scheduled jobs where possible, with persistent run state for delayed and resumable actions.
+Every completed feature should include its data model, migration, API, authorization, UI, tests and documentation.
