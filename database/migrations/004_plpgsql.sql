@@ -45,29 +45,32 @@ CREATE OR REPLACE FUNCTION omnigo_recalculate_quote_totals()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  target_ids uuid[] := ARRAY_REMOVE(ARRAY[NEW.quote_id, OLD.quote_id], NULL);
+  target_id uuid;
 BEGIN
-  UPDATE quotes q
-  SET
-    subtotal = COALESCE(x.subtotal, 0),
-    tax_total = COALESCE(x.tax_total, 0),
-    total = COALESCE(x.subtotal, 0) + COALESCE(x.tax_total, 0)
-  FROM (
-    SELECT
-      quote_id,
-      SUM(quantity * unit_price) AS subtotal,
-      SUM(quantity * unit_price * tax_rate / 100) AS tax_total
-    FROM quote_items
-    WHERE quote_id = COALESCE(NEW.quote_id, OLD.quote_id)
-    GROUP BY quote_id
-  ) x
-  WHERE q.id = x.quote_id;
+  FOREACH target_id IN ARRAY target_ids LOOP
+    UPDATE quotes q
+    SET
+      subtotal = COALESCE(x.subtotal, 0),
+      tax_total = COALESCE(x.tax_total, 0),
+      total = COALESCE(x.subtotal, 0) + COALESCE(x.tax_total, 0)
+    FROM (
+      SELECT
+        quote_id,
+        SUM(quantity * unit_price) AS subtotal,
+        SUM(quantity * unit_price * tax_rate / 100) AS tax_total
+      FROM quote_items
+      WHERE quote_id = target_id
+      GROUP BY quote_id
+    ) x
+    WHERE q.id = x.quote_id;
 
-  UPDATE quotes
-  SET subtotal = 0, tax_total = 0, total = 0
-  WHERE id = COALESCE(NEW.quote_id, OLD.quote_id)
-    AND NOT EXISTS (
-      SELECT 1 FROM quote_items WHERE quote_id = COALESCE(NEW.quote_id, OLD.quote_id)
-    );
+    UPDATE quotes
+    SET subtotal = 0, tax_total = 0, total = 0
+    WHERE id = target_id
+      AND NOT EXISTS (SELECT 1 FROM quote_items WHERE quote_id = target_id);
+  END LOOP;
 
   RETURN COALESCE(NEW, OLD);
 END;
@@ -97,29 +100,32 @@ CREATE OR REPLACE FUNCTION omnigo_recalculate_order_totals()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  target_ids uuid[] := ARRAY_REMOVE(ARRAY[NEW.order_id, OLD.order_id], NULL);
+  target_id uuid;
 BEGIN
-  UPDATE orders o
-  SET
-    subtotal = COALESCE(x.subtotal, 0),
-    tax_total = COALESCE(x.tax_total, 0),
-    total = COALESCE(x.subtotal, 0) + COALESCE(x.tax_total, 0)
-  FROM (
-    SELECT
-      order_id,
-      SUM(quantity * unit_price) AS subtotal,
-      SUM(quantity * unit_price * tax_rate / 100) AS tax_total
-    FROM order_items
-    WHERE order_id = COALESCE(NEW.order_id, OLD.order_id)
-    GROUP BY order_id
-  ) x
-  WHERE o.id = x.order_id;
+  FOREACH target_id IN ARRAY target_ids LOOP
+    UPDATE orders o
+    SET
+      subtotal = COALESCE(x.subtotal, 0),
+      tax_total = COALESCE(x.tax_total, 0),
+      total = COALESCE(x.subtotal, 0) + COALESCE(x.tax_total, 0)
+    FROM (
+      SELECT
+        order_id,
+        SUM(quantity * unit_price) AS subtotal,
+        SUM(quantity * unit_price * tax_rate / 100) AS tax_total
+      FROM order_items
+      WHERE order_id = target_id
+      GROUP BY order_id
+    ) x
+    WHERE o.id = x.order_id;
 
-  UPDATE orders
-  SET subtotal = 0, tax_total = 0, total = 0
-  WHERE id = COALESCE(NEW.order_id, OLD.order_id)
-    AND NOT EXISTS (
-      SELECT 1 FROM order_items WHERE order_id = COALESCE(NEW.order_id, OLD.order_id)
-    );
+    UPDATE orders
+    SET subtotal = 0, tax_total = 0, total = 0
+    WHERE id = target_id
+      AND NOT EXISTS (SELECT 1 FROM order_items WHERE order_id = target_id);
+  END LOOP;
 
   RETURN COALESCE(NEW, OLD);
 END;
@@ -143,28 +149,31 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  target_invoice uuid := COALESCE(NEW.invoice_id, OLD.invoice_id);
+  target_ids uuid[] := ARRAY_REMOVE(ARRAY[NEW.invoice_id, OLD.invoice_id], NULL);
+  target_invoice uuid;
   paid numeric(14,2);
 BEGIN
-  SELECT COALESCE(SUM(amount), 0)
-  INTO paid
-  FROM payments
-  WHERE invoice_id = target_invoice
-    AND status = 'paid';
+  FOREACH target_invoice IN ARRAY target_ids LOOP
+    SELECT COALESCE(SUM(amount), 0)
+    INTO paid
+    FROM payments
+    WHERE invoice_id = target_invoice
+      AND status = 'paid';
 
-  UPDATE invoices
-  SET
-    paid_amount = paid,
-    paid_at = CASE
-      WHEN paid >= total AND total > 0 THEN COALESCE(paid_at, now())
-      ELSE NULL
-    END,
-    status = CASE
-      WHEN paid >= total AND total > 0 THEN 'paid'
-      WHEN paid > 0 THEN 'partially_paid'
-      ELSE status
-    END
-  WHERE id = target_invoice;
+    UPDATE invoices
+    SET
+      paid_amount = paid,
+      paid_at = CASE
+        WHEN paid >= total AND total > 0 THEN COALESCE(paid_at, now())
+        ELSE NULL
+      END,
+      status = CASE
+        WHEN paid >= total AND total > 0 THEN 'paid'
+        WHEN paid > 0 THEN 'partially_paid'
+        ELSE status
+      END
+    WHERE id = target_invoice;
+  END LOOP;
 
   RETURN COALESCE(NEW, OLD);
 END;
