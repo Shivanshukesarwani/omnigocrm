@@ -1,0 +1,25 @@
+{
+  "menuItems": {
+    "omniGoCRM": {
+      "order": -100,
+      "groupIndex": 0,
+      "link": "#OmniGoCRM",
+      "labelTranslation": "Global.labels.OmniGoCRM",
+      "iconClass": "fas fa-layer-group"
+    },
+    "omniGoCRMInbox": {
+      "order": -90,
+      "groupIndex": 0,
+      "link": "#WhatsAppConversation",
+      "labelTranslation": "Global.labels.WhatsAppInbox",
+      "iconClass": "fab fa-whatsapp"
+    },
+    "omniGoCRMWorkspaces": {
+      "order": -80,
+      "groupIndex": 0,
+      "link": "#Workspace",
+      "labelTranslation": "Global.labels.Workspaces",
+      "iconClass": "fas fa-building"
+    }
+  }
+}

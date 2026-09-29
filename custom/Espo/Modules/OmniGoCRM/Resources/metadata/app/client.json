@@ -2,5 +2,13 @@
   "cssList": [
     "__APPEND__",
     "client/custom/modules/omni-go-crm/css/omni-go-crm.css"
+  ],
+  "scriptList": [
+    "__APPEND__",
+    "client/custom/modules/omni-go-crm/src/bootstrap.js"
+  ],
+  "developerModeScriptList": [
+    "__APPEND__",
+    "client/custom/modules/omni-go-crm/src/bootstrap.js"
   ]
 }

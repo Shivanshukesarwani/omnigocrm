@@ -1,13 +1,554 @@
 /*
- * OmniGoCRM custom UI layer.
+ * OmniGoCRM Material 3 product layer.
  *
- * Keep EspoCRM core styles untouched. Add product-specific styling here.
+ * This is intentionally framework-light because EspoCRM owns the SPA/runtime.
+ * It applies Material 3 visual language without replacing EspoCRM's backend.
  */
 
-:root {
-    --omni-primary: #2563eb;
+:root,
+html.omni-m3 {
+    --omni-m3-primary: #4f46a5;
+    --omni-m3-on-primary: #ffffff;
+    --omni-m3-primary-container: #e8def8;
+    --omni-m3-on-primary-container: #1d192b;
+    --omni-m3-secondary: #625b71;
+    --omni-m3-secondary-container: #e8def8;
+    --omni-m3-surface: #fffbfe;
+    --omni-m3-surface-container: #f3edf7;
+    --omni-m3-surface-container-high: #ece6f0;
+    --omni-m3-outline: #79747e;
+    --omni-m3-outline-variant: #cac4d0;
+    --omni-m3-on-surface: #1c1b1f;
+    --omni-m3-on-surface-variant: #49454f;
+    --omni-m3-error: #ba1a1a;
+    --omni-m3-error-container: #ffdad6;
+    --omni-m3-radius-sm: 12px;
+    --omni-m3-radius-md: 16px;
+    --omni-m3-radius-lg: 28px;
+    --omni-m3-elevation-1: 0 1px 2px rgba(0, 0, 0, .10), 0 1px 3px rgba(0, 0, 0, .08);
 }
 
-.omni-go-crm-brand {
+html.omni-m3,
+body.omni-m3-body {
+    background: var(--omni-m3-surface);
+    color: var(--omni-m3-on-surface);
+}
+
+body.omni-m3-body {
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.omni-m3-page {
+    width: 100%;
+    min-height: calc(100vh - 24px);
+    background: var(--omni-m3-surface);
+    color: var(--omni-m3-on-surface);
+}
+
+.omni-m3-appbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 14px 24px;
+    background: rgba(255, 251, 254, .94);
+    border-bottom: 1px solid var(--omni-m3-outline-variant);
+    backdrop-filter: blur(16px);
+}
+
+.omni-m3-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.omni-m3-logo {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--omni-m3-primary);
+    color: var(--omni-m3-on-primary);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .04em;
+}
+
+.omni-m3-brand-name {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+}
+
+.omni-m3-brand-subtitle,
+.omni-m3-supporting,
+.omni-m3-section-header p,
+.omni-m3-card-body p,
+.omni-m3-feature small,
+.omni-m3-chip-card small {
+    color: var(--omni-m3-on-surface-variant);
+}
+
+.omni-m3-brand-subtitle {
+    margin-top: 2px;
+    font-size: 12px;
+}
+
+.omni-m3-appbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.omni-m3-icon-button,
+.omni-m3-avatar {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--omni-m3-on-surface-variant);
+    text-decoration: none !important;
+}
+
+.omni-m3-icon-button:hover,
+.omni-m3-avatar:hover {
+    background: var(--omni-m3-surface-container-high);
+    color: var(--omni-m3-on-surface);
+}
+
+.omni-m3-icon-button {
+    font-size: 10px;
+}
+
+.omni-m3-avatar {
+    background: var(--omni-m3-primary-container);
+    color: var(--omni-m3-primary);
     font-weight: 700;
+}
+
+.omni-m3-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 28px 56px;
+}
+
+.omni-m3-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 28px;
+    padding: 4px 2px;
+}
+
+.omni-m3-eyebrow {
+    margin: 0 0 8px;
+    color: var(--omni-m3-primary);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.omni-m3-hero h1 {
+    margin: 0;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.08;
+    letter-spacing: -.035em;
+    font-weight: 800;
+}
+
+.omni-m3-supporting {
+    max-width: 760px;
+    margin: 12px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.omni-m3-workspace-control {
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.omni-m3-workspace-control label {
+    color: var(--omni-m3-on-surface-variant);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.omni-m3-select,
+.omni-m3-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--omni-m3-outline);
+    border-radius: 12px;
+    background: var(--omni-m3-surface);
+    color: var(--omni-m3-on-surface);
+    font: inherit;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.omni-m3-select:focus,
+.omni-m3-input:focus {
+    border-color: var(--omni-m3-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 165, .14);
+}
+
+.omni-m3-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 28px;
+    padding: 22px;
+    border: 1px solid var(--omni-m3-outline-variant);
+    border-radius: var(--omni-m3-radius-md);
+    background: var(--omni-m3-surface-container);
+}
+
+.omni-m3-card-highlight {
+    background: var(--omni-m3-primary-container);
+    border-color: transparent;
+}
+
+.omni-m3-card-error {
+    align-items: center;
+    flex-wrap: wrap;
+    color: var(--omni-m3-error);
+    background: var(--omni-m3-error-container);
+    border-color: transparent;
+}
+
+.omni-m3-card-error span {
+    flex: 1 1 320px;
+}
+
+.omni-m3-card-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    place-items: center;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .68);
+    font-size: 24px;
+}
+
+.omni-m3-card-body {
+    flex: 1;
+}
+
+.omni-m3-card-body h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.omni-m3-card-body p {
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.omni-m3-inline-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 760px;
+}
+
+.omni-m3-inline-form .omni-m3-input {
+    flex: 1 1 auto;
+}
+
+.omni-m3-section {
+    margin-top: 38px;
+}
+
+.omni-m3-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.omni-m3-section-header h2 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: -.02em;
+}
+
+.omni-m3-section-header p {
+    margin: 4px 0 0;
+    font-size: 14px;
+}
+
+.omni-m3-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.omni-m3-grid-features {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.omni-m3-grid-compact {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.omni-m3-feature,
+.omni-m3-chip-card {
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.omni-m3-feature {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    min-height: 108px;
+    padding: 18px;
+    border-radius: 20px;
+    background: var(--omni-m3-surface-container);
+    border: 1px solid transparent;
+    transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.omni-m3-feature:hover {
+    transform: translateY(-1px);
+    background: var(--omni-m3-surface-container-high);
+    border-color: var(--omni-m3-outline-variant);
+}
+
+.omni-m3-feature-icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--omni-m3-primary-container);
+    color: var(--omni-m3-primary);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.omni-icon-whatsapp {
+    letter-spacing: -.05em;
+}
+
+.omni-m3-feature strong,
+.omni-m3-feature small {
+    display: block;
+}
+
+.omni-m3-feature strong {
+    margin-bottom: 5px;
+    font-size: 15px;
+}
+
+.omni-m3-feature small {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.omni-m3-feature-arrow {
+    color: var(--omni-m3-on-surface-variant);
+    font-size: 18px;
+}
+
+.omni-m3-chip-card {
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--omni-m3-surface);
+    border: 1px solid var(--omni-m3-outline-variant);
+    transition: border-color .16s ease, background .16s ease;
+}
+
+.omni-m3-chip-card:hover {
+    background: var(--omni-m3-surface-container);
+    border-color: var(--omni-m3-primary);
+}
+
+.omni-m3-chip-card span,
+.omni-m3-chip-card small {
+    display: block;
+}
+
+.omni-m3-chip-card span {
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.omni-m3-chip-card small {
+    font-size: 12px;
+}
+
+.omni-m3-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.omni-m3-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+
+.omni-m3-button:hover {
+    transform: translateY(-1px);
+}
+
+.omni-m3-button-filled {
+    background: var(--omni-m3-primary);
+    color: var(--omni-m3-on-primary);
+    box-shadow: var(--omni-m3-elevation-1);
+}
+
+.omni-m3-button-tonal {
+    background: var(--omni-m3-secondary-container);
+    color: var(--omni-m3-on-primary-container);
+}
+
+.omni-m3-button-outlined {
+    border: 1px solid var(--omni-m3-outline);
+    background: transparent;
+    color: var(--omni-m3-on-surface);
+}
+
+/* Global Espo skin: preserve its information architecture, change its visual language. */
+.omni-m3-body .navbar,
+.omni-m3-body #header,
+.omni-m3-body .header {
+    background: var(--omni-m3-surface) !important;
+    border-color: var(--omni-m3-outline-variant) !important;
+}
+
+.omni-m3-body .panel,
+.omni-m3-body .panel-default,
+.omni-m3-body .panel-primary,
+.omni-m3-body .record-container,
+.omni-m3-body .list-container,
+.omni-m3-body .detail-container,
+.omni-m3-body .edit-container {
+    border-radius: var(--omni-m3-radius-md);
+    border-color: var(--omni-m3-outline-variant);
+    box-shadow: none;
+}
+
+.omni-m3-body .panel-heading,
+.omni-m3-body .panel-footer {
+    background: var(--omni-m3-surface-container) !important;
+    border-color: var(--omni-m3-outline-variant) !important;
+}
+
+.omni-m3-body .btn,
+.omni-m3-body button,
+.omni-m3-body input,
+.omni-m3-body select,
+.omni-m3-body textarea {
+    border-radius: 12px;
+}
+
+.omni-m3-body .btn-primary {
+    background: var(--omni-m3-primary);
+    border-color: var(--omni-m3-primary);
+    color: var(--omni-m3-on-primary);
+}
+
+.omni-m3-body .btn-default,
+.omni-m3-body .btn-secondary {
+    background: var(--omni-m3-surface-container);
+    border-color: transparent;
+    color: var(--omni-m3-on-surface);
+}
+
+.omni-m3-body .form-control,
+.omni-m3-body select.form-control,
+.omni-m3-body textarea.form-control {
+    min-height: 42px;
+    border-color: var(--omni-m3-outline);
+    box-shadow: none;
+    background: var(--omni-m3-surface);
+}
+
+.omni-m3-body .form-control:focus,
+.omni-m3-body select.form-control:focus,
+.omni-m3-body textarea.form-control:focus {
+    border-color: var(--omni-m3-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 165, .12);
+}
+
+.omni-m3-body .dropdown-menu,
+.omni-m3-body .modal-content {
+    border-radius: 18px;
+    border-color: var(--omni-m3-outline-variant);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .14);
+}
+
+@media (max-width: 1100px) {
+    .omni-m3-grid-features {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .omni-m3-grid-compact {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .omni-m3-appbar {
+        padding: 12px 16px;
+    }
+
+    .omni-m3-content {
+        padding: 20px 16px 42px;
+    }
+
+    .omni-m3-hero {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .omni-m3-workspace-control {
+        min-width: 0;
+    }
+
+    .omni-m3-grid-features,
+    .omni-m3-grid-compact {
+        grid-template-columns: 1fr;
+    }
+
+    .omni-m3-inline-form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .omni-m3-inline-form .omni-m3-input,
+    .omni-m3-inline-form .omni-m3-button {
+        width: 100%;
+    }
+
+    .omni-m3-actions-row .omni-m3-button {
+        flex: 1 1 100%;
+    }
 }

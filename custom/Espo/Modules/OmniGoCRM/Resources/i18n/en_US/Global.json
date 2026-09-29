@@ -1,12 +1,13 @@
 {
     "labels": {
         "OmniGoCRM": "OmniGoCRM",
-        "OmniGoCRMLeadFields": "OmniGoCRM Lead Fields",
-        "WhatsAppMessage": "WhatsApp Message",
-        "WhatsAppConversation": "WhatsApp Conversation",
-        "WhatsAppTemplate": "WhatsApp Template",
-        "Workspace": "Workspace",
-        "WorkspaceMember": "Workspace Member"
+        "WhatsAppInbox": "WhatsApp Inbox",
+        "Workspaces": "Workspaces",
+        "Broadcasts": "Broadcasts",
+        "Automations": "Automations",
+        "LeadCapture": "Lead Capture",
+        "CustomerTimeline": "Customer Timeline",
+        "Sales": "Sales"
     },
     "scopeNames": {
         "WhatsAppMessage": "WhatsApp Message",
