@@ -8,7 +8,7 @@ Independent platform: no EspoCRM, no Laravel, and no other CRM backend.
 - **Node.js 22 + Fastify** — API, authentication and business logic
 - **PostgreSQL 18** — primary database and system of record
 - **JavaScript (ES modules)** — API and background worker runtime
-- **React + TypeScript** — web application
+- **React + JavaScript (JSX)** — web application
 - **Docker / Kubernetes** — deployment
 
 ## Included
