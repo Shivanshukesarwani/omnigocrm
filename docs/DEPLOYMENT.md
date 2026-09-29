@@ -53,3 +53,22 @@ kubectl apply -f infra/kubernetes/app.yaml
 ```
 
 Production hardening should include TLS, backups, monitoring, secret management, resource limits and a managed/persistent PostgreSQL strategy.
+
+
+## Automatic dependency installation
+
+For a fresh Linux machine, the installer can bootstrap the deployment directly from GitHub:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh
+```
+
+It installs the required host dependencies where supported, clones the repository, generates secrets, builds the Docker images and starts the complete stack.
+
+For Windows PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.ps1 | iex
+```
+
+The production stack itself contains Node.js, PostgreSQL, Redis and Nginx, so these do not need to be installed separately on the host.
