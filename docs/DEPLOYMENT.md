@@ -1,74 +1,73 @@
 # Deployment
 
-OmniGoCRM includes a one-command production Docker deployment for Linux, Windows and macOS.
+OmniGoCRM supports multiple deployment targets. The application code is shared while each deployment adapter provides the required runtime and infrastructure.
 
-## One-click / one-command Docker deployment
+## Deployment choices
 
-### Linux
-```bash
-git clone https://github.com/Shivanshukesarwani/omnigocrm.git
-cd omnigocrm
-cp .env.production.example .env
-# Edit .env and set POSTGRES_PASSWORD and JWT_SECRET
-./scripts/deploy.sh
-```
+| Mode | Requirements | Use case |
+|---|---|---|
+| Direct / native server | Linux, sudo, apt | VPS or dedicated Linux server |
+| Docker server | Docker + Compose | Home server, NAS, VPS, production |
+| Kubernetes | kubectl + Helm + cluster | Kubernetes/cloud production |
+| Cloud / VPS | Any supported VM | AWS, Azure, GCP, DigitalOcean, Hetzner and similar |
+| PaaS / custom | Provider-managed runtime | Managed infrastructure |
 
-### Windows PowerShell
-```powershell
-git clone https://github.com/Shivanshukesarwani/omnigocrm.git
-cd omnigocrm
-Copy-Item .env.production.example .env
-# Edit .env and set POSTGRES_PASSWORD and JWT_SECRET
-./scripts/deploy.ps1
-```
+## Interactive installer
 
-### macOS
-```bash
-git clone https://github.com/Shivanshukesarwani/omnigocrm.git
-cd omnigocrm
-cp .env.production.example .env
-# Edit .env and set POSTGRES_PASSWORD and JWT_SECRET
-./scripts/deploy.command
-```
+Linux/macOS:
 
-The deployment starts PostgreSQL, Redis, the Fastify API, the background worker and the React/Nginx web application. Database migrations run automatically when the API starts.
+    curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh
 
-Open:
+The installer offers native server, Docker, Kubernetes, cloud/VPS and PaaS/custom choices.
 
-`http://localhost`
+Non-interactive modes:
 
-For a server, replace `CORS_ORIGIN` and `WEB_PORT` in `.env` as appropriate and put TLS/reverse-proxy protection in front of the application.
+    curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh -s -- --mode=docker
+    curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh -s -- --mode=native
+    curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh -s -- --mode=kubernetes
 
-## Manual Docker deployment
+Windows PowerShell:
 
-```bash
-docker compose --env-file .env -f infra/docker/docker-compose.prod.yml up -d --build
-```
+    irm https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.ps1 | iex
+
+Set OMNIGOCRM_MODE to docker or kubernetes for non-interactive Windows deployment.
+
+## Direct / native Linux
+
+The native installer currently targets apt-based Linux distributions such as Ubuntu and Debian. It installs Git, curl, Node.js 22, pnpm, PostgreSQL, Redis, Nginx and build tools. It then clones or updates the repository, creates production configuration, installs packages, runs migrations, builds the React web application and creates systemd services for the API and worker.
+
+## Docker
+
+Docker mode automatically installs Docker on supported Linux distributions and uses Docker Compose. Windows/macOS use Docker Desktop. The host does not need Node.js, pnpm, PostgreSQL or Redis.
 
 ## Kubernetes
 
-```bash
-kubectl apply -f infra/kubernetes/namespace.yaml
-kubectl apply -f infra/kubernetes/app.yaml
-```
+The Helm chart is located at deploy/kubernetes/helm/omnigocrm.
 
-Production hardening should include TLS, backups, monitoring, secret management, resource limits and a managed/persistent PostgreSQL strategy.
+Requirements: Kubernetes cluster, kubectl, Helm 3+, persistent storage and access to the OmniGoCRM container images.
 
+Install:
 
-## Automatic dependency installation
+    curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh -s -- --mode=kubernetes
 
-For a fresh Linux machine, the installer can bootstrap the deployment directly from GitHub:
+Or:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.sh | sh
-```
+    helm upgrade --install omnigocrm deploy/kubernetes/helm/omnigocrm --namespace omnigocrm --create-namespace
 
-It installs the required host dependencies where supported, clones the repository, generates secrets, builds the Docker images and starts the complete stack.
+The chart deploys PostgreSQL, Redis, API, worker and web. Generated secrets are preserved across Helm upgrades unless an existing secret is supplied.
 
-For Windows PowerShell:
+## Cloud / VPS
 
-```powershell
-irm https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/scripts/install.ps1 | iex
-```
+OmniGoCRM can run on a normal VM from AWS, Azure, Google Cloud, DigitalOcean, Hetzner and similar providers. Use native or Docker mode on a VM, or Kubernetes mode on a managed Kubernetes service.
 
-The production stack itself contains Node.js, PostgreSQL, Redis and Nginx, so these do not need to be installed separately on the host.
+## PaaS / custom infrastructure
+
+If the provider supplies managed PostgreSQL/Redis and a Node.js or container runtime, configure DATABASE_URL, REDIS_URL, JWT_SECRET and CORS_ORIGIN. Build the web application with pnpm and run the API/worker package start commands.
+
+## Production hardening
+
+For internet-facing deployments add HTTPS/TLS, DNS, backups, monitoring, rate limiting, secret management, firewall/network policies, resource limits and persistent storage. Never expose PostgreSQL or Redis directly to the public internet.
+
+Pin release versions/images for controlled production deployments instead of tracking main indefinitely.
+
+Security note: piping a remote script directly to a shell is convenient but requires trusting the current GitHub file. For higher assurance, download, inspect and pin a release before execution.
