@@ -31,7 +31,8 @@ class WorkspaceFilter implements AdditionalApplier
                 'status' => 'Active',
                 'deleted' => false,
             ])->find();
-            $workspaceIds = array_map(static fn($membership) => $membership->get('workspaceId'), $memberships);
+            $membershipList = iterator_to_array($memberships, false);
+            $workspaceIds = array_map(static fn($membership) => $membership->get('workspaceId'), $membershipList);
             if ($workspaceIds) {
                 $workspaces = $this->entityManager->getRDBRepository('Workspace')->where([
                     'id' => $workspaceIds,
