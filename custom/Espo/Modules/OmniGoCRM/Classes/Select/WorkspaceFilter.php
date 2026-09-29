@@ -8,6 +8,7 @@ use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
 use Espo\Entities\User;
 use Espo\Core\ORM\EntityManager;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 use Espo\ORM\Query\SelectBuilder;
 
 class WorkspaceFilter implements AdditionalApplier
@@ -18,6 +19,7 @@ class WorkspaceFilter implements AdditionalApplier
         private Config $config,
         private Metadata $metadata,
         private EntityManager $entityManager,
+        private WorkspaceService $workspaceService,
     ) {}
 
     public function apply(SelectBuilder $queryBuilder, SearchParams $searchParams): void
@@ -51,7 +53,7 @@ class WorkspaceFilter implements AdditionalApplier
 
         if (!$this->metadata->get("entityDefs.$this->entityType.fields.$workspaceField")) return;
 
-        $workspaceId = trim((string) $this->user->get('omniGoCRMCurrentWorkspaceId'));
+        $workspaceId = $this->workspaceService->currentId() ?? '';
 
         if ($workspaceId !== '') {
             $membership = $this->entityManager->getRDBRepository('WorkspaceMember')->where([

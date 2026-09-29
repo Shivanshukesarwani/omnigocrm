@@ -30,4 +30,43 @@ class WorkspaceSecurityMetadataTest extends TestCase
         self::assertContains('Espo\\Modules\\OmniGoCRM\\Classes\\Record\\WorkspaceMember\\BeforeSave', $member['beforeSaveHookClassNameList'] ?? []);
         self::assertContains('Espo\\Modules\\OmniGoCRM\\Classes\\Record\\WorkspaceMember\\BeforeRead', $member['beforeReadHookClassNameList'] ?? []);
     }
+
+    public function testWorkspaceProvisioningStaysBehindTheCrmUi(): void
+    {
+        $root = dirname(__DIR__, 5);
+
+        $workspaceFields = json_decode(
+            file_get_contents($root . '/custom/Espo/Modules/OmniGoCRM/Resources/metadata/entityDefs/Workspace.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        )['fields'];
+
+        $workspaceClient = json_decode(
+            file_get_contents($root . '/custom/Espo/Modules/OmniGoCRM/Resources/metadata/clientDefs/Workspace.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $workspaceScope = json_decode(
+            file_get_contents($root . '/custom/Espo/Modules/OmniGoCRM/Resources/metadata/scopes/Workspace.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $navbar = json_decode(
+            file_get_contents($root . '/custom/Espo/Modules/OmniGoCRM/Resources/metadata/app/clientNavbar.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        self::assertFalse($workspaceFields['slug']['required'] ?? true);
+        self::assertFalse($workspaceFields['ownerUserId']['required'] ?? true);
+        self::assertTrue($workspaceClient['createDisabled'] ?? false);
+        self::assertFalse($workspaceScope['tab'] ?? true);
+        self::assertArrayNotHasKey('omniGoCRMWorkspaces', $navbar['menuItems'] ?? []);
+    }
 }

@@ -4,23 +4,22 @@ namespace Espo\Modules\OmniGoCRM\Services;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\ORM\EntityManager;
-use Espo\Entities\User;
 use Espo\ORM\Query\Part\Expression;
 
 class DashboardService
 {
     public function __construct(
         private EntityManager $entityManager,
-        private User $user,
         private WorkspaceMemberService $memberService,
+        private WorkspaceService $workspaceService,
     ) {}
 
     public function summary(): array
     {
-        $workspaceId = trim((string) $this->user->get('omniGoCRMCurrentWorkspaceId'));
+        $workspaceId = $this->workspaceService->currentId() ?? '';
 
         if ($workspaceId === '') {
-            throw new BadRequest('Select an active OmniGoCRM workspace.');
+            throw new BadRequest('A workspace could not be initialized for your account. Reload OmniGoCRM and try again.');
         }
         $this->memberService->activeMembership($workspaceId);
 

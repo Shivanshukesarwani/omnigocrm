@@ -7,7 +7,7 @@
         },
         "slug": {
             "type": "varchar",
-            "required": true,
+            "required": false,
             "maxLength": 100
         },
         "status": {
@@ -40,7 +40,7 @@
         "ownerUserId": {
             "type": "varchar",
             "maxLength": 24,
-            "required": true
+            "required": false
         },
         "ownerUser": {
             "type": "link",

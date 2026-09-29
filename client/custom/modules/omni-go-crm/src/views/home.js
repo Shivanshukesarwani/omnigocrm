@@ -3,153 +3,186 @@ define('module:omni-go-crm/views/home', ['view'], (View) => {
         templateContent = `
             <div class="omni-m3-page">
                 <header class="omni-m3-appbar">
-                    <div class="omni-m3-brand">
-                        <div class="omni-m3-logo" aria-hidden="true">OG</div>
-                        <div>
-                            <div class="omni-m3-brand-name">OmniGoCRM</div>
-                            <div class="omni-m3-brand-subtitle">CRM + WhatsApp + Automations</div>
-                        </div>
-                    </div>
+                    <a class="omni-m3-brand" href="#OmniGoCRM" aria-label="OmniGoCRM home">
+                        <span class="omni-m3-logo" aria-hidden="true">OG</span>
+                        <span>
+                            <span class="omni-m3-brand-name">OmniGoCRM</span>
+                            <span class="omni-m3-brand-subtitle">Customer relationships, all in one place</span>
+                        </span>
+                    </a>
                     <div class="omni-m3-appbar-actions">
                         <a class="omni-m3-icon-button" href="#Notification" title="Notifications" aria-label="Notifications">
                             <span aria-hidden="true">●</span>
                         </a>
-                        <a class="omni-m3-avatar" href="#User" title="Profile" aria-label="Profile">U</a>
                     </div>
                 </header>
 
                 <main class="omni-m3-content">
                     <section class="omni-m3-hero">
                         <div>
-                            <p class="omni-m3-eyebrow">YOUR WORKSPACE</p>
-                            <h1>{{workspaceHeading}}</h1>
+                            <p class="omni-m3-eyebrow">OVERVIEW</p>
+                            <h1>Your CRM at a glance</h1>
                             <p class="omni-m3-supporting">
-                                Manage customers, conversations, campaigns, sales and automations from one workspace.
+                                Keep customers, conversations, campaigns and sales moving from one connected place.
                             </p>
                         </div>
-                        <div class="omni-m3-workspace-control">
-                            {{#if hasWorkspaces}}
-                                <label for="omni-workspace-select">Active workspace</label>
-                                <select id="omni-workspace-select" class="omni-m3-select" data-action="switch-workspace">
-                                    {{#each workspaces}}
-                                        <option value="{{id}}"{{#if active}} selected{{/if}}>{{name}}</option>
-                                    {{/each}}
-                                </select>
-                            {{/if}}
-                        </div>
+                        <a class="omni-m3-button omni-m3-button-filled" href="#Lead/create">＋ New lead</a>
                     </section>
-
-                    {{#if showCreateWorkspace}}
-                        <section class="omni-m3-card omni-m3-card-highlight">
-                            <div class="omni-m3-card-icon">＋</div>
-                            <div class="omni-m3-card-body">
-                                <h2>Create your first workspace</h2>
-                                <p>Create a workspace to unlock CRM records, WhatsApp Inbox, broadcasts, automations and team features.</p>
-                                <div class="omni-m3-inline-form">
-                                    <input class="omni-m3-input" data-workspace-name placeholder="Workspace name" maxlength="255" />
-                                    <button class="omni-m3-button omni-m3-button-filled" data-action="create-workspace">Create workspace</button>
-                                </div>
-                            </div>
-                        </section>
-                    {{/if}}
 
                     {{#if errorMessage}}
-                        <section class="omni-m3-card omni-m3-card-error">
-                            <strong>Workspace access needs attention</strong>
-                            <span>{{errorMessage}}</span>
-                            <button class="omni-m3-button omni-m3-button-tonal" data-action="reload-workspaces">Retry</button>
+                        <section class="omni-m3-card omni-m3-card-error" role="alert">
+                            <span class="omni-m3-status-icon" aria-hidden="true">!</span>
+                            <div class="omni-m3-card-body">
+                                <strong>We couldn't load your CRM</strong>
+                                <p>{{errorMessage}}</p>
+                            </div>
+                            <button class="omni-m3-button omni-m3-button-tonal" data-action="reload-dashboard">Try again</button>
                         </section>
                     {{/if}}
 
-                    <section class="omni-m3-section">
-                        <div class="omni-m3-section-header">
-                            <div>
-                                <h2>Omnichannel workspace</h2>
-                                <p>Core WACRM-style tools for your team.</p>
-                            </div>
-                        </div>
-                        <div class="omni-m3-grid omni-m3-grid-features">
-                            <a class="omni-m3-feature" href="#WhatsAppConversation">
-                                <span class="omni-m3-feature-icon omni-icon-whatsapp">WA</span>
-                                <span><strong>WhatsApp Inbox</strong><small>Shared inbox, assignment, replies and media.</small></span>
-                                <span class="omni-m3-feature-arrow">→</span>
-                            </a>
-                            <a class="omni-m3-feature" href="#BroadcastCampaign">
-                                <span class="omni-m3-feature-icon">↗</span>
-                                <span><strong>Broadcasts</strong><small>Templates, recipients, scheduling and retry.</small></span>
-                                <span class="omni-m3-feature-arrow">→</span>
-                            </a>
-                            <a class="omni-m3-feature" href="#AutomationRule">
-                                <span class="omni-m3-feature-icon">⚙</span>
-                                <span><strong>Automations</strong><small>Lead, deal, call and WhatsApp workflows.</small></span>
-                                <span class="omni-m3-feature-arrow">→</span>
-                            </a>
-                            <a class="omni-m3-feature" href="#Workspace">
-                                <span class="omni-m3-feature-icon">▦</span>
-                                <span><strong>Workspaces & Team</strong><small>Members, roles, access and subscriptions.</small></span>
-                                <span class="omni-m3-feature-arrow">→</span>
-                            </a>
-                        </div>
-                    </section>
+                    {{#if isLoading}}
+                        <section class="omni-m3-loading" role="status" aria-live="polite">
+                            <span class="omni-m3-progress" aria-hidden="true"></span>
+                            <span>Preparing your CRM…</span>
+                        </section>
+                    {{else}}
+                        {{#if hasActiveWorkspace}}
+                            <section class="omni-m3-metrics" aria-label="CRM summary">
+                                <article class="omni-m3-metric omni-m3-metric-primary">
+                                    <span class="omni-m3-metric-icon" aria-hidden="true">◎</span>
+                                    <span class="omni-m3-metric-label">Leads</span>
+                                    <strong>{{metrics.leads}}</strong>
+                                    <a href="#Lead">View leads <span aria-hidden="true">→</span></a>
+                                </article>
+                                <article class="omni-m3-metric">
+                                    <span class="omni-m3-metric-icon omni-m3-metric-icon-blue" aria-hidden="true">↗</span>
+                                    <span class="omni-m3-metric-label">Opportunities</span>
+                                    <strong>{{metrics.opportunities}}</strong>
+                                    <a href="#Opportunity">View pipeline <span aria-hidden="true">→</span></a>
+                                </article>
+                                <article class="omni-m3-metric">
+                                    <span class="omni-m3-metric-icon omni-m3-metric-icon-green" aria-hidden="true">✓</span>
+                                    <span class="omni-m3-metric-label">Open tasks</span>
+                                    <strong>{{metrics.openTasks}}</strong>
+                                    <a href="#Task">View tasks <span aria-hidden="true">→</span></a>
+                                </article>
+                                <article class="omni-m3-metric">
+                                    <span class="omni-m3-metric-icon omni-m3-metric-icon-amber" aria-hidden="true">◉</span>
+                                    <span class="omni-m3-metric-label">Unread conversations</span>
+                                    <strong>{{metrics.unreadWhatsApp}}</strong>
+                                    <a href="#WhatsAppConversation">Open inbox <span aria-hidden="true">→</span></a>
+                                </article>
+                            </section>
 
-                    <section class="omni-m3-section">
-                        <div class="omni-m3-section-header">
-                            <div>
-                                <h2>CRM</h2>
-                                <p>Your everyday customer and sales records.</p>
-                            </div>
-                        </div>
-                        <div class="omni-m3-grid omni-m3-grid-compact">
-                            <a class="omni-m3-chip-card" href="#Lead"><span>Lead</span><small>Capture & qualify</small></a>
-                            <a class="omni-m3-chip-card" href="#Contact"><span>Contacts</span><small>People & customers</small></a>
-                            <a class="omni-m3-chip-card" href="#Account"><span>Accounts</span><small>Companies</small></a>
-                            <a class="omni-m3-chip-card" href="#Opportunity"><span>Opportunities</span><small>Pipeline</small></a>
-                            <a class="omni-m3-chip-card" href="#Call"><span>Calls</span><small>Phone activity</small></a>
-                            <a class="omni-m3-chip-card" href="#Meeting"><span>Meetings</span><small>Appointments</small></a>
-                            <a class="omni-m3-chip-card" href="#Quote"><span>Quotes</span><small>Sales documents</small></a>
-                            <a class="omni-m3-chip-card" href="#Order"><span>Orders</span><small>Fulfilment</small></a>
-                            <a class="omni-m3-chip-card" href="#Payment"><span>Payments</span><small>Collections</small></a>
-                        </div>
-                    </section>
+                            <section class="omni-m3-section">
+                                <div class="omni-m3-section-header">
+                                    <div>
+                                        <p class="omni-m3-eyebrow">WORKFLOW</p>
+                                        <h2>Keep work moving</h2>
+                                        <p>Pick up where your team left off.</p>
+                                    </div>
+                                </div>
+                                <div class="omni-m3-grid omni-m3-grid-features">
+                                    <a class="omni-m3-feature" href="#WhatsAppConversation">
+                                        <span class="omni-m3-feature-icon omni-icon-whatsapp" aria-hidden="true">WA</span>
+                                        <span><strong>WhatsApp Inbox</strong><small>Shared conversations, assignments and replies.</small></span>
+                                        <span class="omni-m3-feature-arrow" aria-hidden="true">→</span>
+                                    </a>
+                                    <a class="omni-m3-feature" href="#BroadcastCampaign">
+                                        <span class="omni-m3-feature-icon omni-m3-feature-icon-blue" aria-hidden="true">↗</span>
+                                        <span><strong>Broadcasts</strong><small>Reach customers with approved templates.</small></span>
+                                        <span class="omni-m3-feature-arrow" aria-hidden="true">→</span>
+                                    </a>
+                                    <a class="omni-m3-feature" href="#AutomationRule">
+                                        <span class="omni-m3-feature-icon omni-m3-feature-icon-green" aria-hidden="true">⚙</span>
+                                        <span><strong>Automations</strong><small>Turn repeatable tasks into reliable workflows.</small></span>
+                                        <span class="omni-m3-feature-arrow" aria-hidden="true">→</span>
+                                    </a>
+                                    <a class="omni-m3-feature" href="#Quote">
+                                        <span class="omni-m3-feature-icon omni-m3-feature-icon-amber" aria-hidden="true">▤</span>
+                                        <span><strong>Quotes & orders</strong><small>Move sales from proposal to payment.</small></span>
+                                        <span class="omni-m3-feature-arrow" aria-hidden="true">→</span>
+                                    </a>
+                                </div>
+                            </section>
 
-                    <section class="omni-m3-section">
-                        <div class="omni-m3-section-header">
-                            <div>
-                                <h2>Quick actions</h2>
-                                <p>Jump straight into common work.</p>
-                            </div>
-                        </div>
-                        <div class="omni-m3-actions-row">
-                            <a class="omni-m3-button omni-m3-button-filled" href="#Lead/create">+ New Lead</a>
-                            <a class="omni-m3-button omni-m3-button-tonal" href="#Contact/create">New Contact</a>
-                            <a class="omni-m3-button omni-m3-button-tonal" href="#Opportunity/create">New Opportunity</a>
-                            <a class="omni-m3-button omni-m3-button-outlined" href="#Workspace">Manage Workspace</a>
-                        </div>
-                    </section>
+                            <section class="omni-m3-section">
+                                <div class="omni-m3-section-header">
+                                    <div>
+                                        <p class="omni-m3-eyebrow">CUSTOMER RECORDS</p>
+                                        <h2>Find your people</h2>
+                                        <p>Keep every relationship and next step close at hand.</p>
+                                    </div>
+                                </div>
+                                <div class="omni-m3-grid omni-m3-grid-compact">
+                                    <a class="omni-m3-chip-card" href="#Lead"><span>Leads</span><small>Capture & qualify</small></a>
+                                    <a class="omni-m3-chip-card" href="#Contact"><span>Contacts</span><small>People & customers</small></a>
+                                    <a class="omni-m3-chip-card" href="#Account"><span>Accounts</span><small>Companies</small></a>
+                                    <a class="omni-m3-chip-card" href="#Opportunity"><span>Opportunities</span><small>Sales pipeline</small></a>
+                                    <a class="omni-m3-chip-card" href="#Call"><span>Calls</span><small>Phone activity</small></a>
+                                    <a class="omni-m3-chip-card" href="#Meeting"><span>Meetings</span><small>Appointments</small></a>
+                                    <a class="omni-m3-chip-card" href="#Quote"><span>Quotes</span><small>Sales documents</small></a>
+                                    <a class="omni-m3-chip-card" href="#Order"><span>Orders</span><small>Fulfilment</small></a>
+                                    <a class="omni-m3-chip-card" href="#Payment"><span>Payments</span><small>Collections</small></a>
+                                </div>
+                            </section>
+
+                            <section class="omni-m3-section omni-m3-quick-actions">
+                                <div class="omni-m3-section-header">
+                                    <div>
+                                        <p class="omni-m3-eyebrow">QUICK ACTIONS</p>
+                                        <h2>Make your next move</h2>
+                                    </div>
+                                </div>
+                                <div class="omni-m3-actions-row">
+                                    <a class="omni-m3-button omni-m3-button-filled" href="#Lead/create">＋ New lead</a>
+                                    <a class="omni-m3-button omni-m3-button-tonal" href="#Contact/create">New contact</a>
+                                    <a class="omni-m3-button omni-m3-button-tonal" href="#Opportunity/create">New opportunity</a>
+                                    <a class="omni-m3-button omni-m3-button-outlined" href="#Task/create">Add a task</a>
+                                </div>
+                            </section>
+                        {{else}}
+                            {{#unless errorMessage}}
+                                <section class="omni-m3-empty-state">
+                                    <span class="omni-m3-empty-icon" aria-hidden="true">◎</span>
+                                    <p class="omni-m3-eyebrow">GETTING THINGS READY</p>
+                                    <h2>Your CRM is almost ready</h2>
+                                    <p>Customer data will appear here as soon as setup finishes.</p>
+                                </section>
+                            {{/unless}}
+                        {{/if}}
+                    {{/if}}
                 </main>
             </div>
         `;
 
         setup() {
             this.workspaces = [];
+            this.summary = null;
             this.errorMessage = '';
-            this.workspaceHeading = 'Choose your workspace';
-            this.wait(this.loadWorkspaces());
+            this.isLoading = true;
+            this.wait(this.loadDashboard());
         }
 
         data() {
             const active = this.workspaces.find(item => item.active);
+            const counts = this.summary && this.summary.counts ? this.summary.counts : {};
 
             return {
-                workspaces: this.workspaces,
-                hasWorkspaces: this.workspaces.length > 0,
-                showCreateWorkspace: this.workspaces.length === 0,
-                workspaceHeading: active ? active.name : this.workspaceHeading,
+                hasActiveWorkspace: Boolean(active),
+                isLoading: this.isLoading,
                 errorMessage: this.errorMessage,
+                metrics: {
+                    leads: this.formatCount(counts.leads),
+                    opportunities: this.formatCount(counts.opportunities),
+                    openTasks: this.formatCount(counts.openTasks),
+                    unreadWhatsApp: this.formatCount(counts.unreadWhatsApp),
+                },
             };
         }
 
-        async loadWorkspaces() {
+        async loadDashboard() {
+            this.isLoading = true;
             this.errorMessage = '';
 
             try {
@@ -157,80 +190,35 @@ define('module:omni-go-crm/views/home', ['view'], (View) => {
                 this.workspaces = Array.isArray(response.list) ? response.list : [];
 
                 if (this.workspaces.length === 0) {
-                    this.workspaceHeading = 'Create your first workspace';
-                    return;
+                    throw new Error('No active CRM context was returned.');
                 }
 
-                let active = this.workspaces.find(item => item.active);
-
-                if (!active) {
-                    active = this.workspaces[0];
-
-                    try {
-                        await Espo.Ajax.postRequest('OmniGoCRM/Workspace/switch', {
-                            workspaceId: active.id,
-                        });
-
-                        this.workspaces = this.workspaces.map(item => ({
-                            ...item,
-                            active: item.id === active.id,
-                        }));
-                    } catch (xhr) {
-                        this.errorMessage = this.getErrorMessage(xhr, 'Unable to activate the workspace.');
-                    }
+                if (!this.workspaces.some(item => item.active)) {
+                    await Espo.Ajax.postRequest('OmniGoCRM/Workspace/switch', {
+                        workspaceId: this.workspaces[0].id,
+                    });
+                    this.workspaces = this.workspaces.map((item, index) => ({
+                        ...item,
+                        active: index === 0,
+                    }));
                 }
 
-                if (active) {
-                    this.workspaceHeading = active.name;
-                }
+                this.summary = await Espo.Ajax.getRequest('OmniGoCRM/Dashboard/summary');
             } catch (xhr) {
-                this.errorMessage = this.getErrorMessage(xhr, 'Unable to load your workspaces.');
+                this.workspaces = [];
+                this.summary = null;
+                this.errorMessage = this.getErrorMessage(xhr, 'Your CRM could not be initialized. Please try again.');
+            } finally {
+                this.isLoading = false;
             }
         }
 
-        async createWorkspace() {
-            const input = this.$el.find('[data-workspace-name]');
-            const name = String(input.val() || '').trim();
+        formatCount(value) {
+            const count = Number(value);
 
-            if (!name) {
-                Espo.Ui.error('Enter a workspace name.');
-                input.trigger('focus');
-                return;
-            }
-
-            try {
-                Espo.Ui.notify('Creating workspace…');
-
-                await Espo.Ajax.postRequest('OmniGoCRM/Workspace/create', {name});
-
-                Espo.Ui.success('Workspace created.');
-                await this.loadWorkspaces();
-                this.reRender();
-            } catch (xhr) {
-                Espo.Ui.error(this.getErrorMessage(xhr, 'Workspace could not be created.'));
-            }
-        }
-
-        async switchWorkspace(workspaceId) {
-            if (!workspaceId) return;
-
-            try {
-                Espo.Ui.notify('Switching workspace…');
-                await Espo.Ajax.postRequest('OmniGoCRM/Workspace/switch', {workspaceId});
-
-                this.workspaces = this.workspaces.map(item => ({
-                    ...item,
-                    active: item.id === workspaceId,
-                }));
-
-                const active = this.workspaces.find(item => item.id === workspaceId);
-                this.workspaceHeading = active ? active.name : this.workspaceHeading;
-
-                Espo.Ui.success('Workspace switched.');
-                this.reRender();
-            } catch (xhr) {
-                Espo.Ui.error(this.getErrorMessage(xhr, 'Workspace could not be switched.'));
-            }
+            return Number.isFinite(count)
+                ? new Intl.NumberFormat().format(count)
+                : '—';
         }
 
         getErrorMessage(xhr, fallback) {
@@ -248,20 +236,12 @@ define('module:omni-go-crm/views/home', ['view'], (View) => {
         afterRender() {
             super.afterRender();
 
-            this.$el.off('change.omniWorkspace', '[data-action="switch-workspace"]');
-            this.$el.on('change.omniWorkspace', '[data-action="switch-workspace"]', event => {
-                this.switchWorkspace(event.currentTarget.value);
-            });
-
-            this.$el.off('click.omniWorkspace', '[data-action="create-workspace"]');
-            this.$el.on('click.omniWorkspace', '[data-action="create-workspace"]', () => {
-                this.createWorkspace();
-            });
-
-            this.$el.off('click.omniWorkspace', '[data-action="reload-workspaces"]');
-            this.$el.on('click.omniWorkspace', '[data-action="reload-workspaces"]', async () => {
-                await this.loadWorkspaces();
+            this.$el.off('click.omniDashboard', '[data-action="reload-dashboard"]');
+            this.$el.on('click.omniDashboard', '[data-action="reload-dashboard"]', () => {
+                this.isLoading = true;
+                this.errorMessage = '';
                 this.reRender();
+                this.loadDashboard().then(() => this.reRender());
             });
         }
     };

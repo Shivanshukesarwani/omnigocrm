@@ -63,6 +63,14 @@ body.omni-m3-body {
     display: flex;
     align-items: center;
     gap: 12px;
+    color: inherit;
+    text-decoration: none !important;
+}
+
+.omni-m3-brand > span:last-child,
+.omni-m3-brand-name,
+.omni-m3-brand-subtitle {
+    display: block;
 }
 
 .omni-m3-logo {
@@ -435,6 +443,191 @@ body.omni-m3-body {
     color: var(--omni-m3-on-surface);
 }
 
+.omni-m3-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 36px;
+}
+
+.omni-m3-metric {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    align-items: center;
+    min-height: 132px;
+    padding: 18px;
+    border: 1px solid var(--omni-m3-outline-variant);
+    border-radius: 20px;
+    background: var(--omni-m3-surface-container);
+}
+
+.omni-m3-metric-primary {
+    border-color: transparent;
+    background: var(--omni-m3-primary-container);
+}
+
+.omni-m3-metric-icon,
+.omni-m3-feature-icon-blue {
+    background: #dbe2ff;
+    color: #24408f;
+}
+
+.omni-m3-metric-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    grid-row: span 2;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--omni-m3-primary);
+    color: var(--omni-m3-on-primary);
+    font-size: 20px;
+}
+
+.omni-m3-metric-icon-blue {
+    background: #dbe2ff;
+    color: #24408f;
+}
+
+.omni-m3-metric-icon-green,
+.omni-m3-feature-icon-green {
+    background: #ccebdc;
+    color: #145c3b;
+}
+
+.omni-m3-metric-icon-amber,
+.omni-m3-feature-icon-amber {
+    background: #ffdfb8;
+    color: #754600;
+}
+
+.omni-m3-metric-label {
+    color: var(--omni-m3-on-surface-variant);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.omni-m3-metric strong {
+    grid-column: 2;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.05;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.omni-m3-metric a {
+    grid-column: 1 / -1;
+    margin-top: 14px;
+    color: var(--omni-m3-primary);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.omni-m3-metric a:hover {
+    text-decoration: underline;
+}
+
+.omni-m3-metric a span {
+    padding-left: 4px;
+}
+
+.omni-m3-loading {
+    display: flex;
+    min-height: 220px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--omni-m3-on-surface-variant);
+}
+
+.omni-m3-progress {
+    width: 22px;
+    height: 22px;
+    border: 3px solid var(--omni-m3-primary-container);
+    border-top-color: var(--omni-m3-primary);
+    border-radius: 50%;
+    animation: omni-m3-spin .8s linear infinite;
+}
+
+@keyframes omni-m3-spin {
+    to { transform: rotate(360deg); }
+}
+
+.omni-m3-status-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(186, 26, 26, .12);
+    font-weight: 800;
+}
+
+.omni-m3-card-error strong {
+    display: block;
+    color: var(--omni-m3-error);
+}
+
+.omni-m3-card-error p {
+    margin: 4px 0 0;
+    color: var(--omni-m3-on-surface-variant);
+    line-height: 1.5;
+}
+
+.omni-m3-empty-state {
+    display: flex;
+    min-height: 360px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+}
+
+.omni-m3-empty-state h2 {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 32px);
+    letter-spacing: -.025em;
+}
+
+.omni-m3-empty-state > p:not(.omni-m3-eyebrow) {
+    max-width: 520px;
+    margin: 10px 0 20px;
+    color: var(--omni-m3-on-surface-variant);
+    line-height: 1.55;
+}
+
+.omni-m3-empty-icon {
+    display: grid;
+    width: 68px;
+    height: 68px;
+    margin-bottom: 18px;
+    place-items: center;
+    border-radius: 24px;
+    background: var(--omni-m3-primary-container);
+    color: var(--omni-m3-primary);
+    font-size: 34px;
+}
+
+.omni-m3-body :focus-visible {
+    outline: 3px solid var(--omni-m3-primary);
+    outline-offset: 3px;
+}
+
+.omni-m3-body a,
+.omni-m3-body button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.omni-m3-body .omni-m3-button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* Global Espo skin: preserve its information architecture, change its visual language. */
 .omni-m3-body .navbar,
 .omni-m3-body #header,
@@ -506,6 +699,10 @@ body.omni-m3-body {
 }
 
 @media (max-width: 1100px) {
+    .omni-m3-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .omni-m3-grid-features {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -525,30 +722,41 @@ body.omni-m3-body {
     }
 
     .omni-m3-hero {
-        align-items: stretch;
+        align-items: flex-start;
         flex-direction: column;
     }
 
-    .omni-m3-workspace-control {
-        min-width: 0;
+    .omni-m3-hero > .omni-m3-button {
+        width: 100%;
     }
 
+    .omni-m3-metrics,
     .omni-m3-grid-features,
     .omni-m3-grid-compact {
         grid-template-columns: 1fr;
     }
 
-    .omni-m3-inline-form {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .omni-m3-inline-form .omni-m3-input,
-    .omni-m3-inline-form .omni-m3-button {
-        width: 100%;
+    .omni-m3-metric {
+        min-height: 116px;
     }
 
     .omni-m3-actions-row .omni-m3-button {
         flex: 1 1 100%;
+    }
+
+    .omni-m3-card-error {
+        align-items: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .omni-m3-progress {
+        animation-duration: 1.8s;
+    }
+
+    .omni-m3-feature,
+    .omni-m3-chip-card,
+    .omni-m3-button {
+        transition: none;
     }
 }

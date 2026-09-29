@@ -7,6 +7,7 @@ use Espo\Core\Utils\Config;
 use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
 use Espo\Modules\OmniGoCRM\Services\AutomationService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 use Espo\ORM\Entity;
 
 class WorkspaceScope
@@ -18,6 +19,7 @@ class WorkspaceScope
         private Config $config,
         private EntityManager $entityManager,
         private AutomationService $automationService,
+        private WorkspaceService $workspaceService,
     ) {}
 
     public function beforeSave(Entity $entity, array $options): void
@@ -40,10 +42,10 @@ class WorkspaceScope
             return;
         }
 
-        $workspaceId = trim((string) $this->user->get('omniGoCRMCurrentWorkspaceId'));
+        $workspaceId = $this->workspaceService->currentId() ?? '';
 
         if ($workspaceId === '') {
-            throw new Forbidden('Select an active OmniGoCRM workspace before creating or editing CRM records.');
+            throw new Forbidden('A workspace could not be initialized for your account. Reload OmniGoCRM and try again.');
         }
 
         $membership = $this->entityManager->getRDBRepository('WorkspaceMember')->where([
@@ -100,6 +102,14 @@ class WorkspaceScope
 
     public function afterSave(Entity $entity, array $options): void
     {
+        if ($entity->getEntityType() === 'Workspace') {
+            if ($entity->isNew()) {
+                $this->workspaceService->activateOwnerWorkspace($entity);
+            }
+
+            return;
+        }
+
         $workspaceId = trim((string) ($entity->get('omniGoCRMWorkspaceId') ?: $entity->get('workspaceId')));
 
         if ($workspaceId === '') return;
