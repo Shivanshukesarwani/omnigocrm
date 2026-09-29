@@ -1,8 +1,0 @@
-import bcrypt from "bcryptjs";import {FastifyRequest} from "fastify";import {query} from "./db.js";
-export type Role="owner"|"admin"|"manager"|"agent"|"viewer";
-export type AuthUser={id:string;email:string;name:string;workspaceId:string;role:Role};
-declare module "fastify"{interface FastifyRequest{authUser?:AuthUser}}
-export const hashPassword=(p:string)=>bcrypt.hash(p,12);
-export const verifyPassword=(p:string,h:string)=>bcrypt.compare(p,h);
-export async function requireAuth(request:FastifyRequest){await request.jwtVerify();const p=request.user as any;const r=await query("SELECT u.id,u.email,u.name,wm.workspace_id,wm.role FROM users u JOIN workspace_members wm ON wm.user_id=u.id WHERE u.id=$1 AND wm.workspace_id=$2",[p.sub,p.workspaceId]);if(!r.rowCount)throw Object.assign(new Error("Invalid authentication context"),{statusCode:401});request.authUser={id:r.rows[0].id,email:r.rows[0].email,name:r.rows[0].name,workspaceId:r.rows[0].workspace_id,role:r.rows[0].role}}
-export function requireRole(...roles:Role[]){return async(req:FastifyRequest)=>{if(!req.authUser||!roles.includes(req.authUser.role))throw Object.assign(new Error("Insufficient permissions"),{statusCode:403})}}
