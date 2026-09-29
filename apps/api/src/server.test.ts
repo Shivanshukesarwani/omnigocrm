@@ -1,1 +1,0 @@
-import {describe,it,expect} from "vitest";describe("API contract",()=>it("identifies OmniGoCRM",()=>expect("omnigocrm-api").toBe("omnigocrm-api")));
