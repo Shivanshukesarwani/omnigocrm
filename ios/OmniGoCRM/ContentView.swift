@@ -226,7 +226,7 @@ struct BroadcastsView: View {
                 select: "id,name,status,templateName,scheduledAt,totalRecipients,sentCount,failedCount"
             )
             error = ""
-        } catch { error = error.localizedDescription }
+        } catch { self.error = error.localizedDescription }
     }
 }
 
@@ -268,7 +268,7 @@ struct CreateBroadcastView: View {
             )
             await onSaved()
             dismiss()
-        } catch { error = error.localizedDescription }
+        } catch { self.error = error.localizedDescription }
     }
 }
 
@@ -335,7 +335,7 @@ struct BroadcastCampaignView: View {
             }
             recipients = result["recipients"] as? [[String: Any]] ?? []
             error = ""
-        } catch { error = error.localizedDescription }
+        } catch { self.error = error.localizedDescription }
     }
 
     private func addRecipient(_ lead: Record) async {
@@ -343,7 +343,7 @@ struct BroadcastCampaignView: View {
             let result = try await APIClient(session: session).addBroadcastRecipient(campaignId: campaign.id, leadId: lead.id)
             message = "Recipient: \(result["status"] as? String ?? "added")"
             await load()
-        } catch { error = error.localizedDescription }
+        } catch { self.error = error.localizedDescription }
     }
 
     private func schedule() async {
@@ -353,7 +353,7 @@ struct BroadcastCampaignView: View {
             try await APIClient(session: session).scheduleBroadcast(campaignId: campaign.id)
             message = "Campaign scheduled. The server validates approval and plan limits before sending."
             await load()
-        } catch { error = error.localizedDescription }
+        } catch { self.error = error.localizedDescription }
     }
 }
 
@@ -394,7 +394,7 @@ struct BroadcastLeadPickerView: View {
                 select: "id,name,firstName,lastName,whatsappNumber,whatsappOptIn"
             )
             error = ""
-        } catch { error = error.localizedDescription }
+        } catch { self.error = error.localizedDescription }
     }
 }
 
