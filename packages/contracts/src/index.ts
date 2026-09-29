@@ -1,0 +1,11 @@
+export type Role="owner"|"admin"|"manager"|"agent"|"viewer";
+export type Channel="whatsapp"|"sms"|"email"|"call"|"web";
+export type LeadStatus="new"|"contacted"|"qualified"|"converted"|"lost";
+export interface AuthUser{id:string;email:string;name:string;workspaceId:string;role:Role}
+export interface ApiResponse<T>{data:T}
+export interface Pagination{limit:number;offset:number;count:number}
+export interface ListResponse<T>{data:T[];pagination:Pagination}
+export interface Lead{id:string;workspace_id:string;first_name:string;last_name?:string|null;email?:string|null;phone?:string|null;source:string;status:LeadStatus;owner_id?:string|null;score:number;created_at:string;updated_at:string}
+export interface Contact{id:string;workspace_id:string;first_name:string;last_name?:string|null;email?:string|null;phone?:string|null;job_title?:string|null;account_id?:string|null;owner_id?:string|null}
+export interface Account{id:string;workspace_id:string;name:string;email?:string|null;phone?:string|null;website?:string|null;industry?:string|null;owner_id?:string|null}
+export interface Opportunity{id:string;workspace_id:string;name:string;amount:number;currency:string;stage:string;probability:number;expected_close_date?:string|null;pipeline_id?:string|null;account_id?:string|null;contact_id?:string|null;owner_id?:string|null}
