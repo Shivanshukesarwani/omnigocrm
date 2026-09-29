@@ -4,6 +4,13 @@ Open-source, self-hostable omnichannel CRM built entirely by OmniGoCRM.
 
 Independent platform: no EspoCRM, no Laravel, and no other CRM backend.
 
+## Technology stack
+- **Node.js 22 + Fastify** — API, authentication and business logic
+- **PostgreSQL 18** — primary database and system of record
+- **JavaScript (ES modules)** — API and background worker runtime
+- **React + TypeScript** — web application
+- **Docker / Kubernetes** — deployment
+
 ## Included
 - Authentication and workspace isolation
 - RBAC: owner, admin, manager, agent, viewer
