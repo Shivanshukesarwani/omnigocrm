@@ -203,7 +203,7 @@ class DashboardService
             ],
             'averageLatestReplySeconds30d' => $replySamples > 0 ? (int) round($replySeconds / $replySamples) : null,
             'replySamples30d' => $replySamples,
-            'byAssignee' => array_values($byAssignee),
+            'byAssignee' => $byAssignee,
         ];
     }
 
