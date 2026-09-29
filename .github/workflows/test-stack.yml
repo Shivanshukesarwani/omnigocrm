@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test-stack:
     runs-on: ubuntu-latest
@@ -12,42 +15,68 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and start test stack
-        run: docker compose -f docker-compose.test.yml up -d --build
+      - name: Prepare CI secrets
+        run: |
+          mkdir -p secrets
+          printf 'ci-db-password' > secrets/db_password.txt
+          printf 'ci-admin-password' > secrets/admin_password.txt
+          chmod 600 secrets/*.txt
 
-      - name: Wait for HTTP
+      - name: Validate Compose
+        env:
+          OMNIGOCRM_DOMAIN: localhost
+          OMNIGOCRM_TLS_EMAIL: ci@example.com
+          OMNIGOCRM_SITE_URL: http://localhost
+        run: docker compose -f docker-compose.yml config
+
+      - name: Build and start application stack
+        env:
+          OMNIGOCRM_DOMAIN: localhost
+          OMNIGOCRM_TLS_EMAIL: ci@example.com
+          OMNIGOCRM_SITE_URL: http://localhost
+        run: docker compose -f docker-compose.yml up -d --build db omnigocrm
+
+      - name: Wait for PostgreSQL
+        env:
+          OMNIGOCRM_DOMAIN: localhost
+          OMNIGOCRM_TLS_EMAIL: ci@example.com
+          OMNIGOCRM_SITE_URL: http://localhost
         run: |
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8081/ >/dev/null; then
+            if docker compose -f docker-compose.yml exec -T db pg_isready -U "${POSTGRES_USER:-omnigocrm}" -d "${POSTGRES_DATABASE:-omnigocrm}" >/dev/null 2>&1; then
               exit 0
             fi
             sleep 2
           done
-          docker compose -f docker-compose.test.yml ps
-          docker compose -f docker-compose.test.yml logs --tail=200
+          docker compose -f docker-compose.yml ps
+          docker compose -f docker-compose.yml logs --tail=200 db
           exit 1
 
-      - name: Check database health
+      - name: Check application health
         run: |
-          test "$(docker inspect --format='{{.State.Health.Status}}' omnigocrm-test-db)" = "healthy"
+          for i in $(seq 1 60); do
+            status="$(docker inspect --format='{{.State.Health.Status}}' omnigocrm-omnigocrm-1 2>/dev/null || true)"
+            if [ "$status" = "healthy" ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f docker-compose.yml ps
+          docker compose -f docker-compose.yml logs --tail=300 omnigocrm db
+          exit 1
 
-      - name: Show stack status
-        if: always()
-        run: docker compose -f docker-compose.test.yml ps
+      - name: Validate EspoCRM app
+        run: docker compose -f docker-compose.yml exec -T omnigocrm bin/command app-check
 
       - name: Show logs on failure
         if: failure()
         run: |
-          docker compose -f docker-compose.test.yml logs --tail=300
+          docker compose -f docker-compose.yml ps
+          docker compose -f docker-compose.yml logs --tail=300 omnigocrm db
           rm -rf /tmp/omnigocrm-espo-logs
           mkdir -p /tmp/omnigocrm-espo-logs
-          docker cp omnigocrm-test:/var/www/html/data/logs/. /tmp/omnigocrm-espo-logs/ 2>/dev/null || true
-          echo "===== EspoCRM internal logs ====="
-          find /tmp/omnigocrm-espo-logs -type f -maxdepth 2 -print -exec sh -c 'echo "----- $1 -----"; tail -n 300 "$1"' _ {} \; 2>/dev/null || true
-          docker cp omnigocrm-test-db:/var/lib/mysql/general.log /tmp/omnigocrm-espo-logs/mariadb-general.log 2>/dev/null || true
-          echo "===== MariaDB schema query log ====="
-          tail -n 2000 /tmp/omnigocrm-espo-logs/mariadb-general.log 2>/dev/null || true
+          docker compose -f docker-compose.yml exec -T omnigocrm sh -c 'find /var/www/html/data/logs -type f -maxdepth 1 -print -exec sh -c "echo ----- \\$1 -----; tail -n 300 \\$1" _ {} \\;' 2>/dev/null || true
 
       - name: Tear down
         if: always()
-        run: docker compose -f docker-compose.test.yml down -v
+        run: docker compose -f docker-compose.yml down -v
