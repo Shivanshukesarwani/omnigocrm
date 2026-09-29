@@ -777,7 +777,7 @@ class AutomationService
 
     private function saveOutboundMessage(
         ?Entity $inboundMessage,
-        ?Entity $lead,
+        ?Lead $lead,
         string $recipient,
         string $body,
         ?string $templateName,
