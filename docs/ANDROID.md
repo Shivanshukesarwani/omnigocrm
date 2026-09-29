@@ -17,14 +17,17 @@ Use HTTPS for production.
 The mobile client is being brought to feature parity with the web platform. Current native workflows include:
 
 - Dashboard
+- Quotes, quote line items, quote-to-order conversion, orders and payment recording
+- WhatsApp broadcast campaigns, lead recipients and scheduling
 - Leads
 - Contacts
 - Pipeline
 - Tasks
 - Calling
-- Device registration
+- WhatsApp conversation inbox, thread history, read/close/reopen, and consent-checked replies
+- FCM device registration and notification display (requires project Firebase configuration)
 
-Additional follow-up, WhatsApp, sales-document, broadcast, notification and offline-sync workflows remain on the implementation roadmap.
+Follow-ups, core sales documents and WhatsApp broadcast workflows are available in the native clients. Notification and offline-sync workflows still have roadmap gaps.
 
 ## Calling
 

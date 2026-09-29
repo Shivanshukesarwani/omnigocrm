@@ -3,17 +3,17 @@
 Base URL:
 
 ```
-https://your-crm-domain/api/
+https://your-crm-domain/api/v1/
 ```
 
 ## Authentication
 
 POST `/login` with email and password. The API returns a bearer token.
 
-Send it as:
+Send it using EspoCRM's authorization header:
 
 ```
-Authorization: Bearer TOKEN
+Espo-Authorization: Basic BASE64_USERNAME_COLON_TOKEN
 ```
 
 All authenticated API requests are scoped to the user's workspace.
@@ -29,12 +29,21 @@ All authenticated API requests are scoped to the user's workspace.
 - POST `/contacts/{id}/convert-customer`
 - GET `/customers`
 - GET `/customers/{id}`
-- GET `/follow-ups`
-- POST `/follow-ups`
+- GET `/follow-ups` returns up to 100 follow-up tasks in the active workspace, ordered by due date.
+- POST `/follow-ups` creates a follow-up task. Required fields: `name`, `dateStart` (ISO 8601 date/time), `parentType` (`Lead`, `Contact`, `Account`, or `Opportunity`), and `parentId`. Optional fields: `description`, `priority`, and `assignedUserId`; an assignee must be an active member of the workspace.
 - POST `/calls`
 - POST `/calls/{id}/recording`
 - GET `/message-templates`
 - GET `/whatsapp/{type}/{id}`
+
+## WhatsApp operations
+
+- POST `/OmniGoCRM/WhatsApp/conversationAction` supports `read`, `close`, `open`, `assign`, and `unassign`. Assignment requires an active workspace member's `assignedUserId`.
+- GET `/OmniGoCRM/WhatsApp/conversationMessages?conversationId={id}` returns the active workspace conversation history, including text and media metadata.
+- POST `/OmniGoCRM/Broadcast/recipient` adds a workspace lead to a campaign; recipients without WhatsApp opt-in are skipped.
+- POST `/OmniGoCRM/Broadcast/schedule` requires an active, approved workspace template and at least one queued recipient. It rejects schedules above the plan's remaining monthly recipient allowance. The dispatcher rechecks template approval, workspace ownership, recipient opt-in, and quota before sending.
+
+Broadcast and automation template components support `{{firstName}}`, `{{lastName}}`, `{{name}}`, and `{{whatsappNumber}}` per recipient.
 
 Lead/contact/customer detail responses include calls, follow-ups and the activity timeline.
 
@@ -58,10 +67,9 @@ The web Lead Import screen accepts CSV and spreadsheet formats including XLSX/XL
 
 - GET `/notifications`
 - POST `/notifications/{id}/read`
-- POST `/device-tokens`
-- DELETE `/device-tokens/{id}`
+- POST `/OmniGoCRM/Devices/register`
 
-Database notifications work without Firebase. FCM push delivery is an optional environment-specific integration.
+Database notifications work without Firebase. Android and iOS FCM delivery are enabled when a server-side Firebase service account is configured; iOS additionally requires APNs configured for the Firebase project and a correctly signed app. See `docs/FCM.md`.
 
 ## Security
 

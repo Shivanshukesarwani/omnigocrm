@@ -7,12 +7,19 @@ use Espo\Core\Api\Request;
 use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\ORM\EntityManager;
+use Espo\Modules\OmniGoCRM\Services\BillingService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceMemberService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 
 class PostBroadcastSchedule implements Action
 {
     public function __construct(
         private EntityManager $entityManager,
+        private WorkspaceService $workspaceService,
+        private WorkspaceMemberService $memberService,
+        private BillingService $billingService,
     ) {}
 
     public function process(Request $request): Response
@@ -32,6 +39,35 @@ class PostBroadcastSchedule implements Action
             throw new BadRequest('Broadcast campaign not found.');
         }
 
+        $workspaceId = $this->workspaceService->currentId();
+
+        if (!$workspaceId) {
+            throw new Forbidden('Select an active workspace before scheduling broadcasts.');
+        }
+
+        $this->memberService->assertCanManageCampaigns($workspaceId);
+
+        if ((string) $campaign->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+            throw new Forbidden('The broadcast campaign is not available in the active workspace.');
+        }
+
+        $queuedRecipients = $this->entityManager->getRDBRepository('BroadcastRecipient')->where([
+            'campaignId' => $campaign->getId(),
+            'omniGoCRMWorkspaceId' => $workspaceId,
+            'status' => 'Queued',
+            'deleted' => false,
+        ])->count();
+
+        if ($queuedRecipients < 1) {
+            throw new BadRequest('Add at least one eligible recipient before scheduling this campaign.');
+        }
+
+        $remainingQuota = $this->billingService->broadcastRecipientsRemaining($workspaceId);
+
+        if ($remainingQuota !== null && $queuedRecipients > $remainingQuota) {
+            throw new BadRequest('The campaign exceeds the active plan’s remaining monthly WhatsApp recipient limit.');
+        }
+
         if (!in_array($campaign->get('status'), ['Draft', 'Scheduled'], true)) {
             throw new BadRequest('Campaign is not schedulable from its current status.');
         }
@@ -42,6 +78,7 @@ class PostBroadcastSchedule implements Action
             ->getRDBRepository('WhatsAppTemplate')
             ->where([
                 'name' => $templateName,
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'status' => 'Approved',
                 'active' => true,
                 'deleted' => false,
@@ -72,6 +109,7 @@ class PostBroadcastSchedule implements Action
             ->getRDBRepository('BroadcastRecipient')
             ->where([
                 'campaignId' => $campaign->getId(),
+                'omniGoCRMWorkspaceId' => $workspaceId,
                 'deleted' => false,
             ])
             ->count();

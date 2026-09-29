@@ -9,17 +9,28 @@ use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceMemberService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 
 class PostCallLog implements Action
 {
     public function __construct(
         private EntityManager $entityManager,
         private User $user,
+        private WorkspaceService $workspaceService,
+        private WorkspaceMemberService $memberService,
     ) {}
 
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
+        $workspaceId = $this->workspaceService->currentId();
+
+        if (!$workspaceId) {
+            throw new BadRequest('Select an active OmniGoCRM workspace.');
+        }
+
+        $this->memberService->activeMembership($workspaceId);
         $leadId = $this->stringValue($data, 'leadId');
         $contactId = $this->stringValue($data, 'contactId');
         $phone = preg_replace('/\D+/', '', $this->stringValue($data, 'phoneNumber')) ?? '';
@@ -50,13 +61,14 @@ class PostCallLog implements Action
             'omniGoCRMPhoneNumber' => $phone,
             'omniGoCRMProvider' => $this->stringValue($data, 'provider') ?: 'mobile',
             'omniGoCRMExternalCallId' => $this->stringValue($data, 'externalCallId') ?: null,
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
 
         if ($leadId !== '') {
             $lead = $this->entityManager->getEntityById('Lead', $leadId);
 
-            if (!$lead) {
-                throw new BadRequest('Lead not found.');
+            if (!$lead || (string) $lead->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+                throw new BadRequest('Lead not found in the active workspace.');
             }
 
             $call->setMultiple([
@@ -66,8 +78,8 @@ class PostCallLog implements Action
         } elseif ($contactId !== '') {
             $contact = $this->entityManager->getEntityById('Contact', $contactId);
 
-            if (!$contact) {
-                throw new BadRequest('Contact not found.');
+            if (!$contact || (string) $contact->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+                throw new BadRequest('Contact not found in the active workspace.');
             }
 
             $call->setMultiple([

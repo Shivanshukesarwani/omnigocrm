@@ -2,7 +2,7 @@
 
 ## Website forms
 
-Use `POST /api/v1/OmniGoCRM/LeadCapture` with the `X-OmniGoCRM-Form-Key` header. The gateway supports common first/last name, email, mobile, WhatsApp, source, campaign and `externalLeadId` aliases and deduplicates repeated external IDs.
+Use `POST /api/v1/OmniGoCRM/LeadCapture` with the `X-OmniGoCRM-Form-Key` header. The gateway supports common first/last name, email, mobile, WhatsApp, source, campaign and `externalLeadId` aliases and deduplicates repeated external IDs. It validates the active form key before idempotency lookup and omits CRM record IDs from responses. API and bundled Caddy request-body limits are 32 KiB; requests carrying an `Origin` header must match `omniGoCRMLeadCaptureAllowedOrigins`. Add rate limiting at the public edge/WAF; the bundled Caddy image does not provide it.
 
 ## Meta Lead Ads
 

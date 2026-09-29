@@ -2,7 +2,8 @@
     "fields": {
         "omniGoCRMCurrentWorkspaceId": {
             "type": "varchar",
-            "maxLength": 24
+            "maxLength": 24,
+            "readOnly": true
         },
         "omniGoCRMCurrentWorkspace": {
             "type": "link",

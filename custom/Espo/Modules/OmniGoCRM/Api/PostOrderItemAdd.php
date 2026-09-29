@@ -8,15 +8,26 @@ use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\ORM\EntityManager;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceMemberService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 class PostOrderItemAdd implements Action
 {
     public function __construct(
         private EntityManager $entityManager,
+        private WorkspaceService $workspaceService,
+        private WorkspaceMemberService $memberService,
     ) {}
 
     public function process(Request $request): Response
     {
         $data = $request->getParsedBody();
+        $workspaceId = $this->workspaceService->currentId();
+
+        if (!$workspaceId) {
+            throw new BadRequest('Select an active OmniGoCRM workspace.');
+        }
+
+        $this->memberService->activeMembership($workspaceId);
 
         if (empty($data->orderId)) {
             throw new BadRequest('orderId is required.');
@@ -25,8 +36,8 @@ class PostOrderItemAdd implements Action
         $orderId = trim($data->orderId);
         $order = $this->entityManager->getEntityById('Order', $orderId);
 
-        if (!$order) {
-            throw new BadRequest('Order not found.');
+        if (!$order || (string) $order->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+            throw new BadRequest('Order not found in the active workspace.');
         }
 
         $item = $this->entityManager->getNewEntity('OrderItem');
@@ -51,7 +62,7 @@ class PostOrderItemAdd implements Action
             'taxAmount' => $tax,
             'lineTotal' => max(0, $quantity * $unitPrice - $discount + $tax),
             'currency' => isset($data->currency) && is_string($data->currency) ? trim($data->currency) : 'INR',
-            'omniGoCRMWorkspaceId' => $order->get('omniGoCRMWorkspaceId'),
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
 
         $this->entityManager->saveEntity($item);

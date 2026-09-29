@@ -18,6 +18,9 @@
         "omniGoCRMCallingWebhookSecret": {
             "level": "internal"
         },
+        "omniGoCRMCallingWorkspaceId": {
+            "level": "admin"
+        },
         "omniGoCRMCallingDefaultAssignedUserId": {
             "level": "admin"
         },
@@ -47,6 +50,18 @@
         },
         "omniGoCRMRazorpayWebhookSecret": {
             "level": "internal"
+        },
+        "omniGoCRMAutomationWebhookSecret": {
+            "level": "internal"
+        },
+        "omniGoCRMAutomationWebhookHosts": {
+            "level": "admin"
+        },
+        "omniGoCRMFCMServiceAccountJson": {
+            "level": "internal"
+        },
+        "omniGoCRMLeadCaptureAllowedOrigins": {
+            "level": "admin"
         }
     }
 }

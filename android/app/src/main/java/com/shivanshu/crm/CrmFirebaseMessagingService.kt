@@ -41,6 +41,7 @@ class CrmFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         val intent = Intent(this, MainActivity::class.java)
+        message.data["notificationId"]?.let { intent.putExtra("notificationId", it) }
         val pending = PendingIntent.getActivity(
             this,
             0,

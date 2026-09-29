@@ -1,5 +1,6 @@
 {
     "fields":{
+        "variablesJson":"Template Variables JSON",
         "name":"Recipient",
         "campaignId":"Campaign ID",
         "leadId":"Lead ID",

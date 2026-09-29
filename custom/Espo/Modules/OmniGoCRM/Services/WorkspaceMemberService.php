@@ -16,6 +16,11 @@ class WorkspaceMemberService
 
     public function activeMembership(string $workspaceId): Entity
     {
+        $workspace = $this->entityManager->getEntityById('Workspace', $workspaceId);
+        if (!$workspace || $workspace->get('status') !== 'Active') {
+            throw new Forbidden('This workspace is not active.');
+        }
+
         $membership = $this->entityManager->getRDBRepository('WorkspaceMember')->where([
             'workspaceId' => $workspaceId,
             'userId' => $this->user->getId(),
@@ -30,6 +35,50 @@ class WorkspaceMemberService
     public function canManage(string $workspaceId): bool
     {
         return in_array($this->activeMembership($workspaceId)->get('role'), ['Owner', 'Admin'], true);
+    }
+
+    public function assertCanWrite(string $workspaceId): Entity
+    {
+        $membership = $this->activeMembership($workspaceId);
+
+        if ($membership->get('role') === 'Viewer') {
+            throw new Forbidden('Viewer role is read-only.');
+        }
+
+        return $membership;
+    }
+
+    public function assertCanDelete(string $workspaceId): Entity
+    {
+        $membership = $this->activeMembership($workspaceId);
+
+        if (!in_array($membership->get('role'), ['Owner', 'Admin', 'Manager'], true)) {
+            throw new Forbidden('Manager access is required to delete workspace records.');
+        }
+
+        return $membership;
+    }
+
+    public function assertCanManageConversations(string $workspaceId): Entity
+    {
+        $membership = $this->activeMembership($workspaceId);
+
+        if (!in_array($membership->get('role'), ['Owner', 'Admin', 'Manager'], true)) {
+            throw new Forbidden('Manager access is required to assign WhatsApp conversations.');
+        }
+
+        return $membership;
+    }
+
+    public function assertCanManageCampaigns(string $workspaceId): Entity
+    {
+        $membership = $this->activeMembership($workspaceId);
+
+        if (!in_array($membership->get('role'), ['Owner', 'Admin', 'Manager'], true)) {
+            throw new Forbidden('Manager access is required to schedule broadcast campaigns.');
+        }
+
+        return $membership;
     }
 
     public function addMember(string $workspaceId, string $userId, string $role): Entity

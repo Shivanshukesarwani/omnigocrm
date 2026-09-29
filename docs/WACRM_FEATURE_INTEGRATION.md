@@ -7,13 +7,12 @@ This plan ports product capabilities from [ArnasDon/wacrm](https://github.com/Ar
 | WACRM capability | OmniGoCRM status | Integration direction |
 | --- | --- | --- |
 | CRM contacts, tags, custom fields, import, and sales pipeline | Core CRM capabilities already exist in the repository's CRM platform. | Reuse the existing CRM data model and access controls. |
-| Shared WhatsApp inbox | Conversation and message entities, signed inbound webhooks, read/open/close actions, unread counts, and assignment fields exist. | Complete assignment, internal notes, media access, and inbox workflows in Phase 3. |
-| Template broadcasts | Campaigns, recipients, approved-template sending, opt-in checks, and delivery status storage exist. | Add per-recipient template variable rendering and stronger campaign controls in Phase 3. |
+| Shared WhatsApp inbox | Conversation and message entities, signed inbound webhooks, read/open/close actions, unread counts, workspace-safe assignment, internal notes, authenticated media retrieval, image previews, and mobile audio/document open/share flows exist. | Add response-time metrics and complete inbox workflows in Phase 3. |
+| Template broadcasts | Campaigns, recipients, approved-template sending, dispatch-time opt-in checks, delivery status storage, per-recipient template variables, live recipient-state counts, and bounded manual retry for failed recipients exist. | Continue with richer campaign controls and opt-out handling in Phase 3. |
 | No-code automation | Queued inbound WhatsApp rules, grouped conditions, branches, waits, workspace checks, resumable runs, tasks, record updates, and guarded WhatsApp replies are implemented. | Phase 1 is complete. Phase 2 adds a visual builder and more triggers/actions. |
-| AI reply assistant and knowledge base | Not implemented. | Add optional, administrator-configured provider keys and workspace-scoped retrieval in Phase 4. |
 | Team accounts and roles | Workspace membership and role-management APIs exist. | Align inbox assignment and team workflows with the existing workspace model in Phase 3. |
-| Dashboard and activity metrics | A dashboard summary and customer timeline API exist. | Add response-time and inbox activity metrics with the inbox work in Phase 3. |
-| Public API and MCP | The CRM has its own REST API; a WACRM-style scoped public-key layer and MCP server are not present. | Audit existing API authentication before extending it; build optional read-first MCP integration in Phase 5. |
+| Dashboard and activity metrics | Workspace dashboard includes 30-day inbound/outbound volume and daily series, open/unassigned/waiting inbox counts, average tracked latest reply time, and per-active-member workload and reply metrics attributed to each conversation's current assignee. Reply and backlog tracking starts on new inbound events; historical conversations are not backfilled. | Extend reporting with team and longer-range comparisons in Phase 3. |
+| Public API | The CRM has its own REST API; a WACRM-style scoped public-key layer is not present. | Audit existing API authentication before adding least-privilege integration credentials in Phase 4. |
 
 ## Delivery phases
 
@@ -35,24 +34,14 @@ This plan ports product capabilities from [ArnasDon/wacrm](https://github.com/Ar
 
 ### Phase 3 — Shared inbox and campaign workflows
 
-- Add workspace-safe assignment and internal conversation notes.
-- Complete supported media retrieval and display without slowing webhook acknowledgement.
-- Render approved template variables per recipient and improve campaign progress, retry, and opt-out handling.
-- Add team response-time and inbox-volume reporting to existing dashboard APIs.
+- Add daily inbound/outbound volume for the rolling 30-day dashboard window. Per-assignee workload and reply metrics are included in dashboard summaries; mobile dashboards show the latest seven daily points.
+- Render approved template variables per recipient (implemented through `POST /OmniGoCRM/Broadcast/recipient` using a `variables` object and `{{key}}` placeholders); manual failed-recipient retry is available at `POST /OmniGoCRM/Broadcast/retryRecipient`, limited to three retries, rechecked against workspace membership, current opt-in, approved template, and quota. `GET /OmniGoCRM/Broadcast/campaign` returns live queued/sent/failed/skipped counts. Retries are explicit because a provider timeout can leave delivery outcome uncertain; a retry can duplicate a message accepted by the provider before the timeout.
 
-### Phase 4 — AI reply assistance and knowledge base
-
-- Provide optional bring-your-own-key providers; AI features remain disabled until configured.
-- Add workspace-scoped knowledge articles and retrieval, with citations in generated drafts.
-- Start with agent-approved reply drafts; add automatic replies only with explicit opt-in, bounded retries, and human handoff.
-- Never send conversation or knowledge data to an AI provider without administrator configuration and user-visible controls.
-
-### Phase 5 — Public integrations
+### Phase 4 — Public integrations
 
 - Audit the existing CRM API authentication and add revocable, least-privilege integration credentials only where needed.
-- Add an optional MCP server that is read-only by default; writes require explicit enablement and scoped permissions.
 - Document deployment, credential rotation, auditing, and workspace isolation.
 
 ## Current implementation checkpoint
 
-Phase 1 is complete. Inbound webhooks queue `WhatsAppReceived` runs, and the server-side runner supports action snapshots, wait/recovery, branches, grouped conditions, workspace isolation, and guarded WhatsApp replies. Focused PHPUnit coverage and CI syntax/module validation cover this implementation. The visual builder, additional triggers, AI, and MCP remain later phases. Validate against a live Meta webhook/send setup before production use.
+Phase 1 is complete. Inbound webhooks queue `WhatsAppReceived` runs, and the server-side runner supports action snapshots, wait/recovery, branches, grouped conditions, workspace isolation, and guarded WhatsApp replies. Focused PHPUnit coverage and CI syntax/module validation cover this implementation. The visual builder and additional triggers remain later phases. Validate against a live Meta webhook/send setup before production use.

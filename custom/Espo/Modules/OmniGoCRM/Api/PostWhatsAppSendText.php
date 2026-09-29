@@ -7,10 +7,13 @@ use Espo\Core\Api\Request;
 use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\Crm\Entities\Lead;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppCloudApi;
 use Espo\Modules\OmniGoCRM\Services\WhatsAppConversationService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceMemberService;
+use Espo\Modules\OmniGoCRM\Services\WorkspaceService;
 
 class PostWhatsAppSendText implements Action
 {
@@ -18,6 +21,8 @@ class PostWhatsAppSendText implements Action
         private WhatsAppCloudApi $client,
         private EntityManager $entityManager,
         private WhatsAppConversationService $conversationService,
+        private WorkspaceService $workspaceService,
+        private WorkspaceMemberService $memberService,
     ) {}
 
     public function process(Request $request): Response
@@ -50,6 +55,18 @@ class PostWhatsAppSendText implements Action
             throw new BadRequest('Lead not found.');
         }
 
+        $workspaceId = $this->workspaceService->currentId();
+
+        if (!$workspaceId) {
+            throw new Forbidden('Select an active workspace before sending WhatsApp messages.');
+        }
+
+        $this->memberService->assertCanWrite($workspaceId);
+
+        if ((string) $lead->get('omniGoCRMWorkspaceId') !== $workspaceId) {
+            throw new Forbidden('The lead is not available in the active workspace.');
+        }
+
         if (!$lead->get('whatsappOptIn')) {
             throw new BadRequest('WhatsApp opt-in is required for CRM-initiated messaging.');
         }
@@ -68,6 +85,7 @@ class PostWhatsAppSendText implements Action
         $conversation = $this->conversationService->findOrCreate(
             waId: $recipient,
             lead: $lead,
+            workspaceId: $workspaceId,
         );
 
         $message = $this->entityManager->getNewEntity('WhatsAppMessage');
@@ -85,6 +103,7 @@ class PostWhatsAppSendText implements Action
             'conversationId' => $conversation->getId(),
             'sentAt' => gmdate('Y-m-d H:i:s'),
             'rawPayload' => json_encode($result->response, JSON_UNESCAPED_SLASHES),
+            'omniGoCRMWorkspaceId' => $workspaceId,
         ]);
 
         $this->entityManager->saveEntity($message);

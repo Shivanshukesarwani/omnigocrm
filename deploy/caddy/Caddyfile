@@ -15,5 +15,10 @@
         Referrer-Policy "strict-origin-when-cross-origin"
     }
 
+    @leadCapture path /api/v1/OmniGoCRM/LeadCapture
+    request_body @leadCapture {
+        max_size 32KB
+    }
+
     reverse_proxy omnigocrm:80
 }

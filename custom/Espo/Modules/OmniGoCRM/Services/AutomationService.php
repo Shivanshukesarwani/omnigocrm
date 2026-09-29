@@ -4,17 +4,29 @@ namespace Espo\Modules\OmniGoCRM\Services;
 
 use Espo\Core\ORM\EntityManager;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Utils\Config;
 use Espo\ORM\Entity;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use DateTimeImmutable;
 use DateTimeZone;
 
 class AutomationService
 {
+    private Client $http;
+
     public function __construct(
         private EntityManager $entityManager,
         private WhatsAppCloudApi $whatsApp,
         private WhatsAppConversationService $conversationService,
-    ) {}
+        private Config $config,
+    ) {
+        $this->http = new Client([
+            'timeout' => 8,
+            'connect_timeout' => 3,
+            'allow_redirects' => false,
+        ]);
+    }
 
     public function dispatch(string $event, string $entityType, string $entityId, ?string $workspaceId = null): int
     {
@@ -85,6 +97,32 @@ class AutomationService
             $this->executeRun($run, $rule);
             $count++;
         }
+        return $count;
+    }
+
+    public function dispatchDueFollowUps(): int
+    {
+        $tasks = $this->entityManager->getRDBRepository('Task')->where([
+            'omniGoCRMIsFollowUp' => true,
+            'omniGoCRMDueAutomationDispatchedAt' => null,
+            'dateStart<=' => gmdate('Y-m-d H:i:s'),
+            'status!=' => 'Completed',
+            'deleted' => false,
+        ])->order('dateStart', 'ASC')->limit(100)->find();
+
+        $count = 0;
+
+        foreach ($tasks as $task) {
+            $workspaceId = $this->entityWorkspaceId($task);
+
+            if ($workspaceId === '') continue;
+
+            $this->dispatch('LeadFollowUpDue', 'Task', $task->getId(), $workspaceId);
+            $task->set('omniGoCRMDueAutomationDispatchedAt', gmdate('Y-m-d H:i:s'));
+            $this->entityManager->saveEntity($task);
+            $count++;
+        }
+
         return $count;
     }
 
@@ -284,6 +322,10 @@ class AutomationService
             return $this->sendWhatsAppTemplate($action, $entityType, $entityId, $workspaceId);
         }
 
+        if ($type === 'webhook') {
+            return $this->sendWebhook($action, $entityType, $entityId, $workspaceId);
+        }
+
         throw new BadRequest('Unsupported automation action type: ' . (string) $type);
     }
 
@@ -458,7 +500,7 @@ class AutomationService
                 continue;
             }
 
-            if (!in_array($action['type'], ['createTask', 'updateRecord', 'assignRecord', 'sendWhatsAppText', 'sendWhatsAppTemplate'], true)) {
+            if (!in_array($action['type'], ['createTask', 'updateRecord', 'assignRecord', 'sendWhatsAppText', 'sendWhatsAppTemplate', 'webhook'], true)) {
                 throw new BadRequest('Unsupported automation action type: ' . $action['type']);
             }
 
@@ -472,6 +514,10 @@ class AutomationService
 
             if ($action['type'] === 'sendWhatsAppText' && !is_string($action['body'] ?? null)) {
                 throw new BadRequest('sendWhatsAppText requires a string body.');
+            }
+
+            if ($action['type'] === 'webhook' && !is_string($action['url'] ?? null)) {
+                throw new BadRequest('webhook requires a URL.');
             }
 
             if ($action['type'] === 'sendWhatsAppTemplate') {
@@ -635,9 +681,18 @@ class AutomationService
         string $entityId,
         string $workspaceId,
     ): array {
-        $message = $this->getInboundWhatsAppMessage($entityType, $entityId, $workspaceId);
-        $leadId = trim((string) $message->get('leadId'));
-        $lead = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+        $message = null;
+
+        if ($entityType === 'WhatsAppMessage') {
+            $message = $this->getInboundWhatsAppMessage($entityType, $entityId, $workspaceId);
+            $leadId = trim((string) $message->get('leadId'));
+            $lead = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+        } elseif ($entityType === 'Lead') {
+            $lead = $this->entityManager->getEntityById('Lead', $entityId);
+        } else {
+            throw new BadRequest('WhatsApp template actions require a LeadCreated, LeadStageChanged, or WhatsAppReceived event.');
+        }
+
         if ($lead) {
             $this->assertEntityWorkspace($lead, $workspaceId, 'WhatsApp recipient');
         }
@@ -677,7 +732,9 @@ class AutomationService
             throw new BadRequest('WhatsApp template components must be an array.');
         }
 
-        $recipient = trim((string) $message->get('fromNumber'));
+        $components = $this->personalizeValue($components, $lead);
+
+        $recipient = trim((string) ($message?->get('fromNumber') ?: $lead->get('whatsappNumber')));
         if ($recipient === '') {
             throw new BadRequest('Inbound WhatsApp message has no sender number.');
         }
@@ -715,7 +772,7 @@ class AutomationService
     }
 
     private function saveOutboundMessage(
-        Entity $inboundMessage,
+        ?Entity $inboundMessage,
         ?Entity $lead,
         string $recipient,
         string $body,
@@ -724,10 +781,14 @@ class AutomationService
         string $workspaceId,
     ): array {
         $sentAt = gmdate('Y-m-d H:i:s');
-        $conversationId = trim((string) $inboundMessage->get('conversationId'));
+        $conversationId = trim((string) $inboundMessage?->get('conversationId'));
         $conversation = $conversationId !== ''
             ? $this->entityManager->getEntityById('WhatsAppConversation', $conversationId)
-            : null;
+            : $this->conversationService->findOrCreate(
+                preg_replace('/\D+/', '', $recipient) ?? $recipient,
+                $lead,
+                workspaceId: $workspaceId,
+            );
 
         if (!$conversation) {
             throw new BadRequest('Inbound WhatsApp message has no conversation.');
@@ -769,6 +830,69 @@ class AutomationService
         return trim((string) ($entity->get('omniGoCRMWorkspaceId') ?: $entity->get('workspaceId')));
     }
 
+    private function sendWebhook(array $action, string $entityType, string $entityId, string $workspaceId): array
+    {
+        $url = trim((string) ($action['url'] ?? ''));
+        $parts = parse_url($url);
+        if (
+            !is_array($parts) ||
+            strtolower((string) ($parts['scheme'] ?? '')) !== 'https' ||
+            !isset($parts['host']) ||
+            isset($parts['user']) ||
+            isset($parts['pass']) ||
+            (isset($parts['port']) && (int) $parts['port'] !== 443)
+        ) {
+            throw new BadRequest('Automation webhooks require an HTTPS URL on port 443 without embedded credentials.');
+        }
+
+        $host = strtolower(rtrim((string) $parts['host'], '.'));
+        $allowedHosts = $this->config->get('omniGoCRMAutomationWebhookHosts');
+        if (is_string($allowedHosts)) {
+            $allowedHosts = preg_split('/[,\\s]+/', $allowedHosts, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        }
+        if (!is_array($allowedHosts)) $allowedHosts = [];
+
+        $allowedHosts = array_map(
+            static fn ($item): string => strtolower(rtrim(trim((string) $item), '.')),
+            $allowedHosts,
+        );
+        if ($host === '' || !in_array($host, $allowedHosts, true)) {
+            throw new BadRequest('Automation webhook host is not in the administrator allowlist.');
+        }
+
+        $secret = trim((string) $this->config->get('omniGoCRMAutomationWebhookSecret'));
+        if ($secret === '') {
+            throw new BadRequest('The automation webhook signing secret is not configured.');
+        }
+
+        $payload = json_encode([
+            'event' => (string) ($action['event'] ?? 'AutomationAction'),
+            'entityType' => $entityType,
+            'entityId' => $entityId,
+            'workspaceId' => $workspaceId,
+            'occurredAt' => gmdate('c'),
+        ], JSON_THROW_ON_ERROR);
+
+        try {
+            $response = $this->http->post($url, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'X-OmniGoCRM-Signature' => 'sha256=' . hash_hmac('sha256', $payload, $secret),
+                ],
+                'body' => $payload,
+            ]);
+        } catch (GuzzleException) {
+            throw new BadRequest('Automation webhook delivery failed.');
+        }
+
+        $status = $response->getStatusCode();
+        if ($status < 200 || $status >= 300) {
+            throw new BadRequest('Automation webhook returned HTTP ' . $status . '.');
+        }
+
+        return ['type' => 'webhook', 'status' => $status];
+    }
+
     private function assertEntityWorkspace(Entity $entity, string $workspaceId, string $label): void
     {
         if ($this->entityWorkspaceId($entity) !== $workspaceId) {
@@ -806,6 +930,18 @@ class AutomationService
             : '';
 
         return strtr($body, $values);
+    }
+
+    private function personalizeValue(mixed $value, Entity $lead): mixed
+    {
+        if (is_string($value)) return $this->personalize($value, $lead);
+        if (!is_array($value)) return $value;
+
+        foreach ($value as $key => $item) {
+            $value[$key] = $this->personalizeValue($item, $lead);
+        }
+
+        return $value;
     }
 
     private function createFailedRun(

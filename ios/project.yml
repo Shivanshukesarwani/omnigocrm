@@ -3,6 +3,13 @@ options:
   bundleIdPrefix: com.omnigocrm
   deploymentTarget:
     iOS: "17.0"
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.19.2
+configs:
+  Debug: debug
+  Release: release
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -12,11 +19,20 @@ targets:
     platform: iOS
     sources:
       - OmniGoCRM
+    resources:
+      - path: OmniGoCRM/GoogleService-Info.plist
+        optional: true
+    dependencies:
+      - package: Firebase
+        product: FirebaseMessaging
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.omnigocrm.ios
         INFOPLIST_KEY_CFBundleDisplayName: OmniGoCRM
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.business
-        CODE_SIGNING_ALLOWED: NO
-        CODE_SIGNING_REQUIRED: NO
         GENERATE_INFOPLIST_FILE: YES
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: OmniGoCRM/Debug.entitlements
+        Release:
+          CODE_SIGN_ENTITLEMENTS: OmniGoCRM/Release.entitlements

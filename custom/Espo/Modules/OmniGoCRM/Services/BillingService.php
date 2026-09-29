@@ -75,15 +75,35 @@ class BillingService
         return (bool) ($entitlements['limits'][$feature] ?? false);
     }
 
+    public function broadcastRecipientsRemaining(string $workspaceId): ?int
+    {
+        $limit = $this->entitlements($workspaceId)['limits']['maxBroadcastRecipientsPerMonth'];
+
+        if ($limit === null) return null;
+
+        $used = $this->entityManager->getRDBRepository('BroadcastRecipient')->where([
+            'omniGoCRMWorkspaceId' => $workspaceId,
+            'status' => 'Sent',
+            'sentAt>=' => gmdate('Y-m-01 00:00:00'),
+            'deleted' => false,
+        ])->count();
+
+        return max(0, (int) $limit - $used);
+    }
+
     public function setPlan(
         string $workspaceId,
         string $plan,
         string $status = 'Active',
     ): array {
-        $this->assertManager($workspaceId);
+        $this->assertPlatformAdministrator();
 
         if (!isset(self::PLANS[$plan])) {
             throw new \InvalidArgumentException('Invalid plan.');
+        }
+
+        if (!in_array($status, ['Trialing', 'Active', 'Past Due', 'Canceled', 'None'], true)) {
+            throw new \InvalidArgumentException('Invalid subscription status.');
         }
 
         $workspace = $this->entityManager->getEntityById('Workspace', $workspaceId);
@@ -126,20 +146,10 @@ class BillingService
         return $this->entitlements($workspaceId);
     }
 
-    private function assertManager(string $workspaceId): void
+    private function assertPlatformAdministrator(): void
     {
-        $membership = $this->entityManager
-            ->getRDBRepository('WorkspaceMember')
-            ->where([
-                'workspaceId' => $workspaceId,
-                'userId' => $this->user->getId(),
-                'status' => 'Active',
-                'deleted' => false,
-            ])
-            ->findOne();
-
-        if (!$membership || !in_array($membership->get('role'), ['Owner', 'Admin'], true)) {
-            throw new \RuntimeException('Workspace admin access is required.');
+        if (!$this->user->isAdmin()) {
+            throw new Forbidden('Only a platform administrator can manually change a subscription plan.');
         }
     }
 }

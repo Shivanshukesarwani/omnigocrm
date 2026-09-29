@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UIKit
 
 @MainActor
 final class APIClient: ObservableObject {
@@ -91,9 +92,84 @@ final class APIClient: ObservableObject {
         _ = try await request(method: "POST", path: "OmniGoCRM/Workspace/switch", body: ["workspaceId": id])
     }
 
+    func registerPushToken(_ token: String) async throws {
+        let defaults = UserDefaults.standard
+        let deviceId: String
+        if let saved = defaults.string(forKey: "OmniGoCRMPushDeviceID") {
+            deviceId = saved
+        } else {
+            deviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+            defaults.set(deviceId, forKey: "OmniGoCRMPushDeviceID")
+        }
+
+        _ = try await request(method: "POST", path: "OmniGoCRM/Devices/register", body: [
+            "platform": "iOS",
+            "pushProvider": "FCM",
+            "pushToken": token,
+            "externalDeviceId": deviceId,
+            "deviceName": UIDevice.current.model,
+        ])
+    }
+
     func dashboardSummary() async throws -> [String: Any] {
         let data = try await request(method: "GET", path: "OmniGoCRM/Dashboard/summary")
         return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+    }
+
+    func createQuote(name: String, currency: String) async throws -> [String: Any] {
+        let data = try await request(method: "POST", path: "OmniGoCRM/Sales/quote", body: ["name": name, "currency": currency])
+        return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+    }
+
+    func addQuoteItem(quoteId: String, name: String, quantity: Double, unitPrice: Double) async throws {
+        _ = try await request(method: "POST", path: "OmniGoCRM/Sales/quoteItem", body: [
+            "quoteId": quoteId, "name": name, "quantity": quantity, "unitPrice": unitPrice,
+        ])
+    }
+
+    func convertQuote(id: String) async throws -> [String: Any] {
+        let data = try await request(method: "POST", path: "OmniGoCRM/Sales/quoteConvert", body: ["quoteId": id])
+        return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+    }
+
+    func createPayment(name: String, amount: Double, method: String, orderId: String = "") async throws {
+        var body: [String: Any] = ["name": name, "amount": amount, "method": method]
+        if !orderId.isEmpty { body["orderId"] = orderId }
+        _ = try await request(method: "POST", path: "OmniGoCRM/Sales/payment", body: body)
+    }
+
+    func createBroadcastCampaign(name: String, templateName: String, languageCode: String) async throws -> Record {
+        let data = try await request(method: "POST", path: "BroadcastCampaign", body: [
+            "name": name,
+            "templateName": templateName,
+            "languageCode": languageCode,
+            "status": "Draft",
+        ])
+        return try JSONDecoder().decode(Record.self, from: data)
+    }
+
+    func broadcastCampaign(id: String) async throws -> [String: Any] {
+        var components = URLComponents()
+        components.queryItems = [URLQueryItem(name: "campaignId", value: id)]
+        let path = "OmniGoCRM/Broadcast/campaign?" + (components.percentEncodedQuery ?? "")
+        let data = try await request(method: "GET", path: path)
+        return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+    }
+
+    func addBroadcastRecipient(campaignId: String, leadId: String) async throws -> [String: Any] {
+        let data = try await request(method: "POST", path: "OmniGoCRM/Broadcast/recipient", body: [
+            "campaignId": campaignId,
+            "leadId": leadId,
+        ])
+        return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+    }
+
+    func scheduleBroadcast(campaignId: String) async throws {
+        let formatter = ISO8601DateFormatter()
+        _ = try await request(method: "POST", path: "OmniGoCRM/Broadcast/schedule", body: [
+            "campaignId": campaignId,
+            "scheduledAt": formatter.string(from: Date()),
+        ])
     }
 
     func list(entityType: String, select: String, maxSize: Int = 100) async throws -> [Record] {
@@ -125,15 +201,64 @@ final class APIClient: ObservableObject {
         )
     }
 
-    func actOnWhatsAppConversation(conversationId: String, action: String) async throws {
+    func actOnWhatsAppConversation(conversationId: String, action: String, note: String? = nil) async throws {
+        var body: [String: Any] = ["conversationId": conversationId, "action": action]
+        if let note { body["note"] = note }
         _ = try await request(
             method: "POST",
             path: "OmniGoCRM/WhatsApp/conversationAction",
-            body: [
-                "conversationId": conversationId,
-                "action": action,
-            ]
+            body: body
         )
+    }
+
+    func listWhatsAppConversationMessages(conversationId: String) async throws -> [WhatsAppThreadMessage] {
+        var components = URLComponents()
+        components.queryItems = [URLQueryItem(name: "conversationId", value: conversationId)]
+        let query = components.percentEncodedQuery ?? ""
+        let data = try await request(
+            method: "GET",
+            path: "OmniGoCRM/WhatsApp/conversationMessages?" + query
+        )
+        return try JSONDecoder().decode(WhatsAppMessagesResponse.self, from: data).items
+    }
+
+    func downloadWhatsAppMedia(messageId: String, mimeType: String) async throws -> URL {
+        var components = URLComponents()
+        components.queryItems = [URLQueryItem(name: "messageId", value: messageId)]
+        let root = session.baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = root.hasSuffix("/") ? root : root + "/"
+        guard let url = URL(string: normalized + "api/v1/OmniGoCRM/WhatsApp/media?" + (components.percentEncodedQuery ?? "")) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Accept")
+        if let username = session.username, let token = session.token {
+            request.setValue(authorization(username: username, secret: token), forHTTPHeaderField: "Espo-Authorization")
+        }
+
+        let (temporaryURL, response) = try await URLSession.shared.download(for: request)
+        guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
+        guard (200...299).contains(http.statusCode) else {
+            let data = (try? Data(contentsOf: temporaryURL)) ?? Data()
+            try? FileManager.default.removeItem(at: temporaryURL)
+            throw APIError.http(status: http.statusCode, body: String(data: data, encoding: .utf8) ?? "")
+        }
+
+        let ext = [
+            "image/jpeg": "jpg", "image/png": "png", "image/gif": "gif", "image/webp": "webp",
+            "audio/aac": "aac", "audio/amr": "amr", "audio/mpeg": "mp3", "audio/mp4": "m4a", "audio/ogg": "ogg",
+            "video/mp4": "mp4", "video/3gpp": "3gp", "application/pdf": "pdf", "text/plain": "txt", "text/csv": "csv",
+            "application/msword": "doc", "application/vnd.ms-excel": "xls", "application/vnd.ms-powerpoint": "ppt",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+        ][mimeType] ?? "dat"
+        let destination = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(ext)
+        try FileManager.default.moveItem(at: temporaryURL, to: destination)
+        return destination
     }
 
     func logCompletedCall(
@@ -200,6 +325,34 @@ final class APIClient: ObservableObject {
 
     func completeTask(id: String) async throws {
         _ = try await request(method: "PUT", path: "Task/" + id, body: ["status": "Completed"])
+    }
+
+    func listFollowUps() async throws -> [FollowUpRecord] {
+        let data = try await request(method: "GET", path: "follow-ups")
+        return try JSONDecoder().decode(FollowUpListResponse.self, from: data).list
+    }
+
+    func createFollowUp(
+        name: String,
+        dateStart: Date,
+        parentType: String,
+        parentId: String,
+        description: String,
+        priority: String
+    ) async throws {
+        let formatter = ISO8601DateFormatter()
+        _ = try await request(
+            method: "POST",
+            path: "follow-ups",
+            body: [
+                "name": name,
+                "dateStart": formatter.string(from: dateStart),
+                "parentType": parentType,
+                "parentId": parentId,
+                "description": description,
+                "priority": priority,
+            ]
+        )
     }
 
     func sendWhatsApp(leadId: String, body: String) async throws {

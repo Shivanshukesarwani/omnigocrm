@@ -13,7 +13,8 @@
             "type": "enum",
             "options": [
                 "Inbound",
-                "Outbound"
+                "Outbound",
+                "Internal"
             ],
             "default": "Outbound",
             "audited": true,
@@ -27,7 +28,8 @@
                 "Delivered",
                 "Read",
                 "Failed",
-                "Received"
+                "Received",
+                "Internal"
             ],
             "default": "Queued",
             "audited": true,
@@ -43,6 +45,7 @@
                 "Audio",
                 "Video",
                 "Interactive",
+                "InternalNote",
                 "Unknown"
             ],
             "default": "Text"
@@ -181,6 +184,12 @@
                 "omniGoCRMWorkspaceId",
                 "deleted"
             ]
+        },
+        "workspaceDirectionReceivedAt": {
+            "columns": ["omniGoCRMWorkspaceId", "direction", "deleted", "receivedAt"]
+        },
+        "workspaceDirectionSentAt": {
+            "columns": ["omniGoCRMWorkspaceId", "direction", "deleted", "sentAt"]
         }
     },
     "links": {

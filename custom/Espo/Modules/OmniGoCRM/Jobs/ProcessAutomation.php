@@ -11,6 +11,7 @@ class ProcessAutomation implements JobDataLess
 
     public function run(): void
     {
+        $this->service->dispatchDueFollowUps();
         $this->service->executeDue();
     }
 }
