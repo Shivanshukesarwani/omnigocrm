@@ -6,6 +6,7 @@ use Espo\Core\ORM\EntityManager;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Utils\Config;
 use Espo\ORM\Entity;
+use Espo\Modules\Crm\Entities\Lead;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use DateTimeImmutable;
@@ -647,7 +648,8 @@ class AutomationService
         }
 
         $leadId = trim((string) $message->get('leadId'));
-        $lead = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+        $leadEntity = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+        $lead = $leadEntity instanceof Lead ? $leadEntity : null;
         if ($lead) {
             $this->assertEntityWorkspace($lead, $workspaceId, 'WhatsApp recipient');
         }
@@ -686,9 +688,11 @@ class AutomationService
         if ($entityType === 'WhatsAppMessage') {
             $message = $this->getInboundWhatsAppMessage($entityType, $entityId, $workspaceId);
             $leadId = trim((string) $message->get('leadId'));
-            $lead = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+            $leadEntity = $leadId !== '' ? $this->entityManager->getEntityById('Lead', $leadId) : null;
+            $lead = $leadEntity instanceof Lead ? $leadEntity : null;
         } elseif ($entityType === 'Lead') {
-            $lead = $this->entityManager->getEntityById('Lead', $entityId);
+            $leadEntity = $this->entityManager->getEntityById('Lead', $entityId);
+            $lead = $leadEntity instanceof Lead ? $leadEntity : null;
         } else {
             throw new BadRequest('WhatsApp template actions require a LeadCreated, LeadStageChanged, or WhatsAppReceived event.');
         }
