@@ -5,7 +5,7 @@ OmniGoCRM owns its domain model, PostgreSQL schema, API, authentication, authori
 ## Runtime stack
 - **Node.js** is the server runtime.
 - **Fastify** provides the HTTP API.
-- **PostgreSQL** is the system of record.
+- **PostgreSQL + PL/pgSQL** is the system of record. PL/pgSQL handles database-level invariants, timestamps, document totals, invoice payment state and atomic automation-job enqueueing.
 - **React + JavaScript (JSX)** powers the web client.
 - **Node.js worker** processes asynchronous automation jobs.
 
