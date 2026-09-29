@@ -1,0 +1,4 @@
+import fs from "node:fs";import path from "node:path";import {fileURLToPath} from "node:url";import {pool} from "../db.js";
+const dir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../../../database/migrations");
+await pool.query("CREATE TABLE IF NOT EXISTS schema_migrations(version text PRIMARY KEY,applied_at timestamptz NOT NULL DEFAULT now())");
+for(const file of fs.readdirSync(dir).filter(f=>f.endsWith(".sql")).sort()){const version=file.slice(0,-4);const r=await pool.query("SELECT 1 FROM schema_migrations WHERE version=$1",[version]);if(r.rowCount)continue;const sql=fs.readFileSync(path.join(dir,file),"utf8");await pool.query("BEGIN");try{await pool.query(sql);await pool.query("INSERT INTO schema_migrations(version) VALUES($1)",[version]);await pool.query("COMMIT");console.log("Applied",file)}catch(e){await pool.query("ROLLBACK");throw e}}await pool.end();
