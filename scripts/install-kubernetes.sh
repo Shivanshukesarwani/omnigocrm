@@ -16,10 +16,22 @@ cd "$INSTALL_DIR"
 
 NAMESPACE="${OMNIGOCRM_NAMESPACE:-omnigocrm}"
 RELEASE="${OMNIGOCRM_RELEASE:-omnigocrm}"
+DOMAIN="${OMNIGOCRM_DOMAIN:-}"
+LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
 
 kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$NAMESPACE"
 
-helm upgrade --install "$RELEASE" deploy/kubernetes/helm/omnigocrm   --namespace "$NAMESPACE"   --create-namespace
+HELM_ARGS="--namespace $NAMESPACE --create-namespace"
+if [ -n "$DOMAIN" ]; then
+  [ -n "$LETSENCRYPT_EMAIL" ] || { echo "LETSENCRYPT_EMAIL is required when OMNIGOCRM_DOMAIN is set." >&2; exit 1; }
+  log "Installing/updating cert-manager..."
+  helm repo add jetstack https://charts.jetstack.io >/dev/null 2>&1 || true
+  helm repo update >/dev/null
+  helm upgrade --install cert-manager jetstack/cert-manager     --namespace cert-manager --create-namespace     --set crds.enabled=true
+  HELM_ARGS="$HELM_ARGS --set ingress.enabled=true --set ingress.tls=true --set ingress.host=$DOMAIN --set certManager.enabled=true --set certManager.email=$LETSENCRYPT_EMAIL"
+fi
+
+helm upgrade --install "$RELEASE" deploy/kubernetes/helm/omnigocrm $HELM_ARGS
 
 log "Kubernetes deployment complete."
 log "Check status with: kubectl -n $NAMESPACE get pods,svc"
