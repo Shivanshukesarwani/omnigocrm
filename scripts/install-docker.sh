@@ -58,6 +58,17 @@ else
 fi
 cd "$INSTALL_DIR"
 
+DOMAIN="${OMNIGOCRM_DOMAIN:-}"
+LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
+if [ -z "$DOMAIN" ] && [ -t 0 ]; then
+  printf "Domain for HTTPS (leave blank for local HTTP): "
+  read DOMAIN
+fi
+if [ -n "$DOMAIN" ] && [ -z "$LETSENCRYPT_EMAIL" ] && [ -t 0 ]; then
+  printf "Email for Let's Encrypt renewal notices: "
+  read LETSENCRYPT_EMAIL
+fi
+
 if [ ! -f .env ]; then
   cp .env.production.example .env
   if need_cmd openssl; then
@@ -68,6 +79,17 @@ if [ ! -f .env ]; then
   chmod 600 .env 2>/dev/null || true
 fi
 
+if [ -n "$DOMAIN" ]; then
+  sed -i.bak "s/^DOMAIN=.*/DOMAIN=$DOMAIN/" .env
+  sed -i.bak "s/^LETSENCRYPT_EMAIL=.*/LETSENCRYPT_EMAIL=$LETSENCRYPT_EMAIL/" .env
+  rm -f .env.bak
+fi
+
 log "Building and starting Docker deployment..."
 docker compose --env-file .env -f infra/docker/docker-compose.prod.yml up -d --build
-log "Docker deployment complete: http://localhost"
+if [ -n "$DOMAIN" ]; then
+  log "Docker deployment complete: https://$DOMAIN"
+else
+  log "Docker deployment complete: http://localhost"
+  log "Set OMNIGOCRM_DOMAIN and LETSENCRYPT_EMAIL for automatic Let's Encrypt HTTPS."
+fi
