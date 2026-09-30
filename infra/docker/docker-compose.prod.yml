@@ -65,3 +65,5 @@ services:
 volumes:
   omnigocrm-postgres:
   omnigocrm-redis:
+  omnigocrm-letsencrypt:
+  omnigocrm-certbot-webroot:
