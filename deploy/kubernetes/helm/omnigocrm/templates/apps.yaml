@@ -102,8 +102,18 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "omnigocrm.fullname" . }}
+metadata:
+  annotations:
+    {{- if .Values.certManager.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName | quote }}
+    {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    {{- if .Values.ingress.tls }}
+    - hosts: [{{ .Values.ingress.host | quote }}]
+      secretName: {{ .Values.ingress.tlsSecretName }}
+    {{- end }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:
