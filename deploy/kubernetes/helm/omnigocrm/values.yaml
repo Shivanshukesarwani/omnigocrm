@@ -26,6 +26,12 @@ ingress:
   className: nginx
   host: omnigocrm.local
   tls: false
+  tlsSecretName: omnigocrm-tls
+
+certManager:
+  enabled: false
+  issuerName: letsencrypt-prod
+  email: ""
 
 postgres:
   image: postgres:18
