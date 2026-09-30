@@ -45,6 +45,14 @@ DB_PASS="$(openssl rand -hex 32)"
 JWT_SECRET="$(openssl rand -hex 48)"
 DOMAIN="${OMNIGOCRM_DOMAIN:-}"
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
+if [ -z "$DOMAIN" ] && [ -t 0 ]; then
+  printf "Domain for HTTPS (leave blank for local HTTP): "
+  read DOMAIN
+fi
+if [ -n "$DOMAIN" ] && [ -z "$LETSENCRYPT_EMAIL" ] && [ -t 0 ]; then
+  printf "Email for Let's Encrypt renewal notices: "
+  read LETSENCRYPT_EMAIL
+fi
 
 if [ ! -f .env ]; then
   cat > .env <<EOF
