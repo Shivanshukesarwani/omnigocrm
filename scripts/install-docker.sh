@@ -82,6 +82,7 @@ fi
 if [ -n "$DOMAIN" ]; then
   sed -i.bak "s/^DOMAIN=.*/DOMAIN=$DOMAIN/" .env
   sed -i.bak "s/^LETSENCRYPT_EMAIL=.*/LETSENCRYPT_EMAIL=$LETSENCRYPT_EMAIL/" .env
+  sed -i.bak "s#^CORS_ORIGIN=.*#CORS_ORIGIN=https://$DOMAIN#" .env
   rm -f .env.bak
 fi
 
