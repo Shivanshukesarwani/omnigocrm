@@ -1,0 +1,16 @@
+{{- if and .Values.ingress.enabled .Values.ingress.tls .Values.certManager.enabled }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.certManager.issuerName }}
+spec:
+  acme:
+    email: {{ required "certManager.email is required when Lets Encrypt is enabled" .Values.certManager.email | quote }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: {{ .Values.certManager.issuerName }}-account-key
+    solvers:
+      - http01:
+          ingress:
+            class: {{ .Values.ingress.className }}
+{{- end }}
