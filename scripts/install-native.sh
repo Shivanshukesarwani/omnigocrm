@@ -20,7 +20,7 @@ fi
 
 log "Installing native server dependencies..."
 as_root apt-get update
-as_root apt-get install -y git curl ca-certificates nginx postgresql redis-server build-essential
+as_root apt-get install -y git curl ca-certificates nginx postgresql redis-server build-essential certbot python3-certbot-nginx
 
 if ! need node; then
   log "Installing Node.js 22..."
@@ -43,6 +43,8 @@ DB_NAME="omnigocrm"
 DB_USER="omnigocrm"
 DB_PASS="$(openssl rand -hex 32)"
 JWT_SECRET="$(openssl rand -hex 48)"
+DOMAIN="${OMNIGOCRM_DOMAIN:-}"
+LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
 
 if [ ! -f .env ]; then
   cat > .env <<EOF
@@ -53,6 +55,8 @@ DATABASE_URL=postgresql://$DB_USER:$DB_PASS@localhost:5432/$DB_NAME
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=$JWT_SECRET
 CORS_ORIGIN=http://localhost
+DOMAIN=$DOMAIN
+LETSENCRYPT_EMAIL=$LETSENCRYPT_EMAIL
 EOF
   chmod 600 .env
 fi
@@ -125,4 +129,15 @@ as_root systemctl enable --now nginx postgresql redis-server
 as_root systemctl daemon-reload
 as_root systemctl enable --now omnigocrm-api.service omnigocrm-worker.service
 
-log "Native installation complete: http://localhost"
+DOMAIN="$(sed -n 's/^DOMAIN=//p' .env | head -1)"
+LETSENCRYPT_EMAIL="$(sed -n 's/^LETSENCRYPT_EMAIL=//p' .env | head -1)"
+if [ -n "$DOMAIN" ]; then
+  [ -n "$LETSENCRYPT_EMAIL" ] || { echo "LETSENCRYPT_EMAIL is required when DOMAIN is set." >&2; exit 1; }
+  log "Requesting Let's Encrypt certificate for $DOMAIN..."
+  as_root certbot --nginx --non-interactive --agree-tos --no-eff-email --email "$LETSENCRYPT_EMAIL" -d "$DOMAIN" --redirect
+  log "HTTPS enabled and automatic renewal configured by Certbot."
+  log "Native installation complete: https://$DOMAIN"
+else
+  log "Native installation complete: http://localhost"
+  log "For HTTPS, set OMNIGOCRM_DOMAIN and LETSENCRYPT_EMAIL and rerun the installer."
+fi
