@@ -18,6 +18,14 @@ NAMESPACE="${OMNIGOCRM_NAMESPACE:-omnigocrm}"
 RELEASE="${OMNIGOCRM_RELEASE:-omnigocrm}"
 DOMAIN="${OMNIGOCRM_DOMAIN:-}"
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
+if [ -z "$DOMAIN" ] && [ -t 0 ]; then
+  printf "Domain for HTTPS (leave blank for HTTP): "
+  read DOMAIN
+fi
+if [ -n "$DOMAIN" ] && [ -z "$LETSENCRYPT_EMAIL" ] && [ -t 0 ]; then
+  printf "Email for Let's Encrypt renewal notices: "
+  read LETSENCRYPT_EMAIL
+fi
 
 kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$NAMESPACE"
 
