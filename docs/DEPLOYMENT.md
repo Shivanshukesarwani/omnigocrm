@@ -71,3 +71,23 @@ For internet-facing deployments add HTTPS/TLS, DNS, backups, monitoring, rate li
 Pin release versions/images for controlled production deployments instead of tracking main indefinitely.
 
 Security note: piping a remote script directly to a shell is convenient but requires trusting the current GitHub file. For higher assurance, download, inspect and pin a release before execution.
+
+## Let's Encrypt HTTPS
+
+For public deployments, OmniGoCRM can obtain and renew Let's Encrypt certificates automatically.
+
+Set a real DNS name pointing to the server and make ports 80 and 443 reachable. Let's Encrypt's HTTP-01 validation uses port 80. citeturn0view0
+
+### Native Linux
+
+The native installer installs Certbot and uses the Nginx integration. When a domain and email are supplied, it requests the certificate, enables HTTP-to-HTTPS redirection and relies on Certbot's renewal mechanism.
+
+### Docker
+
+Docker mode runs Certbot with the Nginx web container. Certificates are stored in a persistent Docker volume and renewal is checked every 12 hours. HTTP is redirected to HTTPS after the certificate is available.
+
+### Kubernetes
+
+Kubernetes mode installs cert-manager when a domain is supplied and configures a Let's Encrypt ClusterIssuer plus TLS Ingress. cert-manager handles renewal.
+
+For local development or a server without a public domain, HTTPS is not automatically issued because Let's Encrypt cannot issue a normal HTTP-01 certificate for localhost. Use a real DNS name for production.
