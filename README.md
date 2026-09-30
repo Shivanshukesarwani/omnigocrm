@@ -78,3 +78,16 @@ curl -fsSL https://raw.githubusercontent.com/Shivanshukesarwani/omnigocrm/main/s
 macOS uses Homebrew and Docker Desktop. Docker Desktop must be started before the deployment can continue.
 
 After deployment, open **http://localhost**.
+
+## Automatic HTTPS with Let's Encrypt
+
+For public deployments, OmniGoCRM can automatically obtain and renew a free Let's Encrypt certificate.
+
+- Native Linux: Certbot + Nginx, with automatic renewal.
+- Docker: Certbot runs with the web container; certificates persist in Docker volumes and renewal is checked automatically.
+- Kubernetes: cert-manager + Let's Encrypt ClusterIssuer with automatic renewal.
+- HTTP requests are redirected to HTTPS after HTTPS is configured.
+
+A real DNS domain must point to the server. For HTTP-01 validation, port 80 must be reachable from the internet. Localhost-only installations remain HTTP because they do not have a publicly validated domain.
+
+Set `OMNIGOCRM_DOMAIN` and `LETSENCRYPT_EMAIL` for unattended deployment, or let the interactive installer ask for them.
