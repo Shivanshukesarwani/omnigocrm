@@ -76,7 +76,7 @@ Security note: piping a remote script directly to a shell is convenient but requ
 
 For public deployments, OmniGoCRM can obtain and renew Let's Encrypt certificates automatically.
 
-Set a real DNS name pointing to the server and make ports 80 and 443 reachable. Let's Encrypt's HTTP-01 validation uses port 80. citeturn0view0
+Set a real DNS name pointing to the server and make ports 80 and 443 reachable. Let's Encrypt's HTTP-01 validation uses port 80.
 
 ### Native Linux
 
