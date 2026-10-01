@@ -1,5 +1,5 @@
 INSERT INTO message_templates(workspace_id,name,channel,body)
-SELECT w.id,'Introduction','whatsapp','Hi {first_name}, this is {{company_name}}. I wanted to connect with you regarding our products and services.'
+SELECT w.id,'Introduction','whatsapp','Hi {first_name}, I wanted to connect with you regarding our products and services.'
 FROM workspaces w
 WHERE NOT EXISTS (
   SELECT 1 FROM message_templates mt
