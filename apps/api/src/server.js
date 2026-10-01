@@ -65,6 +65,76 @@ app.get("/api/v1/conversations",{preHandler:requireAuth},async req=>({data:(awai
 app.get("/api/v1/conversations/:id/messages",{preHandler:requireAuth},async(req,reply)=>{const p=z.object({id:uuid}).parse(req.params);const r=await query("SELECT m.* FROM messages m JOIN conversations c ON c.id=m.conversation_id WHERE m.conversation_id=$1 AND c.workspace_id=$2 ORDER BY m.created_at",[p.id,req.authUser.workspaceId]);return {data:r.rows}});
 app.post("/api/v1/conversations",{preHandler:requireAuth},async(req,reply)=>{const b=z.object({channel:z.enum(["whatsapp","sms","email","call","web"]),external_contact:text(200).optional(),subject:text(250).optional()}).parse(req.body);const r=await query("INSERT INTO conversations(workspace_id,channel,external_contact,subject,assigned_to) VALUES($1,$2,$3,$4,$5) RETURNING *",[req.authUser.workspaceId,b.channel,b.external_contact??null,b.subject??null,req.authUser.id]);reply.code(201).send(created(r.rows[0]))});
 app.post("/api/v1/conversations/:id/messages",{preHandler:requireAuth},async(req,reply)=>{const p=z.object({id:uuid}).parse(req.params);const b=z.object({body:z.string().min(1).max(10000),direction:z.enum(["inbound","outbound"]).default("outbound"),message_type:z.enum(["text","image","file","audio","template"]).default("text")}).parse(req.body);const c=await query("SELECT id FROM conversations WHERE id=$1 AND workspace_id=$2",[p.id,req.authUser.workspaceId]);if(!c.rowCount)return reply.code(404).send({error:"Conversation not found"});const r=await query("INSERT INTO messages(conversation_id,sender_id,direction,message_type,body) VALUES($1,$2,$3,$4,$5) RETURNING *",[p.id,req.authUser.id,b.direction,b.message_type,b.body]);await query("UPDATE conversations SET updated_at=now(),last_message_at=now() WHERE id=$1",[p.id]);reply.code(201).send(created(r.rows[0]))});
+function normalizeWhatsAppPhone(value){
+ const raw=String(value??"").trim();
+ if(!raw)return "";
+ const digits=raw.replace(/\\D/g,"");
+ if(digits.length===10)return "91"+digits;
+ if(digits.length===11&&digits.startsWith("0"))return "91"+digits.slice(1);
+ if(digits.length>=10&&digits.length<=15)return digits;
+ return "";
+}
+function renderWhatsAppBody(body,lead){
+ return String(body??"")
+  .replace(/\\{first_name\\}/gi,lead.first_name??"")
+  .replace(/\\{last_name\\}/gi,lead.last_name??"")
+  .replace(/\\{name\\}/gi,[lead.first_name,lead.last_name].filter(Boolean).join(" "));
+}
+app.get("/api/v1/whatsapp/assets",{preHandler:requireAuth},async req=>({
+ data:(await query("SELECT id,name,description,asset_type,url,thumbnail_url,mime_type,created_at FROM media_assets WHERE workspace_id=$1 AND is_active=true ORDER BY created_at DESC",[req.authUser.workspaceId])).rows
+}));
+app.post("/api/v1/whatsapp/assets",{preHandler:[requireAuth,requireRole("owner","admin","manager")]},async(req,reply)=>{
+ const b=z.object({name:text(160),description:text(500).optional(),asset_type:z.enum(["image","video","document","audio","link"]).default("document"),url:z.string().url(),thumbnail_url:z.string().url().optional(),mime_type:text(120).optional()}).parse(req.body);
+ const r=await query("INSERT INTO media_assets(workspace_id,name,description,asset_type,url,thumbnail_url,mime_type) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *",[req.authUser.workspaceId,b.name,b.description??null,b.asset_type,b.url,b.thumbnail_url??null,b.mime_type??null]);
+ await audit(req,"create","media_asset",r.rows[0].id); reply.code(201).send(created(r.rows[0]));
+});
+app.get("/api/v1/whatsapp/templates",{preHandler:requireAuth},async req=>{
+ const channel=req.query?.channel==="sms"||req.query?.channel==="email"?"channel":"whatsapp";
+ const vals=[req.authUser.workspaceId]; const where=["workspace_id=$1","is_active=true"]; let n=2;
+ if(channel!=="channel"){where.push("channel=$"+n++);vals.push(channel)}
+ const r=await query("SELECT mt.id,mt.name,mt.channel,mt.body,mt.media_asset_id,ma.name media_asset_name,ma.url media_asset_url,ma.asset_type media_asset_type FROM message_templates mt LEFT JOIN media_assets ma ON ma.id=mt.media_asset_id WHERE "+where.join(" AND ")+" ORDER BY mt.created_at DESC",vals);
+ return {data:r.rows};
+});
+app.post("/api/v1/whatsapp/templates",{preHandler:[requireAuth,requireRole("owner","admin","manager")]},async(req,reply)=>{
+ const b=z.object({name:text(160),body:z.string().min(1).max(10000),channel:z.enum(["whatsapp","sms","email"]).default("whatsapp"),media_asset_id:uuid.optional()}).parse(req.body);
+ if(b.media_asset_id){
+  const a=await query("SELECT id FROM media_assets WHERE id=$1 AND workspace_id=$2 AND is_active=true",[b.media_asset_id,req.authUser.workspaceId]);
+  if(!a.rowCount)return reply.code(400).send({error:"Media asset not found"});
+ }
+ const r=await query("INSERT INTO message_templates(workspace_id,name,channel,body,media_asset_id) VALUES($1,$2,$3,$4,$5) RETURNING *",[req.authUser.workspaceId,b.name,b.channel,b.body,b.media_asset_id??null]);
+ await audit(req,"create","message_template",r.rows[0].id); reply.code(201).send(created(r.rows[0]));
+});
+app.post("/api/v1/leads/:id/whatsapp/prepare",{preHandler:requireAuth},async(req,reply)=>{
+ const p=z.object({id:uuid}).parse(req.params);
+ const b=z.object({body:z.string().min(1).max(10000),template_id:uuid.optional(),media_asset_id:uuid.optional()}).parse(req.body);
+ const lead=await query("SELECT id,first_name,last_name,phone FROM leads WHERE id=$1 AND workspace_id=$2",[p.id,req.authUser.workspaceId]);
+ if(!lead.rowCount)return reply.code(404).send({error:"Lead not found"});
+ const l=lead.rows[0]; const phone=normalizeWhatsAppPhone(l.phone);
+ if(!phone)return reply.code(400).send({error:"Lead does not have a valid WhatsApp phone number"});
+ let asset=null;
+ if(b.media_asset_id){
+  const ar=await query("SELECT id,name,url,asset_type,mime_type FROM media_assets WHERE id=$1 AND workspace_id=$2 AND is_active=true",[b.media_asset_id,req.authUser.workspaceId]);
+  if(!ar.rowCount)return reply.code(400).send({error:"Media asset not found"});
+  asset=ar.rows[0];
+ }
+ let body=renderWhatsAppBody(b.body,l);
+ if(asset?.url && !body.includes(asset.url))body=(body.trim()+"\\n\\n"+asset.name+": "+asset.url).trim();
+ let conversation=await query("SELECT id FROM conversations WHERE workspace_id=$1 AND lead_id=$2 AND channel='whatsapp' ORDER BY updated_at DESC LIMIT 1",[req.authUser.workspaceId,l.id]);
+ let conversationId=conversation.rows[0]?.id;
+ if(!conversationId){
+  const cr=await query("INSERT INTO conversations(workspace_id,channel,external_contact,assigned_to,lead_id,last_message_at) VALUES($1,'whatsapp',$2,$3,$4,now()) RETURNING id",[req.authUser.workspaceId,l.phone,req.authUser.id,l.id]);
+  conversationId=cr.rows[0].id;
+ }
+ const metadata={delivery_method:"external_redirect",delivery_status:"prepared",phone,template_id:b.template_id??null,media_asset_id:asset?.id??null,media_asset_url:asset?.url??null};
+ const mr=await query("INSERT INTO messages(conversation_id,sender_id,direction,message_type,body,media_url,metadata) VALUES($1,$2,'outbound',$3,$4,$5,$6) RETURNING id,created_at",[conversationId,req.authUser.id,asset?.asset_type==="image"?"image":b.template_id?"template":"text",body,asset?.url??null,metadata]);
+ await query("UPDATE conversations SET updated_at=now(),last_message_at=now() WHERE id=$1",[conversationId]);
+ await audit(req,"whatsapp_redirect","lead",l.id);
+ const encoded=encodeURIComponent(body);
+ const whatsappUrl="https://wa.me/"+phone+"?text="+encoded;
+ const webUrl="https://web.whatsapp.com/send?phone="+phone+"&text="+encoded;
+ const desktopUrl="whatsapp://send?phone="+phone+"&text="+encoded;
+ return {lead:{id:l.id,name:[l.first_name,l.last_name].filter(Boolean).join(" "),phone:l.phone,normalizedPhone:phone},conversationId,messageId:mr.rows[0].id,body,media:asset,urls:{mobile:whatsappUrl,web:webUrl,desktop:desktopUrl}};
+});
 app.get("/api/v1/notifications",{preHandler:requireAuth},async req=>({data:(await query("SELECT * FROM notifications WHERE user_id=$1 AND workspace_id=$2 ORDER BY created_at DESC LIMIT 50",[req.authUser.id,req.authUser.workspaceId])).rows}));
 app.get("/api/v1/audit-logs",{preHandler:[requireAuth,requireRole("owner","admin")]},async req=>({data:(await query("SELECT * FROM audit_logs WHERE workspace_id=$1 ORDER BY created_at DESC LIMIT 100",[req.authUser.workspaceId])).rows}));
 app.post("/api/v1/public/leads/:workspaceSlug",async(req,reply)=>{const p=z.object({workspaceSlug:z.string().min(2)}).parse(req.params);const b=z.object({first_name:text(120),last_name:text(120).optional(),email:z.string().email().optional(),phone:text(50).optional(),source:text(120).default("website")}).parse(req.body);const w=await query("SELECT id FROM workspaces WHERE slug=$1",[p.workspaceSlug]);if(!w.rowCount)return reply.code(404).send({error:"Workspace not found"});const r=await query("INSERT INTO leads(workspace_id,first_name,last_name,email,phone,source) VALUES($1,$2,$3,$4,$5,$6) RETURNING id,first_name,last_name,email,phone,source,status,created_at",[w.rows[0].id,b.first_name,b.last_name??null,b.email??null,b.phone??null,b.source]);reply.code(201).send(created(r.rows[0]))});
