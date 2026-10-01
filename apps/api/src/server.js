@@ -68,7 +68,7 @@ app.post("/api/v1/conversations/:id/messages",{preHandler:requireAuth},async(req
 function normalizeWhatsAppPhone(value){
  const raw=String(value??"").trim();
  if(!raw)return "";
- const digits=raw.replace(/\\D/g,"");
+ const digits=raw.replace(/\D/g,"");
  if(digits.length===10)return "91"+digits;
  if(digits.length===11&&digits.startsWith("0"))return "91"+digits.slice(1);
  if(digits.length>=10&&digits.length<=15)return digits;
@@ -76,9 +76,9 @@ function normalizeWhatsAppPhone(value){
 }
 function renderWhatsAppBody(body,lead){
  return String(body??"")
-  .replace(/\\{first_name\\}/gi,lead.first_name??"")
-  .replace(/\\{last_name\\}/gi,lead.last_name??"")
-  .replace(/\\{name\\}/gi,[lead.first_name,lead.last_name].filter(Boolean).join(" "));
+  .replace(/\{first_name\}/gi,lead.first_name??"")
+  .replace(/\{last_name\}/gi,lead.last_name??"")
+  .replace(/\{name\}/gi,[lead.first_name,lead.last_name].filter(Boolean).join(" "));
 }
 app.get("/api/v1/whatsapp/assets",{preHandler:requireAuth},async req=>({
  data:(await query("SELECT id,name,description,asset_type,url,thumbnail_url,mime_type,created_at FROM media_assets WHERE workspace_id=$1 AND is_active=true ORDER BY created_at DESC",[req.authUser.workspaceId])).rows
